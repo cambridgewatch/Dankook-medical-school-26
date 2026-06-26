@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>로그인 · 단국대 의대 26학번</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="logo"><img src="assets/img/logo.png" alt="단국대학교 의과대학 26" /></span>
+        <span class="brand-text"><small>DANKOOK MEDICINE</small><strong>의과대학 26학번</strong></span>
+      </a>
+      <button class="nav-toggle" aria-label="메뉴 열기"><span></span><span></span><span></span></button>
+      <ul class="nav-menu">
+        <li><a href="index.html">홈</a></li>
+        <li><a href="about.html">학번 소개</a></li>
+        <li><a href="notices.html">공지사항</a></li>
+        <li><a href="calendar.html">학사일정</a></li>
+        <li><a href="gallery.html">갤러리</a></li>
+        <li><a href="members.html">동기 명단</a></li>
+        <li><a href="login.html">로그인</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="page-head">
+    <div class="container">
+      <span class="eyebrow">MEMBER</span>
+      <h1>로그인 / 회원가입</h1>
+      <p>26학번 동기만 가입할 수 있어요. 로그인하면 갤러리에 사진을 올릴 수 있습니다.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="auth-wrap">
+
+        <div class="logged-box" id="loggedInBox">
+          ✅ 현재 <strong id="loggedInName"></strong> 님으로 로그인되어 있습니다.
+          <a href="gallery.html">갤러리로 가기 →</a>
+          <button id="logoutBtn" class="btn-mini">로그아웃</button>
+        </div>
+
+        <div class="auth-card">
+          <div class="auth-tabs">
+            <button class="auth-tab active" data-mode="login">로그인</button>
+            <button class="auth-tab" data-mode="signup">회원가입</button>
+          </div>
+
+          <!-- 로그인 -->
+          <form class="auth-form" id="loginForm">
+            <label for="liName">이름</label>
+            <input type="text" id="liName" placeholder="홍길동" autocomplete="username" />
+            <label for="liPw">비밀번호</label>
+            <input type="password" id="liPw" placeholder="비밀번호" autocomplete="current-password" />
+            <button type="submit" class="btn btn-solid">로그인</button>
+            <p class="auth-hint">아직 가입 안 했다면 위 '회원가입' 탭을 눌러주세요.</p>
+          </form>
+
+          <!-- 회원가입 -->
+          <form class="auth-form" id="signupForm" style="display:none;">
+            <label for="suName">이름 <span style="color:var(--gray);font-weight:400;">(동기 명단에 있는 본인 이름)</span></label>
+            <input type="text" id="suName" placeholder="홍길동" autocomplete="username" />
+            <label for="suPw">비밀번호 <span style="color:var(--gray);font-weight:400;">(6자 이상)</span></label>
+            <input type="password" id="suPw" placeholder="비밀번호" autocomplete="new-password" />
+            <label for="suPw2">비밀번호 확인</label>
+            <input type="password" id="suPw2" placeholder="비밀번호 다시 입력" autocomplete="new-password" />
+            <button type="submit" class="btn btn-solid">회원가입</button>
+            <p class="auth-hint">※ 26학번 동기 명단에 있는 이름만 가입할 수 있고, 같은 이름으로는 중복 가입이 안 됩니다.</p>
+          </form>
+
+          <div class="auth-msg" id="authMsg"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <strong>단국대학교 의과대학 26학번</strong>
+          <p>Dankook University College of Medicine, Class of 2026.</p>
+        </div>
+        <div class="footer-links">
+          <div><h5>바로가기</h5><a href="about.html">학번 소개</a><a href="notices.html">공지사항</a><a href="calendar.html">학사일정</a></div>
+          <div><h5>커뮤니티</h5><a href="gallery.html">갤러리</a><a href="members.html">동기 명단</a><a href="login.html">로그인</a></div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Dankook Medicine '26. All rights reserved.</span>
+        <span>Made with ♥ by 26학번</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script type="module" src="assets/js/auth.js"></script>
+</body>
+</html>
