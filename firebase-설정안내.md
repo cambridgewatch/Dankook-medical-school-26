@@ -39,27 +39,41 @@
    rules_version = '2';
    service cloud.firestore {
      match /databases/{database}/documents {
+       function isAdmin() {
+         return request.auth != null
+           && request.auth.token.email == "ueca095eca780ed9b88@dkumed26.com";
+       }
+       function isApproved() {
+         return request.auth != null
+           && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+           && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == "approved";
+       }
+
+       match /users/{uid} {
+         allow read: if isAdmin() || request.auth.uid == uid;
+         allow create: if request.auth.uid == uid
+                       && request.resource.data.status == "pending";
+         allow update, delete: if isAdmin();
+       }
        match /photos/{doc} {
-         allow read: if request.auth != null;
-         allow create: if request.auth != null;
-         allow delete: if request.auth != null && request.auth.uid == resource.data.uid;
+         allow read: if isAdmin() || isApproved();
+         allow create: if isAdmin() || isApproved();
+         allow delete: if isAdmin() || (isApproved() && request.auth.uid == resource.data.uid);
          allow update: if false;
        }
        match /calendarEvents/{doc} {
-         allow read: if request.auth != null;
-         allow write: if request.auth != null
-                      && request.auth.token.email == "ueca095eca780ed9b88@dkumed26.com";
+         allow read: if isAdmin() || isApproved();
+         allow write: if isAdmin();
        }
        match /members/{doc} {
-         allow read: if request.auth != null;
-         allow write: if request.auth != null
-                      && request.auth.token.email == "ueca095eca780ed9b88@dkumed26.com";
+         allow read: if isAdmin() || isApproved();
+         allow write: if isAdmin();
        }
      }
    }
    ```
-   > 위 `calendarEvents` 규칙은 "캘린더 일정은 누구나 보고, **정지훈(관리자)만** 추가/삭제"한다는 뜻입니다.
-   > 관리자를 바꾸려면 `firebase-init.js`의 `ADMIN_NAME`과 위 이메일을 함께 바꿔야 합니다.
+   > "사진·일정·명단은 **관리자(정지훈) 또는 승인된 회원만** 보고, 추가/수정은 관리자만" 한다는 뜻입니다.
+   > 새로 가입하면 `users`에 `pending`으로 저장되고, 관리자가 **동기 명단 페이지**에서 승인해야 이용할 수 있습니다.
 
 ## 5단계. 사진 저장소 = ImgBB (무료, 카드 불필요) ⭐
 Firebase의 Storage는 신용카드 등록을 요구하므로, 사진 파일은 무료 이미지 호스팅

@@ -42,6 +42,12 @@
         <input type="text" id="memberSearch" placeholder="🔍 이름으로 검색…" />
       </div>
 
+      <!-- 관리자 전용: 가입 승인 대기 -->
+      <div class="approval-panel" id="approvalPanel" style="display:none;">
+        <h3>🙋 가입 신청 (승인 대기)</h3>
+        <ul class="approval-list" id="approvalList"></ul>
+      </div>
+
       <!-- 관리자 전용: 명단 추가 (로그인한 관리자에게만 보임) -->
       <div class="member-admin" id="memberAdmin" style="display:none;">
         <div class="ma-row">

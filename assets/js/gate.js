@@ -2,8 +2,9 @@
    - login.html 에는 적용하지 않음(로그인하러 들어와야 하므로).
    - 그 외 모든 페이지의 <body class="locked"> 를 풀어줌. */
 
-import { auth, isConfigured, ADMIN_EMAIL, ADMIN_NAME } from "./firebase-init.js";
+import { auth, db, isConfigured, ADMIN_EMAIL } from "./firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* 잠금 오버레이를 <html>에 붙임 (body가 숨겨져도 보이도록) */
 const ov = document.createElement("div");
@@ -31,13 +32,24 @@ function deny(msg) {
 if (!isConfigured) {
   deny("사이트 설정이 필요합니다.");
 } else {
-  onAuthStateChanged(auth, (user) => {
-    if (user && user.email === ADMIN_EMAIL) {
-      unlock(); // 관리자 → 열람 허용
-    } else if (user) {
-      deny("현재 이 사이트는 비공개입니다. 접근 권한이 없습니다.");
-    } else {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
       deny("이 사이트는 비공개입니다. 로그인해 주세요.");
+      return;
+    }
+    if (user.email === ADMIN_EMAIL) {
+      unlock(); // 관리자 → 항상 열람 허용
+      return;
+    }
+    /* 일반 회원: 승인된 사람만 열람 가능 */
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      const status = snap.exists() ? snap.data().status : "pending";
+      if (status === "approved") unlock();
+      else if (status === "rejected") deny("가입이 거절되었습니다.");
+      else deny("가입 승인 대기 중입니다. 대표 승인 후 이용할 수 있어요.");
+    } catch (e) {
+      deny("권한 확인 중 오류가 발생했습니다. 다시 로그인해 주세요.");
     }
   });
 }

@@ -1,7 +1,7 @@
 /* 회원가입 / 로그인 로직 (login.html 전용) */
 
 import {
-  auth, isConfigured, ROSTER, nameToEmail,
+  auth, db, isConfigured, ROSTER, nameToEmail, ADMIN_EMAIL,
 } from "./firebase-init.js";
 import {
   createUserWithEmailAndPassword,
@@ -10,6 +10,9 @@ import {
   onAuthStateChanged,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  doc, setDoc, getDoc, serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = (s) => document.querySelector(s);
 
@@ -75,8 +78,10 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       const cred = await createUserWithEmailAndPassword(auth, nameToEmail(name), pw);
       await updateProfile(cred.user, { displayName: name });
-      toast(`🎉 ${name} 님, 회원가입 완료! 갤러리로 이동합니다…`, true);
-      setTimeout(() => (location.href = "gallery.html"), 1200);
+      await setDoc(doc(db, "users", cred.user.uid), {
+        name, status: "pending", createdAt: serverTimestamp(),
+      });
+      toast(`🎉 ${name} 님, 회원가입 완료! 대표(관리자) 승인 후 이용할 수 있어요. 승인되면 로그인해 주세요.`, true);
     } catch (err) {
       if (err.code === "auth/email-already-in-use")
         toast(`'${name}' 님은 이미 가입돼 있습니다. 로그인을 이용해 주세요.`);
@@ -95,9 +100,25 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!name || !pw) return toast("이름과 비밀번호를 입력해 주세요.");
 
     try {
-      await signInWithEmailAndPassword(auth, nameToEmail(name), pw);
-      toast(`${name} 님, 환영합니다! 갤러리로 이동합니다…`, true);
-      setTimeout(() => (location.href = "gallery.html"), 1000);
+      const cred = await signInWithEmailAndPassword(auth, nameToEmail(name), pw);
+      const u = cred.user;
+      if (u.email === ADMIN_EMAIL) {
+        toast(`${name} 님, 환영합니다! 이동합니다…`, true);
+        setTimeout(() => (location.href = "index.html"), 900);
+        return;
+      }
+      const snap = await getDoc(doc(db, "users", u.uid));
+      const status = snap.exists() ? snap.data().status : "pending";
+      if (status === "approved") {
+        toast(`${name} 님, 환영합니다! 이동합니다…`, true);
+        setTimeout(() => (location.href = "index.html"), 900);
+      } else if (status === "rejected") {
+        await signOut(auth);
+        toast("가입이 거절되었습니다. 대표에게 문의해 주세요.");
+      } else {
+        await signOut(auth);
+        toast(`${name} 님은 아직 승인 대기 중입니다. 대표 승인 후 다시 로그인해 주세요.`);
+      }
     } catch (err) {
       if (
         err.code === "auth/invalid-credential" ||
