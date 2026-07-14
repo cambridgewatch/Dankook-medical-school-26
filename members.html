@@ -42,12 +42,6 @@
         <input type="text" id="memberSearch" placeholder="🔍 이름으로 검색…" />
       </div>
 
-      <!-- 관리자 전용: 가입 승인 대기 -->
-      <div class="approval-panel" id="approvalPanel" style="display:none;">
-        <h3>🙋 가입 신청 (승인 대기)</h3>
-        <ul class="approval-list" id="approvalList"></ul>
-      </div>
-
       <!-- 관리자 전용: 등록된 계정 목록 -->
       <div class="approval-panel" id="accountPanel" style="display:none; background:#eef5ff; border-color:#cfe0f7;">
         <h3 style="color:var(--navy);">📋 등록된 로그인 계정 <span id="accountCount"></span></h3>
@@ -70,10 +64,10 @@
         </details>
         <hr style="border:0;border-top:1px solid var(--line);margin:16px 0;" />
         <button class="btn btn-solid" id="maAccounts" style="width:100%;justify-content:center;">
-          🔑 명단 전원 로그인 계정 생성 (비밀번호 = 이름2026)
+          🔄 전체 계정 초기화 (나 빼고 삭제 후 재생성)
         </button>
         <p style="font-size:12px;color:var(--gray);margin-top:8px;">
-          명단에 있는 모든 사람의 계정을 자동 생성·승인합니다. 이미 있는 계정은 건너뜁니다.
+          정지훈(나) 계정만 남기고 모두 삭제한 뒤, 명단 전원 계정을 새로 만듭니다. 비밀번호는 각자 <strong>이름2026</strong>. 자동 승인됩니다.
         </p>
       </div>
 
@@ -108,7 +102,7 @@
 
   <script src="assets/js/main.js?v=3"></script>
   <script src="assets/js/effects3d.js?v=3"></script>
-  <script type="module" src="assets/js/members.js?v=6"></script>
+  <script type="module" src="assets/js/members.js?v=7"></script>
   <script type="module" src="assets/js/gate.js?v=3"></script>
 </body>
 </html>

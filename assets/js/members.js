@@ -2,10 +2,11 @@
    - 이름은 공개 코드에 없고, 로그인한 사람만 볼 수 있는 Firestore "members"에만 저장됨.
    - 추가/삭제는 관리자(정지훈)만 가능. */
 
-import { db, auth, isConfigured, ADMIN_EMAIL, firebaseConfig, nameToEmail } from "./firebase-init.js";
+import { db, auth, isConfigured, ADMIN_EMAIL, ADMIN_NAME, firebaseConfig, nameToEmail } from "./firebase-init.js";
 import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  onAuthStateChanged, getAuth, createUserWithEmailAndPassword, signOut,
+  onAuthStateChanged, getAuth, createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, deleteUser, signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   collection, addDoc, deleteDoc, updateDoc, doc, setDoc, onSnapshot, serverTimestamp,
@@ -27,18 +28,16 @@ window.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  const approvalPanel = $("#approvalPanel");
-  const approvalList = $("#approvalList");
   const accountPanel = $("#accountPanel");
   const accountList = $("#accountList");
   const accountCount = $("#accountCount");
   let pendingSub = false;
+  let accountsAll = [];
   const STATUS = { approved: ["승인", "#2bb673"], pending: ["대기", "#c8a24b"], rejected: ["거절", "#e2574c"] };
 
   onAuthStateChanged(auth, (user) => {
     isAdmin = !!user && user.email === ADMIN_EMAIL;
     adminBar.style.display = isAdmin ? "block" : "none";
-    approvalPanel.style.display = isAdmin ? "block" : "none";
     accountPanel.style.display = isAdmin ? "block" : "none";
     if (user && !subscribed) {
       subscribed = true;
@@ -49,13 +48,12 @@ window.addEventListener("DOMContentLoaded", () => {
         render();
       }, (err) => { note.textContent = "명단을 불러오지 못했습니다: " + err.message; });
     }
-    /* 관리자만 계정(users) 구독 → 승인 대기 + 전체 계정 목록 */
+    /* 관리자만 계정(users) 구독 → 전체 계정 목록 */
     if (isAdmin && !pendingSub) {
       pendingSub = true;
       onSnapshot(collection(db, "users"), (snap) => {
-        const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        renderApprovals(all.filter((u) => (u.status || "pending") === "pending"));
-        renderAccounts(all);
+        accountsAll = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        renderAccounts(accountsAll);
       });
     }
     render();
@@ -82,31 +80,6 @@ window.addEventListener("DOMContentLoaded", () => {
         catch (err) { alert("삭제 실패: " + err.message); }
       });
     });
-  }
-
-  function renderApprovals(pending) {
-    if (!pending.length) {
-      approvalList.innerHTML = `<li class="none">대기 중인 가입 신청이 없습니다.</li>`;
-      return;
-    }
-    approvalList.innerHTML = pending.map((u) => `
-      <li>
-        <span class="ap-name">${esc(u.name || "이름없음")}</span>
-        <span class="ap-act">
-          <button class="ap-ok" data-id="${u.id}">승인</button>
-          <button class="ap-no" data-id="${u.id}">거절</button>
-        </span>
-      </li>`).join("");
-    approvalList.querySelectorAll(".ap-ok").forEach((b) =>
-      b.addEventListener("click", () => setStatus(b.dataset.id, "approved")));
-    approvalList.querySelectorAll(".ap-no").forEach((b) =>
-      b.addEventListener("click", () => {
-        if (confirm("이 가입 신청을 거절할까요?")) setStatus(b.dataset.id, "rejected");
-      }));
-  }
-  async function setStatus(uid, status) {
-    try { await updateDoc(doc(db, "users", uid), { status }); }
-    catch (err) { alert("처리 실패: " + err.message); }
   }
 
   function render() {
@@ -149,49 +122,65 @@ window.addEventListener("DOMContentLoaded", () => {
     addNames(($("#maBulk").value || "").split(/[\n,]/));
   });
 
-  /* 명단 전원 로그인 계정 생성 (비밀번호 = 이름 + 2026) */
+  /* 전체 계정 초기화: 나(관리자) 빼고 삭제 후, 명단 전원 재생성 (비번=이름2026) */
   const accBtn = $("#maAccounts");
-  if (accBtn) accBtn.addEventListener("click", createAllAccounts);
+  if (accBtn) accBtn.addEventListener("click", resetAllAccounts);
 
-  async function createAllAccounts() {
+  async function resetAllAccounts() {
     if (!isAdmin) return alert("관리자만 사용할 수 있습니다.");
-    if (!members.length) return alert("명단이 비어 있어요. 먼저 이름을 추가해 주세요.");
+    if (!members.length) return alert("명단이 비어 있어요. 먼저 이름을 넣어 주세요.");
+    const roster = members.map((m) => (m.name || "").trim()).filter((n) => n && n !== ADMIN_NAME);
     if (!confirm(
-      `${members.length}명의 로그인 계정을 만들까요?\n비밀번호는 각자 '이름2026' 입니다. (예: 정지훈2026)\n이미 있는 계정은 건너뜁니다.`
+      `정지훈 님을 제외한 모든 계정을 삭제하고,\n명단 ${roster.length}명의 계정을 새로 만듭니다.\n비밀번호는 각자 '이름2026' 입니다.\n\n계속할까요?`
     )) return;
 
     accBtn.disabled = true;
     const orig = accBtn.textContent;
-    accBtn.textContent = "계정 생성 중… (닫지 마세요)";
 
-    /* 관리자 로그인이 풀리지 않도록 별도 앱 인스턴스로 생성 */
     const secApp = getApps().some((a) => a.name === "secondary")
       ? getApp("secondary")
       : initializeApp(firebaseConfig, "secondary");
     const secAuth = getAuth(secApp);
 
-    let created = 0, skipped = 0, failed = 0;
-    for (const m of members) {
-      const name = (m.name || "").trim();
-      if (!name) continue;
-      const pw = name + "2026";
+    /* 1) 기존 계정 삭제 (비번=이름2026 로 로그인 후 삭제). 관리자는 건너뜀. */
+    let del = 0, delFail = 0;
+    const toDelete = accountsAll.filter((u) => u.name && u.name !== ADMIN_NAME);
+    for (let i = 0; i < toDelete.length; i++) {
+      const u = toDelete[i];
+      accBtn.textContent = `기존 계정 삭제 중… (${i + 1}/${toDelete.length})`;
       try {
-        const cred = await createUserWithEmailAndPassword(secAuth, nameToEmail(name), pw);
+        const cred = await signInWithEmailAndPassword(secAuth, nameToEmail(u.name), u.name + "2026");
+        await deleteUser(cred.user);
+        del++;
+      } catch (e) { delFail++; }
+      try { await deleteDoc(doc(db, "users", u.id)); } catch (e) {}
+    }
+
+    /* 2) 명단 전원 재생성 */
+    let created = 0, createFail = 0;
+    for (let i = 0; i < roster.length; i++) {
+      const name = roster[i];
+      accBtn.textContent = `계정 생성 중… (${i + 1}/${roster.length})`;
+      try {
+        const cred = await createUserWithEmailAndPassword(secAuth, nameToEmail(name), name + "2026");
         await setDoc(doc(db, "users", cred.user.uid), {
           name, status: "approved", createdAt: serverTimestamp(),
         });
         created++;
       } catch (err) {
-        if (err.code === "auth/email-already-in-use") skipped++;
-        else { failed++; console.error("계정 생성 실패:", name, err.code || err.message); }
+        createFail++;
+        console.error("계정 생성 실패:", name, err.code || err.message);
       }
-      accBtn.textContent = `생성 중… (${created + skipped + failed}/${members.length})`;
     }
     try { await signOut(secAuth); } catch (e) {}
 
     accBtn.disabled = false;
     accBtn.textContent = orig;
-    alert(`완료!\n새로 생성: ${created}명\n이미 있던 계정: ${skipped}명\n실패: ${failed}명\n\n비밀번호는 각자 '이름2026' 입니다.`);
+    alert(
+      `완료!\n삭제: ${del}개 (실패 ${delFail})\n생성: ${created}명 (실패 ${createFail})\n\n` +
+      `비밀번호는 각자 '이름2026' 입니다.` +
+      (createFail ? `\n\n※ 생성 실패가 있으면 잠시 후 버튼을 한 번 더 눌러 주세요.` : "")
+    );
   }
 
   async function addNames(arr) {
