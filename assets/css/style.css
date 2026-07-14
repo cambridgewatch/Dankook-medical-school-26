@@ -361,20 +361,22 @@ body.locked { visibility: hidden; }
 
 /* 공지 작성(관리자) */
 .notice-admin {
-  max-width: 720px; margin: 0 auto 30px;
+  display: flex; flex-direction: column;
+  max-width: 760px; margin: 0 auto 30px;
   background: linear-gradient(160deg, #fff, #f7faff);
   border: 1px solid #dfe7f5; border-radius: 18px;
-  padding: 24px 24px 22px; box-shadow: var(--shadow);
+  padding: 26px 26px 24px; box-shadow: var(--shadow);
 }
-.notice-admin h3 { color: var(--navy); font-size: 18px; margin-bottom: 16px; }
+.notice-admin h3 { color: var(--navy); font-size: 19px; margin-bottom: 18px; }
 .notice-admin .na-title,
 .notice-admin .na-detail {
-  width: 100%; padding: 14px 16px; border: 1px solid var(--line);
-  border-radius: 12px; font-size: 16px; outline: none; font-family: inherit;
+  display: block; width: 100%; box-sizing: border-box;
+  padding: 15px 18px; border: 1px solid var(--line);
+  border-radius: 12px; outline: none; font-family: inherit;
   background: #fff; transition: 0.15s;
 }
-.notice-admin .na-title { font-weight: 600; margin-bottom: 12px; }
-.notice-admin .na-detail { resize: vertical; font-size: 15px; line-height: 1.6; }
+.notice-admin .na-title { font-size: 17px; font-weight: 600; margin-bottom: 12px; }
+.notice-admin .na-detail { font-size: 15px; line-height: 1.7; min-height: 110px; resize: vertical; }
 .notice-admin .na-title:focus,
 .notice-admin .na-detail:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
 .na-foot {
