@@ -142,17 +142,23 @@ window.addEventListener("DOMContentLoaded", () => {
       : initializeApp(firebaseConfig, "secondary");
     const secAuth = getAuth(secApp);
 
-    /* 1) 기존 계정 삭제 (비번=이름2026 로 로그인 후 삭제). 관리자는 건너뜀. */
+    /* 1) 기존 계정 삭제: 명단 이름 기준으로 '이름2026'으로 로그인해 삭제. 관리자 제외. */
     let del = 0, delFail = 0;
-    const toDelete = accountsAll.filter((u) => u.name && u.name !== ADMIN_NAME);
-    for (let i = 0; i < toDelete.length; i++) {
-      const u = toDelete[i];
-      accBtn.textContent = `기존 계정 삭제 중… (${i + 1}/${toDelete.length})`;
+    for (let i = 0; i < roster.length; i++) {
+      const name = roster[i];
+      accBtn.textContent = `기존 계정 삭제 중… (${i + 1}/${roster.length})`;
       try {
-        const cred = await signInWithEmailAndPassword(secAuth, nameToEmail(u.name), u.name + "2026");
+        const cred = await signInWithEmailAndPassword(secAuth, nameToEmail(name), name + "2026");
         await deleteUser(cred.user);
         del++;
-      } catch (e) { delFail++; }
+      } catch (e) {
+        /* 계정이 없거나(정상) 비번이 달라서 실패 */
+        if (e.code !== "auth/user-not-found" && e.code !== "auth/invalid-credential") delFail++;
+      }
+    }
+    /* 남아있는 계정 기록(users 문서)도 정리 */
+    for (const u of accountsAll) {
+      if (u.name === ADMIN_NAME) continue;
       try { await deleteDoc(doc(db, "users", u.id)); } catch (e) {}
     }
 
