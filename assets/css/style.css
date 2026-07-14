@@ -812,6 +812,27 @@ body.locked { visibility: hidden; }
 .roulette-result strong { color: var(--gold); font-size: 26px; }
 .roulette-btn { padding: 13px 40px; font-size: 16px; }
 
+/* 이름 원판 룰렛 */
+#wheelNames {
+  width: 100%; max-width: 420px; margin: 0 auto 6px; display: block;
+  min-height: 92px; padding: 12px 14px; border: 1px solid var(--line);
+  border-radius: 12px; font-size: 15px; font-family: inherit; line-height: 1.6;
+  resize: vertical; outline: none;
+}
+#wheelNames:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.wheel-wrap { position: relative; width: 320px; max-width: 88vw; margin: 18px auto 4px; }
+.wheel-wrap svg { width: 100%; height: auto; display: block; }
+#wheelGroup { transform-box: fill-box; transform-origin: center; }
+.wheel-pointer {
+  position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0; z-index: 2;
+  border-left: 14px solid transparent; border-right: 14px solid transparent;
+  border-top: 26px solid var(--gold);
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+}
+.wheel-result { min-height: 30px; margin: 12px 0 8px; font-size: 20px; color: var(--navy); }
+.wheel-result strong { color: var(--gold); font-size: 24px; }
+
 /* ---------- 푸터 ---------- */
 .site-footer {
   background: var(--navy-dark);
