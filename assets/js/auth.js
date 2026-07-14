@@ -79,10 +79,14 @@ window.addEventListener("DOMContentLoaded", () => {
     const cur = $("#curPw").value.normalize("NFC");
     if (nw.length < 6) return pwMsg("새 비밀번호는 6자 이상이어야 합니다.");
     if (nw !== nw2) return pwMsg("새 비밀번호가 일치하지 않습니다.");
+    const pwSuccess = () => {
+      pwMsg("✅ 비밀번호가 성공적으로 변경되었습니다!", true);
+      $("#newPw").value = ""; $("#newPw2").value = ""; $("#curPw").value = "";
+      alert("✅ 비밀번호 변경 완료!\n새 비밀번호로 로그인해 주세요.");
+    };
     try {
       await updatePassword(user, nw);
-      pwMsg("✅ 비밀번호가 변경되었습니다!", true);
-      $("#newPw").value = ""; $("#newPw2").value = ""; $("#curPw").value = "";
+      pwSuccess();
     } catch (err) {
       if (err.code === "auth/requires-recent-login") {
         /* 로그인한 지 오래됨 → 현재 비밀번호로 재인증 필요 */
@@ -91,8 +95,7 @@ window.addEventListener("DOMContentLoaded", () => {
           const cred = EmailAuthProvider.credential(user.email, cur);
           await reauthenticateWithCredential(user, cred);
           await updatePassword(user, nw);
-          pwMsg("✅ 비밀번호가 변경되었습니다!", true);
-          $("#newPw").value = ""; $("#newPw2").value = ""; $("#curPw").value = "";
+          pwSuccess();
         } catch (e2) {
           if (e2.code === "auth/wrong-password" || e2.code === "auth/invalid-credential")
             pwMsg("현재 비밀번호가 올바르지 않습니다.");
