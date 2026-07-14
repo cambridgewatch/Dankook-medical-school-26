@@ -48,6 +48,15 @@
         <ul class="approval-list" id="approvalList"></ul>
       </div>
 
+      <!-- 관리자 전용: 등록된 계정 목록 -->
+      <div class="approval-panel" id="accountPanel" style="display:none; background:#eef5ff; border-color:#cfe0f7;">
+        <h3 style="color:var(--navy);">📋 등록된 로그인 계정 <span id="accountCount"></span></h3>
+        <ul class="approval-list" id="accountList"></ul>
+        <p style="font-size:12px;color:var(--gray);margin-top:6px;">
+          ※ 정지훈(관리자) 계정은 별도라 이 목록엔 안 나올 수 있어요. Firebase 인증 계정 수 = 이 목록 + 1(정지훈).
+        </p>
+      </div>
+
       <!-- 관리자 전용: 명단 추가 (로그인한 관리자에게만 보임) -->
       <div class="member-admin" id="memberAdmin" style="display:none;">
         <div class="ma-row">
@@ -99,7 +108,7 @@
 
   <script src="assets/js/main.js?v=3"></script>
   <script src="assets/js/effects3d.js?v=3"></script>
-  <script type="module" src="assets/js/members.js?v=4"></script>
+  <script type="module" src="assets/js/members.js?v=5"></script>
   <script type="module" src="assets/js/gate.js?v=3"></script>
 </body>
 </html>

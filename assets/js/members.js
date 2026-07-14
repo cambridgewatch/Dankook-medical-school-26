@@ -29,12 +29,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const approvalPanel = $("#approvalPanel");
   const approvalList = $("#approvalList");
+  const accountPanel = $("#accountPanel");
+  const accountList = $("#accountList");
+  const accountCount = $("#accountCount");
   let pendingSub = false;
+  const STATUS = { approved: ["승인", "#2bb673"], pending: ["대기", "#c8a24b"], rejected: ["거절", "#e2574c"] };
 
   onAuthStateChanged(auth, (user) => {
     isAdmin = !!user && user.email === ADMIN_EMAIL;
     adminBar.style.display = isAdmin ? "block" : "none";
     approvalPanel.style.display = isAdmin ? "block" : "none";
+    accountPanel.style.display = isAdmin ? "block" : "none";
     if (user && !subscribed) {
       subscribed = true;
       onSnapshot(collection(db, "members"), (snap) => {
@@ -44,18 +49,30 @@ window.addEventListener("DOMContentLoaded", () => {
         render();
       }, (err) => { note.textContent = "명단을 불러오지 못했습니다: " + err.message; });
     }
-    /* 관리자만 가입 신청 목록 구독 */
+    /* 관리자만 계정(users) 구독 → 승인 대기 + 전체 계정 목록 */
     if (isAdmin && !pendingSub) {
       pendingSub = true;
       onSnapshot(collection(db, "users"), (snap) => {
-        const pending = snap.docs
-          .map((d) => ({ id: d.id, ...d.data() }))
-          .filter((u) => (u.status || "pending") === "pending");
-        renderApprovals(pending);
+        const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        renderApprovals(all.filter((u) => (u.status || "pending") === "pending"));
+        renderAccounts(all);
       });
     }
     render();
   });
+
+  function renderAccounts(all) {
+    const sorted = all.slice().sort((a, b) => (a.name || "").localeCompare(b.name || "", "ko"));
+    accountCount.textContent = `(${sorted.length}명)`;
+    if (!sorted.length) { accountList.innerHTML = `<li class="none">등록된 계정이 없습니다.</li>`; return; }
+    accountList.innerHTML = sorted.map((u) => {
+      const [label, color] = STATUS[u.status] || STATUS.pending;
+      return `<li>
+        <span class="ap-name">${esc(u.name || "이름없음")}</span>
+        <span style="font-size:12px;font-weight:700;padding:3px 11px;border-radius:999px;color:#fff;background:${color};">${label}</span>
+      </li>`;
+    }).join("");
+  }
 
   function renderApprovals(pending) {
     if (!pending.length) {
