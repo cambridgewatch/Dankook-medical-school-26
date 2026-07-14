@@ -2,10 +2,13 @@
    - 이름은 공개 코드에 없고, 로그인한 사람만 볼 수 있는 Firestore "members"에만 저장됨.
    - 추가/삭제는 관리자(정지훈)만 가능. */
 
-import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { db, auth, isConfigured, ADMIN_EMAIL, firebaseConfig, nameToEmail } from "./firebase-init.js";
+import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, serverTimestamp,
+  onAuthStateChanged, getAuth, createUserWithEmailAndPassword, signOut,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  collection, addDoc, deleteDoc, updateDoc, doc, setDoc, onSnapshot, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = (s) => document.querySelector(s);
@@ -118,6 +121,51 @@ window.addEventListener("DOMContentLoaded", () => {
   $("#maBulkAdd").addEventListener("click", () => {
     addNames(($("#maBulk").value || "").split(/[\n,]/));
   });
+
+  /* 명단 전원 로그인 계정 생성 (비밀번호 = 이름 + 2026) */
+  const accBtn = $("#maAccounts");
+  if (accBtn) accBtn.addEventListener("click", createAllAccounts);
+
+  async function createAllAccounts() {
+    if (!isAdmin) return alert("관리자만 사용할 수 있습니다.");
+    if (!members.length) return alert("명단이 비어 있어요. 먼저 이름을 추가해 주세요.");
+    if (!confirm(
+      `${members.length}명의 로그인 계정을 만들까요?\n비밀번호는 각자 '이름2026' 입니다. (예: 정지훈2026)\n이미 있는 계정은 건너뜁니다.`
+    )) return;
+
+    accBtn.disabled = true;
+    const orig = accBtn.textContent;
+    accBtn.textContent = "계정 생성 중… (닫지 마세요)";
+
+    /* 관리자 로그인이 풀리지 않도록 별도 앱 인스턴스로 생성 */
+    const secApp = getApps().some((a) => a.name === "secondary")
+      ? getApp("secondary")
+      : initializeApp(firebaseConfig, "secondary");
+    const secAuth = getAuth(secApp);
+
+    let created = 0, skipped = 0, failed = 0;
+    for (const m of members) {
+      const name = (m.name || "").trim();
+      if (!name) continue;
+      const pw = name + "2026";
+      try {
+        const cred = await createUserWithEmailAndPassword(secAuth, nameToEmail(name), pw);
+        await setDoc(doc(db, "users", cred.user.uid), {
+          name, status: "approved", createdAt: serverTimestamp(),
+        });
+        created++;
+      } catch (err) {
+        if (err.code === "auth/email-already-in-use") skipped++;
+        else { failed++; console.error("계정 생성 실패:", name, err.code || err.message); }
+      }
+      accBtn.textContent = `생성 중… (${created + skipped + failed}/${members.length})`;
+    }
+    try { await signOut(secAuth); } catch (e) {}
+
+    accBtn.disabled = false;
+    accBtn.textContent = orig;
+    alert(`완료!\n새로 생성: ${created}명\n이미 있던 계정: ${skipped}명\n실패: ${failed}명\n\n비밀번호는 각자 '이름2026' 입니다.`);
+  }
 
   async function addNames(arr) {
     if (!isAdmin) return alert("관리자만 추가할 수 있습니다.");

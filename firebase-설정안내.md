@@ -51,8 +51,8 @@
 
        match /users/{uid} {
          allow read: if isAdmin() || request.auth.uid == uid;
-         allow create: if request.auth.uid == uid
-                       && request.resource.data.status == "pending";
+         allow create: if isAdmin()
+                       || (request.auth.uid == uid && request.resource.data.status == "pending");
          allow update, delete: if isAdmin();
        }
        match /photos/{doc} {
