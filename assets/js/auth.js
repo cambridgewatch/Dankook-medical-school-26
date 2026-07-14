@@ -79,9 +79,10 @@ window.addEventListener("DOMContentLoaded", () => {
       const cred = await createUserWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
       await updateProfile(cred.user, { displayName: name });
       await setDoc(doc(db, "users", cred.user.uid), {
-        name, status: "pending", createdAt: serverTimestamp(),
+        name, status: "approved", createdAt: serverTimestamp(),
       });
-      toast(`🎉 ${name} 님, 회원가입 완료! 대표(관리자) 승인 후 이용할 수 있어요. 승인되면 로그인해 주세요.`, true);
+      toast(`🎉 ${name} 님, 회원가입 완료! 이동합니다…`, true);
+      setTimeout(() => (location.href = "index.html"), 1000);
     } catch (err) {
       if (err.code === "auth/email-already-in-use")
         toast(`'${name}' 님은 이미 가입돼 있습니다. 로그인을 이용해 주세요.`);
@@ -100,25 +101,9 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!name || !pw) return toast("이름과 비밀번호를 입력해 주세요.");
 
     try {
-      const cred = await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
-      const u = cred.user;
-      if (u.email === ADMIN_EMAIL) {
-        toast(`${name} 님, 환영합니다! 이동합니다…`, true);
-        setTimeout(() => (location.href = "index.html"), 900);
-        return;
-      }
-      const snap = await getDoc(doc(db, "users", u.uid));
-      const status = snap.exists() ? snap.data().status : "pending";
-      if (status === "approved") {
-        toast(`${name} 님, 환영합니다! 이동합니다…`, true);
-        setTimeout(() => (location.href = "index.html"), 900);
-      } else if (status === "rejected") {
-        await signOut(auth);
-        toast("가입이 거절되었습니다. 대표에게 문의해 주세요.");
-      } else {
-        await signOut(auth);
-        toast(`${name} 님은 아직 승인 대기 중입니다. 대표 승인 후 다시 로그인해 주세요.`);
-      }
+      await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
+      toast(`${name} 님, 환영합니다! 이동합니다…`, true);
+      setTimeout(() => (location.href = "index.html"), 800);
     } catch (err) {
       if (
         err.code === "auth/invalid-credential" ||

@@ -28,8 +28,6 @@ window.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  const approvalPanel = $("#approvalPanel");
-  const approvalList = $("#approvalList");
   const accountPanel = $("#accountPanel");
   const accountList = $("#accountList");
   const accountCount = $("#accountCount");
@@ -40,7 +38,6 @@ window.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, (user) => {
     isAdmin = !!user && user.email === ADMIN_EMAIL;
     adminBar.style.display = isAdmin ? "block" : "none";
-    approvalPanel.style.display = isAdmin ? "block" : "none";
     accountPanel.style.display = isAdmin ? "block" : "none";
     if (user && !subscribed) {
       subscribed = true;
@@ -51,42 +48,16 @@ window.addEventListener("DOMContentLoaded", () => {
         render();
       }, (err) => { note.textContent = "명단을 불러오지 못했습니다: " + err.message; });
     }
-    /* 관리자만 계정(users) 구독 → 승인 대기 + 전체 계정 목록 */
+    /* 관리자만 계정(users) 구독 → 전체 계정 목록 */
     if (isAdmin && !pendingSub) {
       pendingSub = true;
       onSnapshot(collection(db, "users"), (snap) => {
         accountsAll = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        renderApprovals(accountsAll.filter((u) => (u.status || "pending") === "pending"));
         renderAccounts(accountsAll);
       });
     }
     render();
   });
-
-  function renderApprovals(pending) {
-    if (!pending.length) {
-      approvalList.innerHTML = `<li class="none">대기 중인 가입 신청이 없습니다.</li>`;
-      return;
-    }
-    approvalList.innerHTML = pending.map((u) => `
-      <li>
-        <span class="ap-name">${esc(u.name || "이름없음")}</span>
-        <span class="ap-act">
-          <button class="ap-ok" data-id="${u.id}">승인</button>
-          <button class="ap-no" data-id="${u.id}">거절</button>
-        </span>
-      </li>`).join("");
-    approvalList.querySelectorAll(".ap-ok").forEach((b) =>
-      b.addEventListener("click", () => setStatus(b.dataset.id, "approved")));
-    approvalList.querySelectorAll(".ap-no").forEach((b) =>
-      b.addEventListener("click", () => {
-        if (confirm("이 가입 신청을 거절할까요?")) setStatus(b.dataset.id, "rejected");
-      }));
-  }
-  async function setStatus(uid, status) {
-    try { await updateDoc(doc(db, "users", uid), { status }); }
-    catch (err) { alert("처리 실패: " + err.message); }
-  }
 
   function renderAccounts(all) {
     const sorted = all.slice().sort((a, b) => (a.name || "").localeCompare(b.name || "", "ko"));
@@ -160,11 +131,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
   async function ensureAllAccounts() {
     if (!isAdmin) return alert("관리자만 사용할 수 있습니다.");
-    const roster = members.map((m) => (m.name || "").trim()).filter((n) => n && n !== ADMIN_NAME);
+    /* 명단 이름 정리(중복 제거, 관리자 제외) */
+    const roster = [...new Set(
+      members.map((m) => (m.name || "").trim().normalize("NFC")).filter((n) => n && n !== ADMIN_NAME)
+    )];
     if (!roster.length) return alert("명단이 비어 있어요. 먼저 이름을 넣어 주세요.");
+    /* 이미 계정 기록이 있는 이름은 건너뜀 (요청 과부하 방지) */
+    const already = new Set(accountsAll.map((u) => (u.name || "").normalize("NFC")));
+    const todo = roster.filter((n) => !already.has(n));
+    if (!todo.length) return alert(`이미 ${roster.length}명 모두 계정이 준비돼 있어요. 추가로 만들 계정이 없습니다.`);
     if (!confirm(
-      `명단 ${roster.length}명의 로그인 계정을 만들고 모두 승인합니다.\n` +
-      `비밀번호는 전원 '${LOGIN_PW}' 입니다.\n(기존 계정은 이 비번으로 자동 변경)\n\n계속할까요?`
+      `아직 계정이 없는 ${todo.length}명의 계정을 만듭니다.\n비밀번호는 '${LOGIN_PW}'.\n\n계속할까요?`
     )) return;
 
     accBtn.disabled = true;
@@ -176,51 +153,34 @@ window.addEventListener("DOMContentLoaded", () => {
 
     let ok = 0, fail = 0, docFail = 0;
     const failNames = [];
-    for (let i = 0; i < roster.length; i++) {
-      const name = roster[i];
-      accBtn.textContent = `처리 중… (${i + 1}/${roster.length})`;
-      const nm = name.normalize("NFC");
+    for (let i = 0; i < todo.length; i++) {
+      const nm = todo[i];
+      accBtn.textContent = `계정 생성 중… (${i + 1}/${todo.length})`;
       const email = nameToEmail(nm);
       let uid = null;
       try {
-        /* 새 계정 생성 시도 */
         const cred = await createUserWithEmailAndPassword(secAuth, email, LOGIN_PW);
         uid = cred.user.uid;
       } catch (err) {
         if (err.code === "auth/email-already-in-use") {
-          /* 이미 있음: 현재 비번 후보로 로그인 시도 */
-          let done = false;
-          /* 1) 이미 새 비번이면 그대로 사용 */
-          try {
-            const c = await signInWithEmailAndPassword(secAuth, email, LOGIN_PW);
-            uid = c.user.uid; done = true;
-          } catch (_) {}
-          /* 2) 예전 비번(이름2026)이면 삭제 후 새 비번으로 재생성 */
-          if (!done) {
-            try {
-              const c = await signInWithEmailAndPassword(secAuth, email, nm + "2026");
-              await deleteUser(c.user);
-              const c2 = await createUserWithEmailAndPassword(secAuth, email, LOGIN_PW);
-              uid = c2.user.uid; done = true;
-            } catch (_) {}
-          }
-          if (!done) { fail++; failNames.push(name); continue; }
-        } else { fail++; failNames.push(name); continue; }
+          /* Auth 계정은 있는데 기록만 없는 경우 → 비번으로 로그인해 uid 확보 */
+          try { const c = await signInWithEmailAndPassword(secAuth, email, LOGIN_PW); uid = c.user.uid; }
+          catch (_) { fail++; failNames.push(nm); continue; }
+        } else { fail++; failNames.push(nm); continue; }
       }
-      /* 승인 기록 저장 */
       try {
         await setDoc(doc(db, "users", uid), { name: nm, status: "approved", createdAt: serverTimestamp() });
         ok++;
-      } catch (e) { docFail++; failNames.push(name + "(승인기록실패)"); }
+      } catch (e) { docFail++; failNames.push(nm + "(기록실패)"); }
     }
     try { await signOut(secAuth); } catch (e) {}
 
     accBtn.disabled = false;
     accBtn.textContent = orig;
-    let msg = `완료!\n정상 처리(로그인 가능): ${ok}명\n실패: ${fail}명\n승인기록 저장 실패: ${docFail}명`;
-    if (docFail && !ok) msg += `\n\n⚠️ 승인기록이 전부 실패했어요. Firestore 규칙의 users create에 isAdmin() 허용이 빠졌을 수 있어요. 규칙을 다시 게시해 주세요.`;
-    if (failNames.length) msg += `\n\n실패 이름: ${failNames.slice(0, 12).join(", ")}${failNames.length > 12 ? " 외" : ""}`;
-    msg += `\n\n비밀번호는 전원 '${LOGIN_PW}' 입니다.`;
+    let msg = `완료!\n새로 만든 계정: ${ok}명\n실패: ${fail}명\n기록 실패: ${docFail}명`;
+    if (failNames.length) msg += `\n\n실패: ${failNames.slice(0, 12).join(", ")}${failNames.length > 12 ? " 외" : ""}`;
+    if (fail) msg += `\n\n※ '요청 과다'로 실패했다면 5~10분 뒤 버튼을 한 번 더 눌러 주세요.`;
+    msg += `\n\n비밀번호는 전원 '${LOGIN_PW}'.`;
     alert(msg);
   }
 
