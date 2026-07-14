@@ -331,6 +331,26 @@ body.locked { visibility: hidden; }
 .notice-item .t-title small { display:block; color: var(--gray); font-weight: 400; font-size: 13px; margin-top: 2px; }
 .notice-item .date { text-align: right; color: var(--gray); font-size: 14px; }
 
+/* 공지 작성(관리자) */
+.notice-admin {
+  max-width: 720px; margin: 0 auto 22px;
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  padding: 16px 18px; box-shadow: var(--shadow-sm);
+}
+.na-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.notice-admin input {
+  flex: 1; padding: 11px 14px; border: 1px solid var(--line);
+  border-radius: 10px; font-size: 15px; outline: none; width: 100%;
+}
+.notice-admin input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.notice-admin #naDetail { margin-bottom: 10px; }
+.notice-admin select { border: 1px solid var(--line); border-radius: 10px; padding: 0 10px; font-size: 14px; }
+.tag.info { background: #7a8699; }
+.notice-del {
+  border: 0; background: none; cursor: pointer; font-size: 14px; opacity: 0.55; margin-left: 6px;
+}
+.notice-del:hover { opacity: 1; }
+
 /* ---------- 캘린더 / 학사일정 ---------- */
 .timeline { position: relative; margin-top: 10px; }
 .timeline::before {

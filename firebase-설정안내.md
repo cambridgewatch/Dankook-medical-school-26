@@ -69,6 +69,10 @@
          allow read: if isAdmin() || isApproved();
          allow write: if isAdmin();
        }
+       match /notices/{doc} {
+         allow read: if isAdmin() || isApproved();
+         allow write: if isAdmin();
+       }
      }
    }
    ```
