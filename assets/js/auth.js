@@ -79,10 +79,9 @@ window.addEventListener("DOMContentLoaded", () => {
       const cred = await createUserWithEmailAndPassword(auth, nameToEmail(name), pw);
       await updateProfile(cred.user, { displayName: name });
       await setDoc(doc(db, "users", cred.user.uid), {
-        name, status: "approved", createdAt: serverTimestamp(),
+        name, status: "pending", createdAt: serverTimestamp(),
       });
-      toast(`🎉 ${name} 님, 회원가입 완료! 이동합니다…`, true);
-      setTimeout(() => (location.href = "index.html"), 1000);
+      toast(`🎉 ${name} 님, 회원가입 완료! 대표(관리자) 승인 후 이용할 수 있어요. 승인되면 로그인해 주세요.`, true);
     } catch (err) {
       if (err.code === "auth/email-already-in-use")
         toast(`'${name}' 님은 이미 가입돼 있습니다. 로그인을 이용해 주세요.`);

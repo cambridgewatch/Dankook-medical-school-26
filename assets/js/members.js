@@ -28,6 +28,8 @@ window.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  const approvalPanel = $("#approvalPanel");
+  const approvalList = $("#approvalList");
   const accountPanel = $("#accountPanel");
   const accountList = $("#accountList");
   const accountCount = $("#accountCount");
@@ -38,6 +40,7 @@ window.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, (user) => {
     isAdmin = !!user && user.email === ADMIN_EMAIL;
     adminBar.style.display = isAdmin ? "block" : "none";
+    approvalPanel.style.display = isAdmin ? "block" : "none";
     accountPanel.style.display = isAdmin ? "block" : "none";
     if (user && !subscribed) {
       subscribed = true;
@@ -48,16 +51,42 @@ window.addEventListener("DOMContentLoaded", () => {
         render();
       }, (err) => { note.textContent = "명단을 불러오지 못했습니다: " + err.message; });
     }
-    /* 관리자만 계정(users) 구독 → 전체 계정 목록 */
+    /* 관리자만 계정(users) 구독 → 승인 대기 + 전체 계정 목록 */
     if (isAdmin && !pendingSub) {
       pendingSub = true;
       onSnapshot(collection(db, "users"), (snap) => {
         accountsAll = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        renderApprovals(accountsAll.filter((u) => (u.status || "pending") === "pending"));
         renderAccounts(accountsAll);
       });
     }
     render();
   });
+
+  function renderApprovals(pending) {
+    if (!pending.length) {
+      approvalList.innerHTML = `<li class="none">대기 중인 가입 신청이 없습니다.</li>`;
+      return;
+    }
+    approvalList.innerHTML = pending.map((u) => `
+      <li>
+        <span class="ap-name">${esc(u.name || "이름없음")}</span>
+        <span class="ap-act">
+          <button class="ap-ok" data-id="${u.id}">승인</button>
+          <button class="ap-no" data-id="${u.id}">거절</button>
+        </span>
+      </li>`).join("");
+    approvalList.querySelectorAll(".ap-ok").forEach((b) =>
+      b.addEventListener("click", () => setStatus(b.dataset.id, "approved")));
+    approvalList.querySelectorAll(".ap-no").forEach((b) =>
+      b.addEventListener("click", () => {
+        if (confirm("이 가입 신청을 거절할까요?")) setStatus(b.dataset.id, "rejected");
+      }));
+  }
+  async function setStatus(uid, status) {
+    try { await updateDoc(doc(db, "users", uid), { status }); }
+    catch (err) { alert("처리 실패: " + err.message); }
+  }
 
   function renderAccounts(all) {
     const sorted = all.slice().sort((a, b) => (a.name || "").localeCompare(b.name || "", "ko"));
