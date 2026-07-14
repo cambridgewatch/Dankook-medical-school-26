@@ -151,71 +151,60 @@ window.addEventListener("DOMContentLoaded", () => {
     addNames(($("#maBulk").value || "").split(/[\n,]/));
   });
 
-  /* 전체 계정 초기화: 나(관리자) 빼고 삭제 후, 명단 전원 재생성 (비번=이름2026) */
+  /* 명단 전원 계정 생성 & 승인 (비번=이름2026). 이미 있으면 승인만 채움. */
   const accBtn = $("#maAccounts");
-  if (accBtn) accBtn.addEventListener("click", resetAllAccounts);
+  if (accBtn) accBtn.addEventListener("click", ensureAllAccounts);
 
-  async function resetAllAccounts() {
+  async function ensureAllAccounts() {
     if (!isAdmin) return alert("관리자만 사용할 수 있습니다.");
-    if (!members.length) return alert("명단이 비어 있어요. 먼저 이름을 넣어 주세요.");
     const roster = members.map((m) => (m.name || "").trim()).filter((n) => n && n !== ADMIN_NAME);
+    if (!roster.length) return alert("명단이 비어 있어요. 먼저 이름을 넣어 주세요.");
     if (!confirm(
-      `정지훈 님을 제외한 모든 계정을 삭제하고,\n명단 ${roster.length}명의 계정을 새로 만듭니다.\n비밀번호는 각자 '이름2026' 입니다.\n\n계속할까요?`
+      `명단 ${roster.length}명의 로그인 계정을 만들고 모두 승인합니다.\n` +
+      `비밀번호는 각자 '이름2026' 입니다.\n(이미 있는 계정은 비밀번호 확인 후 승인만 처리)\n\n계속할까요?`
     )) return;
 
     accBtn.disabled = true;
     const orig = accBtn.textContent;
-
     const secApp = getApps().some((a) => a.name === "secondary")
       ? getApp("secondary")
       : initializeApp(firebaseConfig, "secondary");
     const secAuth = getAuth(secApp);
 
-    /* 1) 기존 계정 삭제: 명단 이름 기준으로 '이름2026'으로 로그인해 삭제. 관리자 제외. */
-    let del = 0, delFail = 0;
+    let ok = 0, fail = 0, docFail = 0;
+    const failNames = [];
     for (let i = 0; i < roster.length; i++) {
       const name = roster[i];
-      accBtn.textContent = `기존 계정 삭제 중… (${i + 1}/${roster.length})`;
+      accBtn.textContent = `처리 중… (${i + 1}/${roster.length})`;
+      let uid = null;
       try {
-        const cred = await signInWithEmailAndPassword(secAuth, nameToEmail(name), name + "2026");
-        await deleteUser(cred.user);
-        del++;
-      } catch (e) {
-        /* 계정이 없거나(정상) 비번이 달라서 실패 */
-        if (e.code !== "auth/user-not-found" && e.code !== "auth/invalid-credential") delFail++;
-      }
-    }
-    /* 남아있는 계정 기록(users 문서)도 정리 */
-    for (const u of accountsAll) {
-      if (u.name === ADMIN_NAME) continue;
-      try { await deleteDoc(doc(db, "users", u.id)); } catch (e) {}
-    }
-
-    /* 2) 명단 전원 재생성 */
-    let created = 0, createFail = 0;
-    for (let i = 0; i < roster.length; i++) {
-      const name = roster[i];
-      accBtn.textContent = `계정 생성 중… (${i + 1}/${roster.length})`;
-      try {
+        /* 계정 생성 시도 */
         const cred = await createUserWithEmailAndPassword(secAuth, nameToEmail(name), name + "2026");
-        await setDoc(doc(db, "users", cred.user.uid), {
-          name, status: "approved", createdAt: serverTimestamp(),
-        });
-        created++;
+        uid = cred.user.uid;
       } catch (err) {
-        createFail++;
-        console.error("계정 생성 실패:", name, err.code || err.message);
+        if (err.code === "auth/email-already-in-use") {
+          /* 이미 있으면 비번(이름2026)으로 로그인해 uid 확보 */
+          try {
+            const cred = await signInWithEmailAndPassword(secAuth, nameToEmail(name), name + "2026");
+            uid = cred.user.uid;
+          } catch (e2) { fail++; failNames.push(name); continue; }
+        } else { fail++; failNames.push(name); continue; }
       }
+      /* 승인 기록 저장 */
+      try {
+        await setDoc(doc(db, "users", uid), { name, status: "approved", createdAt: serverTimestamp() });
+        ok++;
+      } catch (e) { docFail++; failNames.push(name + "(승인기록실패)"); }
     }
     try { await signOut(secAuth); } catch (e) {}
 
     accBtn.disabled = false;
     accBtn.textContent = orig;
-    alert(
-      `완료!\n삭제: ${del}개 (실패 ${delFail})\n생성: ${created}명 (실패 ${createFail})\n\n` +
-      `비밀번호는 각자 '이름2026' 입니다.` +
-      (createFail ? `\n\n※ 생성 실패가 있으면 잠시 후 버튼을 한 번 더 눌러 주세요.` : "")
-    );
+    let msg = `완료!\n정상 처리(로그인 가능): ${ok}명\n비번 불일치/실패: ${fail}명\n승인기록 저장 실패: ${docFail}명`;
+    if (docFail && !ok) msg += `\n\n⚠️ 승인기록이 전부 실패했어요. Firestore 규칙의 users create에 isAdmin() 허용이 빠졌을 수 있어요. 규칙을 다시 게시해 주세요.`;
+    if (failNames.length) msg += `\n\n실패 이름: ${failNames.slice(0, 12).join(", ")}${failNames.length > 12 ? " 외" : ""}`;
+    msg += `\n\n비밀번호는 각자 '이름2026' 입니다.`;
+    alert(msg);
   }
 
   async function addNames(arr) {
