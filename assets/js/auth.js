@@ -12,6 +12,9 @@ import {
   updatePassword,
   reauthenticateWithCredential,
   EmailAuthProvider,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   doc, setDoc, getDoc, serverTimestamp,
@@ -120,6 +123,9 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!name || !pw) return toast("이름과 비밀번호를 입력해 주세요.");
 
     try {
+      /* 자동 로그인 선택: 체크 시 브라우저 닫아도 유지(local), 해제 시 세션(session) */
+      const remember = $("#rememberMe") ? $("#rememberMe").checked : true;
+      await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
       await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
       toast(`${name} 님, 환영합니다! 이동합니다…`, true);
       setTimeout(() => (location.href = "index.html"), 800);

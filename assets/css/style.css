@@ -672,6 +672,11 @@ body.locked { visibility: hidden; }
 .auth-form input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
 .auth-form .btn { width: 100%; justify-content: center; margin-top: 22px; }
 .auth-hint { font-size: 13px; color: var(--gray); margin-top: 14px; text-align: center; }
+.remember {
+  display: flex; align-items: center; gap: 8px;
+  margin: 16px 0 4px; font-size: 14px; color: var(--ink); cursor: pointer; font-weight: 500;
+}
+.remember input { width: 17px; height: 17px; accent-color: var(--navy); cursor: pointer; }
 .auth-msg { display: none; margin-top: 18px; padding: 12px 14px; border-radius: 10px; font-size: 14px; font-weight: 600; }
 .auth-msg.err { background: #fdecec; color: #c0392b; border: 1px solid #f5c6c6; }
 .auth-msg.ok  { background: #eafaf0; color: #1e8a4c; border: 1px solid #bfe9cd; }
