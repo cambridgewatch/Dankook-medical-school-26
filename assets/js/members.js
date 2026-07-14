@@ -69,9 +69,19 @@ window.addEventListener("DOMContentLoaded", () => {
       const [label, color] = STATUS[u.status] || STATUS.pending;
       return `<li>
         <span class="ap-name">${esc(u.name || "이름없음")}</span>
-        <span style="font-size:12px;font-weight:700;padding:3px 11px;border-radius:999px;color:#fff;background:${color};">${label}</span>
+        <span class="ap-act">
+          <span style="font-size:12px;font-weight:700;padding:3px 11px;border-radius:999px;color:#fff;background:${color};">${label}</span>
+          <button class="acc-del" data-id="${u.id}" title="접근 권한 삭제" style="border:0;background:none;cursor:pointer;font-size:14px;opacity:.55;">🗑</button>
+        </span>
       </li>`;
     }).join("");
+    accountList.querySelectorAll(".acc-del").forEach((b) => {
+      b.addEventListener("click", async () => {
+        if (!confirm("이 계정의 접근 권한(승인 기록)을 삭제할까요?\n※ 로그인 자체 삭제는 Firebase 콘솔에서 해야 합니다.")) return;
+        try { await deleteDoc(doc(db, "users", b.dataset.id)); }
+        catch (err) { alert("삭제 실패: " + err.message); }
+      });
+    });
   }
 
   function renderApprovals(pending) {
