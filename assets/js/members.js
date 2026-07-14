@@ -155,13 +155,16 @@ window.addEventListener("DOMContentLoaded", () => {
   const accBtn = $("#maAccounts");
   if (accBtn) accBtn.addEventListener("click", ensureAllAccounts);
 
+  /* 전원 공통 비밀번호 (6자 이상 필수). 바꾸려면 이 값만 수정. */
+  const LOGIN_PW = "dku1842";
+
   async function ensureAllAccounts() {
     if (!isAdmin) return alert("관리자만 사용할 수 있습니다.");
     const roster = members.map((m) => (m.name || "").trim()).filter((n) => n && n !== ADMIN_NAME);
     if (!roster.length) return alert("명단이 비어 있어요. 먼저 이름을 넣어 주세요.");
     if (!confirm(
       `명단 ${roster.length}명의 로그인 계정을 만들고 모두 승인합니다.\n` +
-      `비밀번호는 각자 '이름2026' 입니다.\n(이미 있는 계정은 비밀번호 확인 후 승인만 처리)\n\n계속할까요?`
+      `비밀번호는 전원 '${LOGIN_PW}' 입니다.\n(기존 계정은 이 비번으로 자동 변경)\n\n계속할까요?`
     )) return;
 
     accBtn.disabled = true;
@@ -178,24 +181,35 @@ window.addEventListener("DOMContentLoaded", () => {
       accBtn.textContent = `처리 중… (${i + 1}/${roster.length})`;
       const nm = name.normalize("NFC");
       const email = nameToEmail(nm);
-      const pw = nm + "2026";
       let uid = null;
       try {
-        /* 계정 생성 시도 */
-        const cred = await createUserWithEmailAndPassword(secAuth, email, pw);
+        /* 새 계정 생성 시도 */
+        const cred = await createUserWithEmailAndPassword(secAuth, email, LOGIN_PW);
         uid = cred.user.uid;
       } catch (err) {
         if (err.code === "auth/email-already-in-use") {
-          /* 이미 있으면 비번(이름2026)으로 로그인해 uid 확보 */
+          /* 이미 있음: 현재 비번 후보로 로그인 시도 */
+          let done = false;
+          /* 1) 이미 새 비번이면 그대로 사용 */
           try {
-            const cred = await signInWithEmailAndPassword(secAuth, email, pw);
-            uid = cred.user.uid;
-          } catch (e2) { fail++; failNames.push(name); continue; }
+            const c = await signInWithEmailAndPassword(secAuth, email, LOGIN_PW);
+            uid = c.user.uid; done = true;
+          } catch (_) {}
+          /* 2) 예전 비번(이름2026)이면 삭제 후 새 비번으로 재생성 */
+          if (!done) {
+            try {
+              const c = await signInWithEmailAndPassword(secAuth, email, nm + "2026");
+              await deleteUser(c.user);
+              const c2 = await createUserWithEmailAndPassword(secAuth, email, LOGIN_PW);
+              uid = c2.user.uid; done = true;
+            } catch (_) {}
+          }
+          if (!done) { fail++; failNames.push(name); continue; }
         } else { fail++; failNames.push(name); continue; }
       }
       /* 승인 기록 저장 */
       try {
-        await setDoc(doc(db, "users", uid), { name, status: "approved", createdAt: serverTimestamp() });
+        await setDoc(doc(db, "users", uid), { name: nm, status: "approved", createdAt: serverTimestamp() });
         ok++;
       } catch (e) { docFail++; failNames.push(name + "(승인기록실패)"); }
     }
@@ -203,10 +217,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
     accBtn.disabled = false;
     accBtn.textContent = orig;
-    let msg = `완료!\n정상 처리(로그인 가능): ${ok}명\n비번 불일치/실패: ${fail}명\n승인기록 저장 실패: ${docFail}명`;
+    let msg = `완료!\n정상 처리(로그인 가능): ${ok}명\n실패: ${fail}명\n승인기록 저장 실패: ${docFail}명`;
     if (docFail && !ok) msg += `\n\n⚠️ 승인기록이 전부 실패했어요. Firestore 규칙의 users create에 isAdmin() 허용이 빠졌을 수 있어요. 규칙을 다시 게시해 주세요.`;
     if (failNames.length) msg += `\n\n실패 이름: ${failNames.slice(0, 12).join(", ")}${failNames.length > 12 ? " 외" : ""}`;
-    msg += `\n\n비밀번호는 각자 '이름2026' 입니다.`;
+    msg += `\n\n비밀번호는 전원 '${LOGIN_PW}' 입니다.`;
     alert(msg);
   }
 
