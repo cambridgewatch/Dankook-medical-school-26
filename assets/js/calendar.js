@@ -3,7 +3,7 @@
    - 관리자(정지훈)만: 날짜를 눌러 일정/할 일 추가·삭제
    - 데이터: Firebase Firestore (calendarEvents) */
 
-import { db, auth, isConfigured, ADMIN_EMAIL, ADMIN_NAME } from "./firebase-init.js";
+import { db, auth, isConfigured, ADMIN_EMAIL, ADMIN_NAME } from "./firebase-init.js?v=11";
 import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";

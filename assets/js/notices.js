@@ -3,7 +3,7 @@
    - 관리자(정지훈)만: 공지 등록/삭제
    - 데이터: Firebase Firestore (notices) */
 
-import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js";
+import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp,

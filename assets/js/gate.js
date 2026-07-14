@@ -2,7 +2,7 @@
    - login.html 에는 적용하지 않음(로그인하러 들어와야 하므로).
    - 그 외 모든 페이지의 <body class="locked"> 를 풀어줌. */
 
-import { auth, db, isConfigured, ADMIN_EMAIL } from "./firebase-init.js";
+import { auth, db, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 

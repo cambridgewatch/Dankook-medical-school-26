@@ -2,7 +2,7 @@
    - 이름은 공개 코드에 없고, 로그인한 사람만 볼 수 있는 Firestore "members"에만 저장됨.
    - 추가/삭제는 관리자(정지훈)만 가능. */
 
-import { db, auth, isConfigured, ADMIN_EMAIL, ADMIN_NAME, firebaseConfig, nameToEmail } from "./firebase-init.js";
+import { db, auth, isConfigured, ADMIN_EMAIL, ADMIN_NAME, firebaseConfig, nameToEmail } from "./firebase-init.js?v=11";
 import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   onAuthStateChanged, getAuth, createUserWithEmailAndPassword,

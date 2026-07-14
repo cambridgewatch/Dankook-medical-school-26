@@ -2,7 +2,7 @@
    - 로그인/데이터: Firebase (무료)
    - 사진 파일 저장: ImgBB (무료, 카드 불필요) */
 
-import { auth, db, isConfigured, IMGBB_API_KEY, imgbbReady } from "./firebase-init.js";
+import { auth, db, isConfigured, IMGBB_API_KEY, imgbbReady } from "./firebase-init.js?v=11";
 import {
   onAuthStateChanged, signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";

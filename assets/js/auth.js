@@ -2,7 +2,7 @@
 
 import {
   auth, db, isConfigured, ROSTER, nameToEmail, ADMIN_EMAIL,
-} from "./firebase-init.js";
+} from "./firebase-init.js?v=11";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,

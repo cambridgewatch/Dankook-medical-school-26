@@ -10,13 +10,13 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebas
 
 /* ▼▼▼ 여기에 Firebase 콘솔에서 복사한 값을 붙여넣으세요 ▼▼▼ */
 export const firebaseConfig = {
-  apiKey: "AIzaSyAvsWdMN6GiZOll8AqpAFK1PSFB-R1TGng",
-  authDomain: "dankook26-4260a.firebaseapp.com",
-  projectId: "dankook26-4260a",
-  storageBucket: "dankook26-4260a.firebasestorage.app",
-  messagingSenderId: "505380299011",
-  appId: "1:505380299011:web:d6ef4fdfd13521405b8936",
-  measurementId: "G-JHFSWN10Q2",
+  apiKey: "AIzaSyAHyZBoqjbBYF6x1KC9oDYhXPLNU7CjspM",
+  authDomain: "dankook-re.firebaseapp.com",
+  projectId: "dankook-re",
+  storageBucket: "dankook-re.firebasestorage.app",
+  messagingSenderId: "761179895525",
+  appId: "1:761179895525:web:731134fe5ac0fa1724460c",
+  measurementId: "G-7Q4TRWHFWF",
 };
 /* ▲▲▲ 여기까지 교체 ▲▲▲ */
 
