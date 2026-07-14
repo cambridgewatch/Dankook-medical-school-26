@@ -30,21 +30,29 @@ window.addEventListener("DOMContentLoaded", () => {
       set.add(ADMIN_NAME); // 정지훈(나) 포함
       names = [...set];
       infoEl.textContent = `총 ${names.length}명 참여 · 버튼을 눌러 1명을 뽑아요!`;
-      renderReel(randomReel(24), -1);
+      renderReel(shuffle(names)); // 시작 전에도 전체 한 번 섞어서 표시
     } catch (e) {
       infoEl.textContent = "명단을 불러오지 못했어요: " + e.message;
     }
   });
 
-  function randomReel(len) {
-    const r = [];
-    for (let i = 0; i < len; i++) r.push(names[Math.floor(Math.random() * names.length)]);
-    return r;
+  /* 피셔-예이츠 셔플 */
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
   }
-  function renderReel(reel, winIdx) {
-    track.innerHTML = reel
-      .map((n, i) => `<div class="roulette-card${i === winIdx ? " win" : ""}">${esc(n)}</div>`)
-      .join("");
+  /* 전체 인원을 섞은 묶음을 반복해 길이를 채움 */
+  function buildReel(len) {
+    const r = [];
+    while (r.length < len) r.push(...shuffle(names));
+    return r.slice(0, len);
+  }
+  function renderReel(reel) {
+    track.innerHTML = reel.map((n) => `<div class="roulette-card">${esc(n)}</div>`).join("");
   }
 
   spinBtn.addEventListener("click", () => {
@@ -55,9 +63,9 @@ window.addEventListener("DOMContentLoaded", () => {
     infoEl.textContent = "🎲 두구두구두구…";
 
     const winner = names[Math.floor(Math.random() * names.length)];
-    const reel = randomReel(WIN_IDX + 8);
+    const reel = buildReel(WIN_IDX + 8); // 전체 인원 셔플로 채움
     reel[WIN_IDX] = winner;
-    renderReel(reel, WIN_IDX);
+    renderReel(reel);
 
     /* 시작 위치로 리셋 */
     track.style.transition = "none";
