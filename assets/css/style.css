@@ -765,6 +765,53 @@ body.locked { visibility: hidden; }
 }
 .mem-del:hover { opacity: 1; }
 
+/* ---------- 미니게임 ---------- */
+.game-card {
+  max-width: 720px; margin: 0 auto 22px;
+  background: #fff; border: 1px solid var(--line); border-radius: 20px;
+  padding: 30px 28px; box-shadow: var(--shadow); text-align: center;
+}
+.game-head h2 { color: var(--navy); font-size: 24px; }
+.game-head p { color: var(--gray); margin: 6px 0 22px; }
+.game-soon { background: #f7faff; border-style: dashed; color: var(--gray); }
+.game-soon h2 { color: var(--navy); font-size: 19px; }
+.game-soon p { color: var(--gray); margin-top: 6px; }
+
+.roulette {
+  position: relative; overflow: hidden;
+  border-radius: 16px; border: 1px solid var(--line);
+  background: linear-gradient(180deg, #f4f8ff, #fff);
+  height: 118px;
+  box-shadow: inset 0 2px 8px rgba(0,32,91,0.06);
+}
+/* 가운데 포인터 */
+.roulette-pointer {
+  position: absolute; top: 0; bottom: 0; left: 50%; width: 3px;
+  transform: translateX(-50%); z-index: 3;
+  background: linear-gradient(180deg, var(--gold), #e0b95a);
+}
+.roulette-pointer::before, .roulette-pointer::after {
+  content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+  border-left: 8px solid transparent; border-right: 8px solid transparent;
+}
+.roulette-pointer::before { top: -1px; border-top: 10px solid var(--gold); }
+.roulette-pointer::after { bottom: -1px; border-bottom: 10px solid var(--gold); }
+
+.roulette-track { display: flex; height: 100%; align-items: center; will-change: transform; }
+.roulette-card {
+  flex: 0 0 150px; width: 150px; height: 84px;
+  display: grid; place-items: center;
+  margin: 0; border-right: 1px solid #eef1f6;
+  font-weight: 800; font-size: 19px; color: var(--navy);
+  background: #fff;
+}
+.roulette-card:nth-child(even) { background: #f7faff; }
+.roulette-card.win { background: #fff6da; color: #8a6d1f; }
+
+.roulette-result { min-height: 34px; margin: 20px 0 6px; font-size: 22px; color: var(--navy); }
+.roulette-result strong { color: var(--gold); font-size: 26px; }
+.roulette-btn { padding: 13px 40px; font-size: 16px; }
+
 /* ---------- 푸터 ---------- */
 .site-footer {
   background: var(--navy-dark);
