@@ -680,6 +680,14 @@ body.locked { visibility: hidden; }
   border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; font-size: 14px;
 }
 .logged-box a { color: var(--blue); font-weight: 700; }
+.pw-change { margin-top: 16px; padding-top: 14px; border-top: 1px solid #cfe0f7; }
+.pw-change h4 { color: var(--navy); font-size: 15px; margin-bottom: 10px; }
+.pw-change input {
+  width: 100%; margin-bottom: 8px; padding: 11px 13px;
+  border: 1px solid var(--line); border-radius: 10px; font-size: 14px; outline: none;
+}
+.pw-change input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.pw-change .btn { width: 100%; justify-content: center; margin-top: 4px; }
 
 /* ---------- 갤러리 인증/업로드 바 ---------- */
 .gallery-authbar {

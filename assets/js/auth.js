@@ -9,6 +9,9 @@ import {
   updateProfile,
   onAuthStateChanged,
   signOut,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   doc, setDoc, getDoc, serverTimestamp,
@@ -59,6 +62,48 @@ window.addEventListener("DOMContentLoaded", () => {
   $("#logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
     toast("로그아웃 되었습니다.", true);
+  });
+
+  /* 비밀번호 변경 */
+  const pwMsg = (msg, ok = false) => {
+    const box = $("#pwMsg");
+    box.textContent = msg;
+    box.className = "auth-msg " + (ok ? "ok" : "err");
+    box.style.display = "block";
+  };
+  $("#changePwBtn").addEventListener("click", async () => {
+    const user = auth.currentUser;
+    if (!user) return pwMsg("로그인 후 이용해 주세요.");
+    const nw = $("#newPw").value.normalize("NFC");
+    const nw2 = $("#newPw2").value.normalize("NFC");
+    const cur = $("#curPw").value.normalize("NFC");
+    if (nw.length < 6) return pwMsg("새 비밀번호는 6자 이상이어야 합니다.");
+    if (nw !== nw2) return pwMsg("새 비밀번호가 일치하지 않습니다.");
+    try {
+      await updatePassword(user, nw);
+      pwMsg("✅ 비밀번호가 변경되었습니다!", true);
+      $("#newPw").value = ""; $("#newPw2").value = ""; $("#curPw").value = "";
+    } catch (err) {
+      if (err.code === "auth/requires-recent-login") {
+        /* 로그인한 지 오래됨 → 현재 비밀번호로 재인증 필요 */
+        if (!cur) return pwMsg("보안을 위해 '현재 비밀번호'를 입력해 주세요.");
+        try {
+          const cred = EmailAuthProvider.credential(user.email, cur);
+          await reauthenticateWithCredential(user, cred);
+          await updatePassword(user, nw);
+          pwMsg("✅ 비밀번호가 변경되었습니다!", true);
+          $("#newPw").value = ""; $("#newPw2").value = ""; $("#curPw").value = "";
+        } catch (e2) {
+          if (e2.code === "auth/wrong-password" || e2.code === "auth/invalid-credential")
+            pwMsg("현재 비밀번호가 올바르지 않습니다.");
+          else pwMsg("변경 실패: " + (e2.message || e2.code));
+        }
+      } else if (err.code === "auth/weak-password") {
+        pwMsg("비밀번호가 너무 약합니다. (6자 이상)");
+      } else {
+        pwMsg("변경 실패: " + (err.message || err.code));
+      }
+    }
   });
 
   /* 회원가입 */
