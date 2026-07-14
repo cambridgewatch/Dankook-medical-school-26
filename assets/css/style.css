@@ -307,21 +307,46 @@ body.locked { visibility: hidden; }
 .stat strong { display: block; font-size: 34px; color: var(--navy); font-weight: 800; }
 .stat span { color: var(--gray); font-size: 14px; }
 
-/* ---------- 공지 게시판 ---------- */
+/* ---------- 공지 게시판 (아코디언 카드) ---------- */
 .notice-list { display: flex; flex-direction: column; gap: 12px; max-width: 820px; margin: 0 auto; }
+.notice-card {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: var(--shadow-sm); overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
+}
+.notice-card:hover { border-color: #cdd9ee; box-shadow: var(--shadow); }
+.notice-head { display: flex; align-items: center; gap: 14px; padding: 16px 20px; }
+.notice-card.has-detail .notice-head { cursor: pointer; }
+.notice-card.has-detail .notice-head:hover { background: #f7faff; }
+.notice-head .tag {
+  flex: 0 0 auto; font-size: 12px; font-weight: 700;
+  padding: 5px 12px; border-radius: 999px; background: var(--navy); color: #fff;
+}
+.notice-head .tag.event { background: var(--gold); }
+.notice-head .tag.acad { background: var(--blue); }
+.notice-head .tag.info { background: #7a8699; }
+.nt-title { flex: 1; font-weight: 600; color: var(--ink); font-size: 16px; }
+.nt-date { color: var(--gray); font-size: 13px; white-space: nowrap; }
+.nt-chev { color: var(--gray); font-size: 12px; transition: transform 0.25s; }
+.notice-card.open .nt-chev { transform: rotate(180deg); color: var(--navy); }
+.notice-body {
+  max-height: 0; opacity: 0; overflow: hidden;
+  padding: 0 20px; color: var(--gray); font-size: 14.5px; line-height: 1.75;
+  border-top: 1px solid transparent; transition: all 0.28s ease;
+}
+.notice-card.open .notice-body {
+  max-height: 600px; opacity: 1; padding: 14px 20px 18px; border-top-color: var(--line);
+}
 .notice-item {
   display: grid;
   grid-template-columns: 64px 1fr auto;
   gap: 16px;
   align-items: center;
   padding: 18px 22px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.15s;
 }
-.notice-item:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: #cdd9ee; }
+.notice-item:hover { background: var(--blue-light); }
 .notice-item .tag {
   justify-self: start;
   font-size: 12px; font-weight: 700;

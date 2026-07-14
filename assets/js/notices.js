@@ -46,17 +46,32 @@ window.addEventListener("DOMContentLoaded", () => {
     list.innerHTML = notices.map((n) => {
       const tag = TAG_CLASS[n.tag] || "";
       const date = fmt(n.createdAt);
+      const hasDetail = !!(n.detail && n.detail.trim());
+      const body = hasDetail ? esc(n.detail).replace(/\n/g, "<br>") : "";
       return `
-        <div class="notice-item">
-          <span class="tag ${tag}">${TAG_LABEL[n.tag] || "공지"}</span>
-          <div class="t-title">${esc(n.title)}
-            ${n.detail ? `<small>${esc(n.detail)}</small>` : ""}
+        <div class="notice-card ${hasDetail ? "has-detail" : ""}">
+          <div class="notice-head">
+            <span class="tag ${tag}">${TAG_LABEL[n.tag] || "공지"}</span>
+            <span class="nt-title">${esc(n.title)}</span>
+            <span class="nt-date">${date}</span>
+            ${hasDetail ? `<span class="nt-chev">▾</span>` : ""}
+            ${isAdmin ? `<button class="notice-del" data-id="${n.id}" title="삭제">🗑</button>` : ""}
           </div>
-          <span class="date">${date}${isAdmin ? ` <button class="notice-del" data-id="${n.id}" title="삭제">🗑</button>` : ""}</span>
+          ${hasDetail ? `<div class="notice-body">${body}</div>` : ""}
         </div>`;
     }).join("");
+
+    /* 제목 클릭 → 상세 펼치기/접기 */
+    list.querySelectorAll(".notice-card.has-detail .notice-head").forEach((h) => {
+      h.addEventListener("click", (e) => {
+        if (e.target.closest(".notice-del")) return;
+        h.parentElement.classList.toggle("open");
+      });
+    });
+    /* 삭제 (관리자) */
     list.querySelectorAll(".notice-del").forEach((b) => {
-      b.addEventListener("click", async () => {
+      b.addEventListener("click", async (e) => {
+        e.stopPropagation();
         if (!confirm("이 공지를 삭제할까요?")) return;
         try { await deleteDoc(doc(db, "notices", b.dataset.id)); }
         catch (err) { alert("삭제 실패: " + err.message); }
