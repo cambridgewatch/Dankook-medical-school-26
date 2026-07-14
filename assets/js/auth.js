@@ -109,36 +109,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* 회원가입 */
-  $("#signupForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!isConfigured) return toast("⚠️ Firebase 설정을 먼저 완료해 주세요.");
-    const name = $("#suName").value.trim();
-    const pw = $("#suPw").value;
-    const pw2 = $("#suPw2").value;
-
-    if (!name) return toast("이름을 입력해 주세요.");
-    if (ROSTER.length && !ROSTER.includes(name))
-      return toast(`'${name}' 님은 26학번 동기 명단에 없습니다. 이름을 정확히 입력해 주세요.`);
-    if (pw.length < 6) return toast("비밀번호는 6자 이상이어야 합니다.");
-    if (pw !== pw2) return toast("비밀번호가 일치하지 않습니다.");
-
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
-      await updateProfile(cred.user, { displayName: name });
-      await setDoc(doc(db, "users", cred.user.uid), {
-        name, status: "approved", createdAt: serverTimestamp(),
-      });
-      toast(`🎉 ${name} 님, 회원가입 완료! 이동합니다…`, true);
-      setTimeout(() => (location.href = "index.html"), 1000);
-    } catch (err) {
-      if (err.code === "auth/email-already-in-use")
-        toast(`'${name}' 님은 이미 가입돼 있습니다. 로그인을 이용해 주세요.`);
-      else if (err.code === "auth/weak-password")
-        toast("비밀번호가 너무 약합니다. (6자 이상)");
-      else toast("회원가입 오류: " + (err.message || err.code));
-    }
-  });
+  /* 회원가입은 비활성화됨 (계정은 대표가 미리 생성) */
 
   /* 로그인 */
   $("#loginForm").addEventListener("submit", async (e) => {
