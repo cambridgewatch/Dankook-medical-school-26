@@ -40,17 +40,21 @@
 
       <!-- 관리자 전용: 공지 작성 -->
       <div class="notice-admin" id="noticeAdmin" style="display:none;">
-        <div class="na-row">
-          <input type="text" id="naTitle" placeholder="공지 제목" maxlength="60" />
-          <select id="naTag">
-            <option value="notice">필독</option>
-            <option value="event">행사</option>
-            <option value="acad">학사</option>
-            <option value="info">안내</option>
-          </select>
+        <h3>✏️ 새 공지 작성</h3>
+        <input type="text" id="naTitle" class="na-title" placeholder="공지 제목을 입력하세요" maxlength="60" />
+        <textarea id="naDetail" class="na-detail" rows="3" placeholder="상세 내용 (선택)" maxlength="200"></textarea>
+        <div class="na-foot">
+          <div class="na-tags">
+            <span>분류</span>
+            <select id="naTag">
+              <option value="notice">필독</option>
+              <option value="event">행사</option>
+              <option value="acad">학사</option>
+              <option value="info">안내</option>
+            </select>
+          </div>
+          <button class="btn btn-solid" id="naAdd">공지 등록</button>
         </div>
-        <input type="text" id="naDetail" placeholder="상세 내용 (선택)" maxlength="120" />
-        <button class="btn btn-solid" id="naAdd">공지 등록</button>
       </div>
 
       <!-- 게시판 (JS가 채움) -->
