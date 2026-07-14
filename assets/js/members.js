@@ -176,16 +176,19 @@ window.addEventListener("DOMContentLoaded", () => {
     for (let i = 0; i < roster.length; i++) {
       const name = roster[i];
       accBtn.textContent = `처리 중… (${i + 1}/${roster.length})`;
+      const nm = name.normalize("NFC");
+      const email = nameToEmail(nm);
+      const pw = nm + "2026";
       let uid = null;
       try {
         /* 계정 생성 시도 */
-        const cred = await createUserWithEmailAndPassword(secAuth, nameToEmail(name), name + "2026");
+        const cred = await createUserWithEmailAndPassword(secAuth, email, pw);
         uid = cred.user.uid;
       } catch (err) {
         if (err.code === "auth/email-already-in-use") {
           /* 이미 있으면 비번(이름2026)으로 로그인해 uid 확보 */
           try {
-            const cred = await signInWithEmailAndPassword(secAuth, nameToEmail(name), name + "2026");
+            const cred = await signInWithEmailAndPassword(secAuth, email, pw);
             uid = cred.user.uid;
           } catch (e2) { fail++; failNames.push(name); continue; }
         } else { fail++; failNames.push(name); continue; }

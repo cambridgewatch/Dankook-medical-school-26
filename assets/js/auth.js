@@ -76,7 +76,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (pw !== pw2) return toast("비밀번호가 일치하지 않습니다.");
 
     try {
-      const cred = await createUserWithEmailAndPassword(auth, nameToEmail(name), pw);
+      const cred = await createUserWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
       await updateProfile(cred.user, { displayName: name });
       await setDoc(doc(db, "users", cred.user.uid), {
         name, status: "pending", createdAt: serverTimestamp(),
@@ -100,7 +100,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!name || !pw) return toast("이름과 비밀번호를 입력해 주세요.");
 
     try {
-      const cred = await signInWithEmailAndPassword(auth, nameToEmail(name), pw);
+      const cred = await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
       const u = cred.user;
       if (u.email === ADMIN_EMAIL) {
         toast(`${name} 님, 환영합니다! 이동합니다…`, true);
