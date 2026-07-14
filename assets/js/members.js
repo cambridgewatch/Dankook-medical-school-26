@@ -28,17 +28,9 @@ window.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  const accountPanel = $("#accountPanel");
-  const accountList = $("#accountList");
-  const accountCount = $("#accountCount");
-  let pendingSub = false;
-  let accountsAll = [];
-  const STATUS = { approved: ["승인", "#2bb673"], pending: ["대기", "#c8a24b"], rejected: ["거절", "#e2574c"] };
-
   onAuthStateChanged(auth, (user) => {
     isAdmin = !!user && user.email === ADMIN_EMAIL;
     adminBar.style.display = isAdmin ? "block" : "none";
-    accountPanel.style.display = isAdmin ? "block" : "none";
     if (user && !subscribed) {
       subscribed = true;
       onSnapshot(collection(db, "members"), (snap) => {
@@ -48,39 +40,8 @@ window.addEventListener("DOMContentLoaded", () => {
         render();
       }, (err) => { note.textContent = "명단을 불러오지 못했습니다: " + err.message; });
     }
-    /* 관리자만 계정(users) 구독 → 전체 계정 목록 */
-    if (isAdmin && !pendingSub) {
-      pendingSub = true;
-      onSnapshot(collection(db, "users"), (snap) => {
-        accountsAll = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        renderAccounts(accountsAll);
-      });
-    }
     render();
   });
-
-  function renderAccounts(all) {
-    const sorted = all.slice().sort((a, b) => (a.name || "").localeCompare(b.name || "", "ko"));
-    accountCount.textContent = `(${sorted.length}명)`;
-    if (!sorted.length) { accountList.innerHTML = `<li class="none">등록된 계정이 없습니다.</li>`; return; }
-    accountList.innerHTML = sorted.map((u) => {
-      const [label, color] = STATUS[u.status] || STATUS.pending;
-      return `<li>
-        <span class="ap-name">${esc(u.name || "이름없음")}</span>
-        <span class="ap-act">
-          <span style="font-size:12px;font-weight:700;padding:3px 11px;border-radius:999px;color:#fff;background:${color};">${label}</span>
-          <button class="acc-del" data-id="${u.id}" title="접근 권한 삭제" style="border:0;background:none;cursor:pointer;font-size:14px;opacity:.55;">🗑</button>
-        </span>
-      </li>`;
-    }).join("");
-    accountList.querySelectorAll(".acc-del").forEach((b) => {
-      b.addEventListener("click", async () => {
-        if (!confirm("이 계정의 접근 권한(승인 기록)을 삭제할까요?\n※ 로그인 자체 삭제는 Firebase 콘솔에서 해야 합니다.")) return;
-        try { await deleteDoc(doc(db, "users", b.dataset.id)); }
-        catch (err) { alert("삭제 실패: " + err.message); }
-      });
-    });
-  }
 
   function render() {
     const q = (search.value || "").trim().toLowerCase();
@@ -136,12 +97,8 @@ window.addEventListener("DOMContentLoaded", () => {
       members.map((m) => (m.name || "").trim().normalize("NFC")).filter((n) => n && n !== ADMIN_NAME)
     )];
     if (!roster.length) return alert("명단이 비어 있어요. 먼저 이름을 넣어 주세요.");
-    /* 이미 계정 기록이 있는 이름은 건너뜀 (요청 과부하 방지) */
-    const already = new Set(accountsAll.map((u) => (u.name || "").normalize("NFC")));
-    const todo = roster.filter((n) => !already.has(n));
-    if (!todo.length) return alert(`이미 ${roster.length}명 모두 계정이 준비돼 있어요. 추가로 만들 계정이 없습니다.`);
     if (!confirm(
-      `아직 계정이 없는 ${todo.length}명의 계정을 만듭니다.\n비밀번호는 '${LOGIN_PW}'.\n\n계속할까요?`
+      `명단 ${roster.length}명의 로그인 계정을 확인/생성합니다.\n비밀번호는 전원 '${LOGIN_PW}'.\n(이미 있는 계정은 그대로 둡니다)\n\n계속할까요?`
     )) return;
 
     accBtn.disabled = true;
@@ -151,36 +108,27 @@ window.addEventListener("DOMContentLoaded", () => {
       : initializeApp(firebaseConfig, "secondary");
     const secAuth = getAuth(secApp);
 
-    let ok = 0, fail = 0, docFail = 0;
+    let created = 0, existed = 0, fail = 0;
     const failNames = [];
-    for (let i = 0; i < todo.length; i++) {
-      const nm = todo[i];
-      accBtn.textContent = `계정 생성 중… (${i + 1}/${todo.length})`;
-      const email = nameToEmail(nm);
-      let uid = null;
+    for (let i = 0; i < roster.length; i++) {
+      const nm = roster[i];
+      accBtn.textContent = `확인/생성 중… (${i + 1}/${roster.length})`;
       try {
-        const cred = await createUserWithEmailAndPassword(secAuth, email, LOGIN_PW);
-        uid = cred.user.uid;
+        await createUserWithEmailAndPassword(secAuth, nameToEmail(nm), LOGIN_PW);
+        created++; // 새로 만들어짐
       } catch (err) {
-        if (err.code === "auth/email-already-in-use") {
-          /* Auth 계정은 있는데 기록만 없는 경우 → 비번으로 로그인해 uid 확보 */
-          try { const c = await signInWithEmailAndPassword(secAuth, email, LOGIN_PW); uid = c.user.uid; }
-          catch (_) { fail++; failNames.push(nm); continue; }
-        } else { fail++; failNames.push(nm); continue; }
+        if (err.code === "auth/email-already-in-use") existed++; // 이미 있음 → 그대로 로그인 가능
+        else { fail++; failNames.push(nm); }
       }
-      try {
-        await setDoc(doc(db, "users", uid), { name: nm, status: "approved", createdAt: serverTimestamp() });
-        ok++;
-      } catch (e) { docFail++; failNames.push(nm + "(기록실패)"); }
     }
     try { await signOut(secAuth); } catch (e) {}
 
     accBtn.disabled = false;
     accBtn.textContent = orig;
-    let msg = `완료!\n새로 만든 계정: ${ok}명\n실패: ${fail}명\n기록 실패: ${docFail}명`;
+    let msg = `완료!\n새로 만든 계정: ${created}명\n이미 있던 계정: ${existed}명\n실패: ${fail}명`;
     if (failNames.length) msg += `\n\n실패: ${failNames.slice(0, 12).join(", ")}${failNames.length > 12 ? " 외" : ""}`;
-    if (fail) msg += `\n\n※ '요청 과다'로 실패했다면 5~10분 뒤 버튼을 한 번 더 눌러 주세요.`;
-    msg += `\n\n비밀번호는 전원 '${LOGIN_PW}'.`;
+    if (fail) msg += `\n\n※ '요청 과다(too many requests)'로 실패했다면 5~10분 뒤 한 번 더 눌러 주세요.`;
+    msg += `\n\n로그인: 이름 + 비밀번호 '${LOGIN_PW}'`;
     alert(msg);
   }
 
