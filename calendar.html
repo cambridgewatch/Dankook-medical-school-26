@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>학사일정 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=26" />
+  <link rel="stylesheet" href="assets/css/style.css?v=30" />
 </head>
 <body class="locked">
 
@@ -41,6 +41,20 @@
     <div class="container">
 
       <div class="cal-banner" id="calBanner">날짜를 클릭하면 그날의 일정을 볼 수 있어요.</div>
+
+      <section class="dday-panel" aria-labelledby="ddayTitle">
+        <div class="dday-head"><span>UPCOMING</span><h2 id="ddayTitle">다가오는 주요 일정</h2></div>
+        <div class="dday-list" id="ddayList"><p>일정을 불러오는 중…</p></div>
+      </section>
+
+      <div class="calendar-search-wrap">
+        <div class="content-search">
+          <span>🔎</span>
+          <input type="search" id="calendarSearch" placeholder="일정명이나 세부 내용 검색" autocomplete="off" />
+          <button type="button" id="calendarSearchClear" aria-label="검색어 지우기">×</button>
+        </div>
+        <div class="calendar-search-results" id="calendarSearchResults"></div>
+      </div>
 
       <div class="cal-card">
         <!-- 달력 헤더 (월 이동) -->
@@ -120,7 +134,7 @@
 
   <script src="assets/js/main.js?v=11"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
-  <script type="module" src="assets/js/calendar.js?v=40"></script>
+  <script type="module" src="assets/js/calendar.js?v=41"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=14"></script>
 </body>

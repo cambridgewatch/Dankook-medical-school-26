@@ -69,6 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const titleEl = document.querySelector("#calTitle");
   const banner = document.querySelector("#calBanner");
+  const ddayList = document.querySelector("#ddayList");
+  const calendarSearch = document.querySelector("#calendarSearch");
+  const calendarSearchResults = document.querySelector("#calendarSearchResults");
 
   const today = new Date();
   const todayKey = key(today.getFullYear(), today.getMonth(), today.getDate());
@@ -100,6 +103,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function overrideRef(sourceId) {
     return doc(db, "calendarEvents", `default_${sourceId.replace(/[^0-9A-Za-z_-]/g, "_")}`);
+  }
+
+  function allCalendarEvents() {
+    return [...new Set([...Object.keys(DEFAULTS), ...Object.keys(custom)])]
+      .sort()
+      .flatMap((date) => eventsOf(date).map((event) => ({ date, ...event })));
+  }
+
+  function goToEvent(date) {
+    const [y, m] = date.split("-").map(Number);
+    view = new Date(y, m - 1, 1);
+    render();
+    openDay(date);
+  }
+
+  function renderDdays() {
+    if (!ddayList) return;
+    const base = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const majorTypes = new Set(["exam", "acad", "event"]);
+    const upcoming = allCalendarEvents()
+      .filter((event) => majorTypes.has(event.type))
+      .map((event) => ({
+        ...event,
+        days: Math.round((new Date(`${event.date}T00:00:00`) - base) / 86400000),
+      }))
+      .filter((event) => event.days >= 0)
+      .sort((a, b) => a.days - b.days || a.date.localeCompare(b.date))
+      .slice(0, 4);
+    if (!upcoming.length) {
+      ddayList.innerHTML = `<p class="dday-empty">등록된 예정 시험이나 주요 일정이 없습니다.</p>`;
+      return;
+    }
+    ddayList.innerHTML = upcoming.map((event) => `
+      <button type="button" class="dday-item" data-date="${event.date}">
+        <strong>${event.days === 0 ? "D-Day" : `D-${event.days}`}</strong>
+        <span>${esc(event.text)}</span>
+        <small>${event.date.replaceAll("-", ".")} · ${LABEL[event.type] || "일정"}</small>
+      </button>`).join("");
+    ddayList.querySelectorAll(".dday-item").forEach((button) => {
+      button.addEventListener("click", () => goToEvent(button.dataset.date));
+    });
+  }
+
+  function renderCalendarSearch() {
+    if (!calendarSearch || !calendarSearchResults) return;
+    const keyword = calendarSearch.value.trim().toLocaleLowerCase("ko");
+    if (!keyword) {
+      calendarSearchResults.classList.remove("open");
+      calendarSearchResults.innerHTML = "";
+      return;
+    }
+    const results = allCalendarEvents().filter((event) =>
+      `${event.text || ""} ${event.detail || ""} ${LABEL[event.type] || ""}`.toLocaleLowerCase("ko").includes(keyword)
+    ).slice(0, 20);
+    calendarSearchResults.classList.add("open");
+    calendarSearchResults.innerHTML = results.length ? results.map((event) => `
+      <button type="button" class="cal-search-item" data-date="${event.date}">
+        <time>${event.date.slice(5).replace("-", ".")}</time>
+        <span>${esc(event.text)}</span>
+      </button>`).join("") : `<p class="empty-note">검색 결과가 없습니다.</p>`;
+    calendarSearchResults.querySelectorAll(".cal-search-item").forEach((button) => {
+      button.addEventListener("click", () => {
+        goToEvent(button.dataset.date);
+        calendarSearchResults.classList.remove("open");
+      });
+    });
   }
 
   async function migrateAllToEditable() {
@@ -155,6 +224,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       render();
       tryDeepLink();
+      renderDdays();
+      renderCalendarSearch();
       migrateAllToEditable();
     });
   } else {
@@ -357,6 +428,12 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector("#calPrev").addEventListener("click", () => { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); render(); });
   document.querySelector("#calNext").addEventListener("click", () => { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); render(); });
   document.querySelector("#calToday").addEventListener("click", () => { view = new Date(today.getFullYear(), today.getMonth(), 1); render(); });
+  calendarSearch?.addEventListener("input", renderCalendarSearch);
+  document.querySelector("#calendarSearchClear")?.addEventListener("click", () => {
+    calendarSearch.value = "";
+    renderCalendarSearch();
+    calendarSearch.focus();
+  });
 
   function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 

@@ -26,6 +26,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const note = $("#noticeNote");
   const adminBar = $("#noticeAdmin");
   const pagerEl = $("#noticePager");
+  const searchEl = $("#noticeSearch");
   const PER_PAGE = 10;
   let page = 1;
   let isAdmin = false;
@@ -72,14 +73,24 @@ window.addEventListener("DOMContentLoaded", () => {
       if (pagerEl) pagerEl.innerHTML = "";
       return;
     }
+    const keyword = (searchEl?.value || "").trim().toLocaleLowerCase("ko");
+    const filtered = keyword
+      ? notices.filter((n) => `${n.title || ""} ${n.detail || ""} ${TAG_LABEL[n.tag] || ""}`.toLocaleLowerCase("ko").includes(keyword))
+      : notices;
+    if (!filtered.length) {
+      list.innerHTML = "";
+      note.textContent = `“${searchEl.value.trim()}” 검색 결과가 없습니다.`;
+      if (pagerEl) pagerEl.innerHTML = "";
+      return;
+    }
     note.textContent = "";
     if (openId && !openHandled) {
-      const idx = notices.findIndex((n) => n.id === openId);
+      const idx = filtered.findIndex((n) => n.id === openId);
       if (idx >= 0) page = Math.floor(idx / PER_PAGE) + 1;
     }
-    const totalPages = Math.ceil(notices.length / PER_PAGE);
+    const totalPages = Math.ceil(filtered.length / PER_PAGE);
     if (page > totalPages) page = totalPages;
-    const pageItems = notices.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+    const pageItems = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
     list.innerHTML = pageItems.map((n) => {
       const tag = TAG_CLASS[n.tag] || "";
       const date = fmt(n.createdAt);
@@ -158,6 +169,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
     renderPager(totalPages);
   }
+
+  searchEl?.addEventListener("input", () => { page = 1; render(); });
+  $("#noticeSearchClear")?.addEventListener("click", () => {
+    searchEl.value = "";
+    page = 1;
+    render();
+    searchEl.focus();
+  });
 
   $("#naAdd").addEventListener("click", async () => {
     if (!isAdmin) return alert("관리자만 등록할 수 있습니다.");

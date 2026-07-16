@@ -379,6 +379,14 @@ body.locked { visibility: hidden; }
 
 /* ---------- 공지 게시판 (아코디언 카드) ---------- */
 .notice-list { display: flex; flex-direction: column; gap: 12px; max-width: 820px; margin: 0 auto; }
+.content-search {
+  display: flex; align-items: center; gap: 10px; max-width: 820px; margin: 0 auto 20px;
+  padding: 12px 15px; background: #fff; border: 1px solid var(--line);
+  border-radius: 14px; box-shadow: var(--shadow-sm);
+}
+.content-search:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.content-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; color: var(--ink); }
+.content-search button { border: 0; background: transparent; color: var(--gray); font-size: 22px; cursor: pointer; line-height: 1; }
 .notice-card {
   background: #fff; border: 1px solid var(--line); border-radius: 14px;
   box-shadow: var(--shadow-sm); overflow: hidden;
@@ -505,6 +513,29 @@ body.locked { visibility: hidden; }
   border-radius: 999px; padding: 11px 22px; text-align: center;
   font-size: 14px; font-weight: 500;
 }
+.dday-panel {
+  max-width: 960px; margin: 0 auto 20px; padding: 22px;
+  background: linear-gradient(135deg, #082c68, #1557a6); color: #fff;
+  border-radius: 18px; box-shadow: var(--shadow);
+}
+.dday-head span { color: #a9cbff; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; }
+.dday-head h2 { margin: 3px 0 16px; font-size: 20px; }
+.dday-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.dday-item { border: 1px solid #ffffff2e; border-radius: 13px; padding: 13px 14px; background: #ffffff12; cursor: pointer; text-align: left; color: #fff; }
+.dday-item:hover { background: #ffffff20; transform: translateY(-1px); }
+.dday-item strong { display: block; color: #ffd66b; font-size: 18px; margin-bottom: 4px; }
+.dday-item span { display: block; font-size: 14px; font-weight: 700; }
+.dday-item small { display: block; margin-top: 5px; color: #c8daf4; }
+.dday-empty { color: #d8e6fa; font-size: 14px; }
+.calendar-search-wrap { max-width: 960px; margin: 0 auto 20px; position: relative; }
+.calendar-search-wrap .content-search { max-width: none; margin-bottom: 0; }
+.calendar-search-results { display: none; margin-top: 8px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.calendar-search-results.open { display: block; }
+.cal-search-item { width: 100%; display: flex; align-items: center; gap: 10px; padding: 12px 15px; border: 0; border-bottom: 1px solid var(--line); background: #fff; cursor: pointer; text-align: left; }
+.cal-search-item:last-child { border-bottom: 0; }
+.cal-search-item:hover { background: var(--blue-light); }
+.cal-search-item time { color: var(--blue); font-weight: 800; font-size: 13px; }
+.cal-search-item span { color: var(--ink); font-weight: 650; }
 .cal-card {
   background: #fff; border: 1px solid var(--line);
   border-radius: 24px; box-shadow: var(--shadow);
