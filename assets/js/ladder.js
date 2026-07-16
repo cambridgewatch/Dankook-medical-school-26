@@ -31,10 +31,11 @@ window.addEventListener("DOMContentLoaded", function () {
     return Math.max(2, Math.min(20, count));
   }
 
-  function makeInput(className, value, label, maxLength) {
+  function makeInput(className, value, label, placeholder, maxLength) {
     var input = document.createElement("input");
     input.className = className;
-    input.value = value;
+    input.value = value || "";
+    input.placeholder = placeholder;
     input.maxLength = maxLength;
     input.setAttribute("aria-label", label);
     return input;
@@ -45,7 +46,7 @@ window.addEventListener("DOMContentLoaded", function () {
     row.className = "ladder-input-row";
     row.style.gridTemplateColumns = "repeat(" + count + ", minmax(96px, 1fr))";
     for (var i = 0; i < count; i++) {
-      row.appendChild(makeInput(className, values[i] || fallback(i), (i + 1) + "번 입력", maxLength));
+      row.appendChild(makeInput(className, values[i] || "", (i + 1) + "번 입력", fallback(i), maxLength));
     }
     return row;
   }
