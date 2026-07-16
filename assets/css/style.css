@@ -514,19 +514,26 @@ body.locked { visibility: hidden; }
   font-size: 14px; font-weight: 500;
 }
 .dday-panel {
-  max-width: 960px; margin: 0 auto 20px; padding: 22px;
-  background: linear-gradient(135deg, #082c68, #1557a6); color: #fff;
-  border-radius: 18px; box-shadow: var(--shadow);
+  max-width: 940px; margin: 0 auto 20px; padding: 24px;
+  background: linear-gradient(145deg, #ffffff 35%, #f2f7ff); color: var(--ink);
+  border: 1px solid #dfe9f8; border-radius: 22px; box-shadow: 0 12px 35px rgba(17, 48, 93, 0.09);
 }
-.dday-head span { color: #a9cbff; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; }
-.dday-head h2 { margin: 3px 0 16px; font-size: 20px; }
+.dday-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 17px; }
+.dday-head span { color: var(--blue); font-size: 10px; font-weight: 850; letter-spacing: 1.5px; }
+.dday-head h2 { margin: 0; color: var(--navy); font-size: 20px; letter-spacing: -.3px; }
 .dday-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
-.dday-item { border: 1px solid #ffffff2e; border-radius: 13px; padding: 13px 14px; background: #ffffff12; cursor: pointer; text-align: left; color: #fff; }
-.dday-item:hover { background: #ffffff20; transform: translateY(-1px); }
-.dday-item strong { display: block; color: #ffd66b; font-size: 18px; margin-bottom: 4px; }
-.dday-item span { display: block; font-size: 14px; font-weight: 700; }
-.dday-item small { display: block; margin-top: 5px; color: #c8daf4; }
-.dday-empty { color: #d8e6fa; font-size: 14px; }
+.dday-item {
+  position: relative; overflow: hidden; border: 1px solid #e2eaf5; border-radius: 16px;
+  padding: 15px 15px 14px; background: rgba(255,255,255,.88); cursor: pointer;
+  text-align: left; color: var(--ink); box-shadow: 0 4px 14px rgba(25,55,95,.05);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.dday-item::after { content: ""; position: absolute; right: -22px; top: -30px; width: 70px; height: 70px; border-radius: 50%; background: #e8f1ff; }
+.dday-item:hover { border-color: #b8cff0; box-shadow: 0 9px 22px rgba(25,55,95,.1); transform: translateY(-3px); }
+.dday-item strong { display: inline-block; color: #fff; background: var(--navy); border-radius: 999px; padding: 4px 9px; font-size: 13px; margin-bottom: 9px; }
+.dday-item span { display: block; position: relative; z-index: 1; font-size: 14px; font-weight: 750; }
+.dday-item small { display: block; position: relative; z-index: 1; margin-top: 7px; color: var(--gray); font-size: 12px; }
+.dday-empty { color: var(--gray); font-size: 14px; }
 .calendar-search-wrap { max-width: 960px; margin: 0 auto 20px; position: relative; }
 .calendar-search-wrap .content-search { max-width: none; margin-bottom: 0; }
 .calendar-search-results { display: none; margin-top: 8px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
