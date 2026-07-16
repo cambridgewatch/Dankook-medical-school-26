@@ -153,7 +153,40 @@
 
   <script src="assets/js/main.js?v=17"></script>
   <script src="assets/js/effects3d.js?v=17"></script>
-  <script src="assets/js/game-panels.js?v=1"></script>
+  <script>
+    (function () {
+      var cards = Array.from(document.querySelectorAll(".game-launch-card"));
+
+      function closeCard(card) {
+        var button = card.querySelector(".game-toggle");
+        var panel = card.querySelector(".game-panel");
+        card.classList.remove("game-open");
+        panel.hidden = true;
+        button.setAttribute("aria-expanded", "false");
+        button.textContent = "게임 열기";
+      }
+
+      function openCard(card) {
+        cards.forEach(function (other) { if (other !== card) closeCard(other); });
+        var button = card.querySelector(".game-toggle");
+        var panel = card.querySelector(".game-panel");
+        card.classList.add("game-open");
+        panel.hidden = false;
+        button.setAttribute("aria-expanded", "true");
+        button.textContent = "게임 닫기";
+        setTimeout(function () { card.scrollIntoView({ behavior: "smooth", block: "start" }); }, 20);
+      }
+
+      cards.forEach(function (card) {
+        var button = card.querySelector(".game-toggle");
+        closeCard(card);
+        button.onclick = function () {
+          if (card.classList.contains("game-open")) closeCard(card);
+          else openCard(card);
+        };
+      });
+    })();
+  </script>
   <script type="module" src="assets/js/minigame.js?v=34"></script>
   <script src="assets/js/ladder.js?v=5"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
