@@ -47,13 +47,22 @@ window.addEventListener("DOMContentLoaded", () => {
     const pw = $("#liPw").value;
     if (!name || !pw) return toast("이름과 비밀번호를 입력해 주세요.");
 
+    const button = $("#loginForm button[type='submit']");
+    button.disabled = true;
+    button.textContent = "로그인 중…";
+
     try {
       /* 설정 페이지에서 선택한 이 기기의 로그인 유지 방식을 적용 */
       const remember = localStorage.getItem("dkuAutoLogin") !== "false";
-      await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+      try {
+        await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+      } catch (persistenceError) {
+        /* 저장소 제한·시크릿 모드 등으로 유지 설정이 실패해도 로그인은 계속 진행 */
+        console.warn("로그인 유지 설정을 적용하지 못했습니다.", persistenceError);
+      }
       await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
       toast(`${name} 님, 환영합니다! 이동합니다…`, true);
-      setTimeout(() => (location.href = "index.html"), 800);
+      setTimeout(() => location.replace("/"), 500);
     } catch (err) {
       if (
         err.code === "auth/invalid-credential" ||
@@ -62,6 +71,9 @@ window.addEventListener("DOMContentLoaded", () => {
       )
         toast("이름 또는 비밀번호가 올바르지 않습니다.");
       else toast("로그인 오류: " + (err.message || err.code));
+    } finally {
+      button.disabled = false;
+      button.textContent = "로그인";
     }
   });
 });
