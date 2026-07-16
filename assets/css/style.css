@@ -691,6 +691,7 @@ body.locked { visibility: hidden; }
   padding: 28px 16px 12px;
   background: linear-gradient(transparent, rgba(0,0,0,0.7));
   color:#fff; font-size: 14px; font-weight: 600;
+  display: flex; align-items: flex-end; gap: 8px;
 }
 
 /* 라이트박스 */
@@ -811,9 +812,10 @@ body.locked { visibility: hidden; }
 }
 .upload-row input[type="text"]:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
 .photo-hashtags {
-  display: block; margin-bottom: 5px; color: #bcd8ff; font-size: 12px;
+  display: block; margin-left: auto; color: #bcd8ff; font-size: 12px; text-align: right;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.photo-uploader { flex: 0 0 auto; }
 .del-btn {
   background: rgba(0,0,0,0.45); border: 0; color: #fff; cursor: pointer;
   border-radius: 6px; padding: 2px 7px; font-size: 13px; margin-left: 8px;

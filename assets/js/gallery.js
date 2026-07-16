@@ -71,18 +71,16 @@ window.addEventListener("DOMContentLoaded", () => {
       </figure>`;
     photos.forEach((p) => {
       const mine = currentUser && currentUser.uid === p.uid;
-      const caption = escapeHtml(p.caption || "");
       const uploader = escapeHtml(p.uploader || "익명");
       const tags = Array.isArray(p.hashtags) ? p.hashtags : [];
       const tagHtml = tags.length
         ? `<span class="photo-hashtags">${tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join(" ")}</span>`
         : "";
-      const cap = caption ? caption + " · " : "";
       html += `
         <figure data-id="${p.id}">
-          <img src="${p.url}" alt="${cap}${uploader}" loading="lazy" />
-          <figcaption>${tagHtml}<span>${cap}🙋 ${uploader}</span>
-            ${mine ? '<button class="del-btn" title="삭제">🗑</button>' : ""}
+          <img src="${p.url}" alt="${uploader}님이 올린 사진" loading="lazy" />
+          <figcaption><span class="photo-uploader">🙋 ${uploader}</span>
+            ${mine ? '<button class="del-btn" title="삭제">🗑</button>' : ""}${tagHtml}
           </figcaption>
         </figure>`;
     });
@@ -118,7 +116,6 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!imgbbReady)
       return alert("⚠️ ImgBB API 키가 아직 설정되지 않았습니다. (firebase-설정안내.md 참고)");
     const file = $("#photoFile").files[0];
-    const caption = $("#photoCaption").value.trim();
     const hashtags = normalizeHashtags($("#photoHashtags").value);
     if (!file) return alert("사진 파일을 선택해 주세요.");
     if (!file.type.startsWith("image/")) return alert("이미지 파일만 올릴 수 있습니다.");
@@ -143,7 +140,6 @@ window.addEventListener("DOMContentLoaded", () => {
       await addDoc(collection(db, "photos"), {
         url,
         deleteUrl: data.data.delete_url || "",
-        caption,
         hashtags,
         uploader: currentUser.displayName || "동기",
         uid: currentUser.uid,
