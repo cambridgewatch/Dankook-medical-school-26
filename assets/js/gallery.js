@@ -2,7 +2,7 @@
    - 로그인/데이터: Firebase (무료)
    - 사진 파일 저장: ImgBB (무료, 카드 불필요) */
 
-import { auth, db, isConfigured, IMGBB_API_KEY, imgbbReady } from "./firebase-init.js?v=11";
+import { auth, db, isConfigured, IMGBB_API_KEY, imgbbReady, emailToName } from "./firebase-init.js?v=12";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp,
@@ -10,6 +10,7 @@ import {
 
 const $ = (s) => document.querySelector(s);
 let currentUser = null;
+let currentName = "";
 
 const escapeHtml = (value = "") => String(value)
   .replaceAll("&", "&amp;")
@@ -39,9 +40,10 @@ window.addEventListener("DOMContentLoaded", () => {
   /* 로그인 상태에 따라 업로드 영역 표시 */
   onAuthStateChanged(auth, (user) => {
     currentUser = user;
+    currentName = user ? (user.displayName || emailToName(user.email) || "동기") : "";
     if (user) {
       authBar.innerHTML =
-        `👤 <strong>${user.displayName || "동기"}</strong> 님으로 로그인됨 ` +
+        `👤 <strong>${escapeHtml(currentName)}</strong> 님으로 로그인됨 ` +
         `<a href="settings.html" class="btn-mini">계정 설정</a>`;
       uploadBox.style.display = "block";
     } else {
@@ -71,7 +73,9 @@ window.addEventListener("DOMContentLoaded", () => {
       </figure>`;
     photos.forEach((p) => {
       const mine = currentUser && currentUser.uid === p.uid;
-      const uploader = escapeHtml(p.uploader || "익명");
+      const uploader = escapeHtml(
+        p.uploader && p.uploader !== "동기" ? p.uploader : (mine ? currentName : "동기")
+      );
       const tags = Array.isArray(p.hashtags) ? p.hashtags : [];
       const tagHtml = tags.length
         ? `<span class="photo-hashtags">${tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join(" ")}</span>`
@@ -141,7 +145,7 @@ window.addEventListener("DOMContentLoaded", () => {
         url,
         deleteUrl: data.data.delete_url || "",
         hashtags,
-        uploader: currentUser.displayName || "동기",
+        uploader: currentName,
         uid: currentUser.uid,
         createdAt: serverTimestamp(),
       });

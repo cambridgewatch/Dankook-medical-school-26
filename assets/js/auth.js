@@ -1,10 +1,11 @@
 /* 회원가입 / 로그인 로직 (login.html 전용) */
 
-import { auth, isConfigured, nameToEmail } from "./firebase-init.js?v=11";
+import { auth, isConfigured, nameToEmail, emailToName } from "./firebase-init.js?v=12";
 import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
   setPersistence,
+  updateProfile,
   browserLocalPersistence,
   browserSessionPersistence,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -31,7 +32,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const status = $("#loggedInBox");
     if (user) {
       status.style.display = "block";
-      $("#loggedInName").textContent = user.displayName || "동기";
+      $("#loggedInName").textContent = user.displayName || emailToName(user.email) || "동기";
     } else {
       status.style.display = "none";
     }
@@ -60,7 +61,10 @@ window.addEventListener("DOMContentLoaded", () => {
         /* 저장소 제한·시크릿 모드 등으로 유지 설정이 실패해도 로그인은 계속 진행 */
         console.warn("로그인 유지 설정을 적용하지 못했습니다.", persistenceError);
       }
-      await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
+      const credential = await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
+      if (!credential.user.displayName) {
+        await updateProfile(credential.user, { displayName: name.normalize("NFC") });
+      }
       toast(`${name} 님, 환영합니다! 이동합니다…`, true);
       setTimeout(() => location.replace("/"), 500);
     } catch (err) {

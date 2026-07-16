@@ -47,6 +47,18 @@ export function nameToEmail(name) {
   return `u${hex}@dkumed26.com`;
 }
 
+/* Firebase Auth용 이메일을 다시 한글 실명으로 복원합니다. */
+export function emailToName(email = "") {
+  const match = email.match(/^u([0-9a-f]+)@dkumed26\.com$/i);
+  if (!match || match[1].length % 2) return "";
+  try {
+    const bytes = new Uint8Array(match[1].match(/../g).map((hex) => parseInt(hex, 16)));
+    return new TextDecoder().decode(bytes);
+  } catch {
+    return "";
+  }
+}
+
 /* 캘린더 관리자(이 사람만 일정을 추가/수정/삭제할 수 있음).
    다른 사람으로 바꾸려면 이름만 바꾸고, Firestore 규칙의 이메일도 함께 바꿔주세요. */
 export const ADMIN_NAME = "정지훈";
