@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, addDoc, deleteDoc, doc, onSnapshot, query, where, getDocs, serverTimestamp,
+  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* 특정 날짜+내용의 캘린더 알림 모두 삭제 */
@@ -158,12 +158,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const cmType = document.querySelector("#cmType");
   const cmDetail = document.querySelector("#cmDetail");
   const cmHint = document.querySelector("#cmHint");
+  const cmSubmit = cmForm.querySelector("button[type='submit']");
   let activeKey = null;
+  let editingEventId = null;
 
   cmType.innerHTML = ADD_TYPES.map((t) => `<option value="${t}">${LABEL[t]}</option>`).join("");
 
   function openDay(k) {
     activeKey = k;
+    editingEventId = null;
+    cmSubmit.textContent = "추가";
+    cmForm.reset();
     const [y, m, d] = k.split("-").map(Number);
     cmDate.textContent = `${m}월 ${d}일`;
     drawList();
@@ -187,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="ev-text">${esc(e.text)}</span>
           ${hasDetail ? `<span class="ev-chev">▾</span>` : ""}
           ${isAdmin ? `<button class="ev-alert" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
+          ${isAdmin && !e.fixed ? `<button class="ev-edit" data-id="${e.id}" title="수정">✏️</button>` : ""}
           ${isAdmin && !e.fixed ? `<button class="ev-del" data-id="${e.id}" data-text="${esc(e.text)}" title="삭제">🗑</button>` : ""}
         </div>
         ${hasDetail ? `<div class="cm-ev-body">${body}</div>` : ""}
@@ -194,8 +200,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }).join("");
     cmList.querySelectorAll(".cm-ev.has-detail .cm-ev-head").forEach((h) => {
       h.addEventListener("click", (e) => {
-        if (e.target.closest(".ev-del") || e.target.closest(".ev-alert")) return;
+        if (e.target.closest(".ev-del") || e.target.closest(".ev-alert") || e.target.closest(".ev-edit")) return;
         h.parentElement.classList.toggle("open");
+      });
+    });
+    cmList.querySelectorAll(".ev-edit").forEach((b) => {
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const event = (custom[activeKey] || []).find((item) => item.id === b.dataset.id);
+        if (!event) return;
+        editingEventId = event.id;
+        cmText.value = event.text || "";
+        cmDetail.value = event.detail || "";
+        cmType.value = event.type || "event";
+        cmSubmit.textContent = "수정 저장";
+        cmText.focus();
       });
     });
     cmList.querySelectorAll(".ev-del").forEach((b) => {
@@ -228,18 +247,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const text = cmText.value.trim();
     if (!text) return;
     try {
-      await addDoc(collection(db, "calendarEvents"), {
-        date: activeKey, text, detail: cmDetail.value.trim(), type: cmType.value,
-        by: ADMIN_NAME, createdAt: serverTimestamp(),
-      });
+      const values = { date: activeKey, text, detail: cmDetail.value.trim(), type: cmType.value, by: ADMIN_NAME };
+      if (editingEventId) {
+        const previous = (custom[activeKey] || []).find((item) => item.id === editingEventId);
+        await updateDoc(doc(db, "calendarEvents", editingEventId), { ...values, updatedAt: serverTimestamp() });
+        if (previous) await deleteCalAlerts(activeKey, previous.text);
+      } else {
+        await addDoc(collection(db, "calendarEvents"), { ...values, createdAt: serverTimestamp() });
+      }
       cmText.value = "";
       cmDetail.value = "";
+      editingEventId = null;
+      cmSubmit.textContent = "추가";
     } catch (err) { alert("추가 실패: " + err.message); }
   });
 
-  document.querySelector("#cmClose").addEventListener("click", () => modal.classList.remove("open"));
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") modal.classList.remove("open"); });
+  function closeModal() {
+    modal.classList.remove("open");
+    editingEventId = null;
+    cmSubmit.textContent = "추가";
+    cmForm.reset();
+  }
+  document.querySelector("#cmClose").addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
 
   /* 모달이 열려 있는 동안 실시간 갱신 반영 */
   const _render = render;

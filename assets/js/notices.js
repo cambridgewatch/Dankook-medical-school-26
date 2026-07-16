@@ -6,7 +6,7 @@
 import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs, serverTimestamp,
+  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* 특정 공지에 연결된 알림 모두 삭제 */
@@ -31,6 +31,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let isAdmin = false;
   let notices = [];
   let subscribed = false;
+  let editingId = null;
   const openId = new URLSearchParams(location.search).get("open");
   let openHandled = false;
 
@@ -92,6 +93,7 @@ window.addEventListener("DOMContentLoaded", () => {
             <span class="nt-date">${date}</span>
             ${hasDetail ? `<span class="nt-chev">▾</span>` : ""}
             ${isAdmin ? `<button class="notice-alert" data-id="${n.id}" data-title="${esc(n.title)}" data-detail="${esc(n.detail || "")}" title="알림 보내기">🔔</button>` : ""}
+            ${isAdmin ? `<button class="notice-edit" data-id="${n.id}" title="수정">✏️</button>` : ""}
             ${isAdmin ? `<button class="notice-del" data-id="${n.id}" title="삭제">🗑</button>` : ""}
           </div>
           ${hasDetail ? `<div class="notice-body">${body}</div>` : ""}
@@ -101,8 +103,23 @@ window.addEventListener("DOMContentLoaded", () => {
     /* 제목 클릭 → 상세 펼치기/접기 */
     list.querySelectorAll(".notice-card.has-detail .notice-head").forEach((h) => {
       h.addEventListener("click", (e) => {
-        if (e.target.closest(".notice-del") || e.target.closest(".notice-alert")) return;
+        if (e.target.closest(".notice-del") || e.target.closest(".notice-alert") || e.target.closest(".notice-edit")) return;
         h.parentElement.classList.toggle("open");
+      });
+    });
+    list.querySelectorAll(".notice-edit").forEach((b) => {
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const notice = notices.find((n) => n.id === b.dataset.id);
+        if (!notice) return;
+        editingId = notice.id;
+        $("#naTitle").value = notice.title || "";
+        $("#naDetail").value = notice.detail || "";
+        $("#naTag").value = notice.tag || "notice";
+        $("#noticeAdmin h3").textContent = "✏️ 공지 수정";
+        $("#naAdd").textContent = "수정 저장";
+        adminBar.scrollIntoView({ behavior: "smooth", block: "center" });
+        $("#naTitle").focus();
       });
     });
     /* 알림 보내기 (관리자) */
@@ -149,9 +166,16 @@ window.addEventListener("DOMContentLoaded", () => {
     const tag = $("#naTag").value;
     if (!title) return alert("공지 제목을 입력해 주세요.");
     try {
-      await addDoc(collection(db, "notices"), { title, detail, tag, createdAt: serverTimestamp() });
+      if (editingId) {
+        await updateDoc(doc(db, "notices", editingId), { title, detail, tag, updatedAt: serverTimestamp() });
+      } else {
+        await addDoc(collection(db, "notices"), { title, detail, tag, createdAt: serverTimestamp() });
+      }
       $("#naTitle").value = "";
       $("#naDetail").value = "";
+      editingId = null;
+      $("#noticeAdmin h3").textContent = "✏️ 새 공지 작성";
+      $("#naAdd").textContent = "공지 등록";
     } catch (err) { alert("등록 실패: " + err.message); }
   });
 

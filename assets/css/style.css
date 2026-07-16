@@ -461,10 +461,10 @@ body.locked { visibility: hidden; }
 .na-tags select:focus { border-color: var(--blue); }
 .na-foot .btn { padding: 12px 28px; }
 .tag.info { background: #7a8699; }
-.notice-del {
+.notice-del, .notice-edit {
   border: 0; background: none; cursor: pointer; font-size: 14px; opacity: 0.55; margin-left: 6px;
 }
-.notice-del:hover { opacity: 1; }
+.notice-del:hover, .notice-edit:hover { opacity: 1; }
 
 /* ---------- 캘린더 / 학사일정 ---------- */
 .timeline { position: relative; margin-top: 10px; }
@@ -630,8 +630,8 @@ body.locked { visibility: hidden; }
 .ev-tag.holi { background: #9aa3b2; }
 .ev-tag.etc { background: #7a8699; }
 .ev-text { flex: 1; color: var(--ink); font-size: 14px; }
-.ev-del { border: 0; background: none; cursor: pointer; font-size: 15px; opacity: 0.6; }
-.ev-del:hover { opacity: 1; }
+.ev-del, .ev-edit { border: 0; background: none; cursor: pointer; font-size: 15px; opacity: 0.6; }
+.ev-del:hover, .ev-edit:hover { opacity: 1; }
 /* 캘린더 일정 아코디언(세부내용) */
 .cm-list li.cm-ev { display: block; padding: 0; overflow: hidden; }
 .cm-ev-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
