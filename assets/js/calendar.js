@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, addDoc, setDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs, serverTimestamp,
+  collection, addDoc, setDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs, writeBatch, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* 특정 날짜+내용의 캘린더 알림 모두 삭제 */
@@ -75,13 +75,17 @@ document.addEventListener("DOMContentLoaded", () => {
   let view = new Date(today.getFullYear(), today.getMonth(), 1);
   let custom = {};        // Firestore 일정 { "YYYY-MM-DD": [{id,text,type}] }
   let overrides = {};     // 기본 일정의 수정·삭제 상태 { sourceId: {...} }
+  let useDefaults = true;
   let isAdmin = false;
+  let latestCalendarSnap = null;
+  let migrationStarted = false;
+  const MIGRATION_ID = "editable-reset-v1";
 
   function key(y, m, d) {
     return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
   }
   function eventsOf(k) {
-    const def = (DEFAULTS[k] || []).map((e, index) => {
+    const def = (useDefaults ? (DEFAULTS[k] || []) : []).map((e, index) => {
       const sourceId = `${k}:${index}`;
       const override = overrides[sourceId];
       if (override?.hidden) return null;
@@ -98,20 +102,52 @@ document.addEventListener("DOMContentLoaded", () => {
     return doc(db, "calendarEvents", `default_${sourceId.replace(/[^0-9A-Za-z_-]/g, "_")}`);
   }
 
+  async function migrateAllToEditable() {
+    if (!isAdmin || !latestCalendarSnap || migrationStarted) return;
+    if (latestCalendarSnap.docs.some((d) => d.id === MIGRATION_ID)) return;
+    migrationStarted = true;
+    try {
+      const dates = [...new Set([...Object.keys(DEFAULTS), ...Object.keys(custom)])].sort();
+      const visible = dates.flatMap((date) => eventsOf(date).map((event) => ({
+        date, text: event.text, detail: event.detail || "", type: event.type || "etc",
+      })));
+      const batch = writeBatch(db);
+      latestCalendarSnap.docs.forEach((item) => batch.delete(item.ref));
+      visible.forEach((event) => {
+        batch.set(doc(collection(db, "calendarEvents")), {
+          ...event, by: ADMIN_NAME, createdAt: serverTimestamp(),
+        });
+      });
+      batch.set(doc(db, "calendarEvents", MIGRATION_ID), {
+        kind: "migrationMarker", version: 1, migratedAt: serverTimestamp(), by: ADMIN_NAME,
+      });
+      await batch.commit();
+      alert("캘린더 항목을 모두 다시 등록했습니다. 이제 공휴일까지 수정·삭제할 수 있습니다.");
+    } catch (err) {
+      migrationStarted = false;
+      alert("캘린더 재등록 실패: " + err.message);
+    }
+  }
+
   /* 로그인 상태 → 관리자 여부 */
   if (isConfigured) {
     onAuthStateChanged(auth, (user) => {
       isAdmin = !!user && user.email === ADMIN_EMAIL;
       updateBanner();
       render();
+      migrateAllToEditable();
     });
     /* 실시간 일정 */
     onSnapshot(collection(db, "calendarEvents"), (snap) => {
+      latestCalendarSnap = snap;
+      useDefaults = !snap.docs.some((d) => d.id === MIGRATION_ID);
       custom = {};
       overrides = {};
       snap.forEach((d) => {
         const v = d.data();
-        if (v.kind === "defaultOverride" && v.sourceId) {
+        if (v.kind === "migrationMarker") {
+          return;
+        } else if (v.kind === "defaultOverride" && v.sourceId) {
           overrides[v.sourceId] = { id: d.id, ...v };
         } else {
           (custom[v.date] = custom[v.date] || []).push({ id: d.id, text: v.text, type: v.type, detail: v.detail || "" });
@@ -119,6 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       render();
       tryDeepLink();
+      migrateAllToEditable();
     });
   } else {
     banner.textContent = "⚠️ 일정 편집은 Firebase 설정 후 사용할 수 있어요. (지금은 학사일정만 표시)";
