@@ -116,7 +116,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!imgbbReady)
       return alert("⚠️ ImgBB API 키가 아직 설정되지 않았습니다. (firebase-설정안내.md 참고)");
     const file = $("#photoFile").files[0];
-    const hashtags = normalizeHashtags($("#photoHashtags").value);
+    const hashtags = normalizeHashtags($("#photoHashtags")?.value || "");
     if (!file) return alert("사진 파일을 선택해 주세요.");
     if (!file.type.startsWith("image/")) return alert("이미지 파일만 올릴 수 있습니다.");
     if (file.size > 32 * 1024 * 1024) return alert("32MB 이하 사진만 올릴 수 있습니다.");
@@ -146,6 +146,7 @@ window.addEventListener("DOMContentLoaded", () => {
         createdAt: serverTimestamp(),
       });
       $("#uploadForm").reset();
+      alert("사진을 올렸습니다.");
     } catch (err) {
       alert("업로드 실패: " + err.message);
     } finally {
