@@ -293,6 +293,37 @@ body.locked { visibility: hidden; }
 .greeting .sign { margin-top: 24px; font-weight: 700; color: var(--navy); }
 .greeting .sign small { display: block; font-weight: 500; color: var(--gray); }
 
+/* ---------- 6년의 여정 로드맵 ---------- */
+.journey {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;
+}
+.jstep {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  padding: 20px 18px; box-shadow: var(--shadow-sm); position: relative; transition: 0.2s;
+}
+.jstep:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: #cdd9ee; }
+.jstep .yr {
+  display: inline-block; font-size: 12px; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  padding: 3px 10px; border-radius: 999px; margin-bottom: 10px;
+}
+.jstep h4 { color: var(--navy); font-size: 16px; margin-bottom: 5px; }
+.jstep p { color: var(--gray); font-size: 13px; line-height: 1.55; }
+.jstep.grad { background: linear-gradient(135deg, #fff6da, #fff); border-color: #f0deb8; }
+.jstep.grad .yr { background: linear-gradient(135deg, var(--gold), #d9b45f); }
+
+/* ---------- 다짐 배너 ---------- */
+.pledge {
+  position: relative; overflow: hidden; border-radius: 22px; margin-top: 8px;
+  background:
+    radial-gradient(800px 300px at 80% -20%, rgba(0,87,184,0.35), transparent 60%),
+    linear-gradient(135deg, var(--navy-dark), var(--navy) 60%, var(--blue));
+  color: #fff; padding: 54px 34px; text-align: center;
+}
+.pledge .mark { font-size: 40px; color: var(--gold); line-height: 1; }
+.pledge .q { font-size: clamp(19px, 3vw, 26px); font-weight: 700; line-height: 1.7; margin: 14px auto 0; max-width: 680px; }
+.pledge .who { margin-top: 20px; color: var(--gold); font-weight: 700; font-size: 15px; letter-spacing: 1px; }
+
 /* ---------- 통계 ---------- */
 .stats {
   display: grid;
