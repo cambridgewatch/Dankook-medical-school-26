@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs, serverTimestamp,
+  collection, addDoc, setDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* 특정 날짜+내용의 캘린더 알림 모두 삭제 */
@@ -92,6 +92,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }).filter(Boolean);
     const cus = (custom[k] || []).map((e) => ({ ...e, eventKey: `custom:${e.id}` }));
     return [...def, ...cus];
+  }
+
+  function overrideRef(sourceId) {
+    return doc(db, "calendarEvents", `default_${sourceId.replace(/[^0-9A-Za-z_-]/g, "_")}`);
   }
 
   /* 로그인 상태 → 관리자 여부 */
@@ -245,11 +249,12 @@ document.addEventListener("DOMContentLoaded", () => {
               by: ADMIN_NAME, updatedAt: serverTimestamp(),
             };
             if (event.overrideId) await updateDoc(doc(db, "calendarEvents", event.overrideId), values);
-            else await addDoc(collection(db, "calendarEvents"), values);
+            else await setDoc(overrideRef(event.sourceId), values);
           } else {
             await deleteDoc(doc(db, "calendarEvents", event.id));
           }
           await deleteCalAlerts(activeKey, b.dataset.text); // 일정 삭제 시 관련 알림도 삭제
+          alert("일정을 삭제했습니다.");
         } catch (err) { alert("삭제 실패: " + err.message); }
       });
     });
@@ -281,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
             hidden: false, updatedAt: serverTimestamp(),
           };
           if (editingEvent.overrideId) await updateDoc(doc(db, "calendarEvents", editingEvent.overrideId), overrideValues);
-          else await addDoc(collection(db, "calendarEvents"), overrideValues);
+          else await setDoc(overrideRef(editingEvent.sourceId), overrideValues);
         } else {
           await updateDoc(doc(db, "calendarEvents", editingEvent.id), { ...values, updatedAt: serverTimestamp() });
         }
@@ -293,6 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cmDetail.value = "";
       editingEvent = null;
       cmSubmit.textContent = "추가";
+      alert("일정을 저장했습니다.");
     } catch (err) { alert("저장 실패: " + err.message); }
   });
 
