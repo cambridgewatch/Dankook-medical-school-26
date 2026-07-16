@@ -26,7 +26,7 @@ const LABEL = {
   todo: "할 일", meet: "모임", etc: "기타",
 };
 /* 관리자가 추가할 때 고를 수 있는 분류 */
-const ADD_TYPES = ["event", "todo", "exam", "meet", "etc"];
+const ADD_TYPES = ["acad", "exam", "event", "vac", "holi", "todo", "meet", "etc"];
 
 /* 단국대/의과대학 학사일정 (기본 표시, 수정 불가) */
 const DEFAULTS = {
@@ -74,14 +74,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const todayKey = key(today.getFullYear(), today.getMonth(), today.getDate());
   let view = new Date(today.getFullYear(), today.getMonth(), 1);
   let custom = {};        // Firestore 일정 { "YYYY-MM-DD": [{id,text,type}] }
+  let overrides = {};     // 기본 일정의 수정·삭제 상태 { sourceId: {...} }
   let isAdmin = false;
 
   function key(y, m, d) {
     return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
   }
   function eventsOf(k) {
-    const def = (DEFAULTS[k] || []).map((e) => ({ ...e, fixed: true }));
-    const cus = custom[k] || [];
+    const def = (DEFAULTS[k] || []).map((e, index) => {
+      const sourceId = `${k}:${index}`;
+      const override = overrides[sourceId];
+      if (override?.hidden) return null;
+      return {
+        ...e, ...(override || {}), fixed: true, sourceId,
+        overrideId: override?.id || "", eventKey: `fixed:${sourceId}`,
+      };
+    }).filter(Boolean);
+    const cus = (custom[k] || []).map((e) => ({ ...e, eventKey: `custom:${e.id}` }));
     return [...def, ...cus];
   }
 
@@ -95,9 +104,14 @@ document.addEventListener("DOMContentLoaded", () => {
     /* 실시간 일정 */
     onSnapshot(collection(db, "calendarEvents"), (snap) => {
       custom = {};
+      overrides = {};
       snap.forEach((d) => {
         const v = d.data();
-        (custom[v.date] = custom[v.date] || []).push({ id: d.id, text: v.text, type: v.type, detail: v.detail || "" });
+        if (v.kind === "defaultOverride" && v.sourceId) {
+          overrides[v.sourceId] = { id: d.id, ...v };
+        } else {
+          (custom[v.date] = custom[v.date] || []).push({ id: d.id, text: v.text, type: v.type, detail: v.detail || "" });
+        }
       });
       render();
       tryDeepLink();
@@ -107,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateBanner() {
-    if (isAdmin) banner.innerHTML = `✏️ <strong>${ADMIN_NAME}</strong> 님(관리자) — 날짜를 클릭해 일정을 추가/삭제하세요.`;
+    if (isAdmin) banner.innerHTML = `✏️ <strong>${ADMIN_NAME}</strong> 님(관리자) — 날짜를 클릭해 모든 일정을 추가·수정·삭제하세요.`;
     else banner.innerHTML = `날짜를 클릭하면 그날의 일정을 볼 수 있어요. (일정 등록은 대표만 가능)`;
   }
 
@@ -160,13 +174,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const cmHint = document.querySelector("#cmHint");
   const cmSubmit = cmForm.querySelector("button[type='submit']");
   let activeKey = null;
-  let editingEventId = null;
+  let editingEvent = null;
 
   cmType.innerHTML = ADD_TYPES.map((t) => `<option value="${t}">${LABEL[t]}</option>`).join("");
 
   function openDay(k) {
     activeKey = k;
-    editingEventId = null;
+    editingEvent = null;
     cmSubmit.textContent = "추가";
     cmForm.reset();
     const [y, m, d] = k.split("-").map(Number);
@@ -192,8 +206,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="ev-text">${esc(e.text)}</span>
           ${hasDetail ? `<span class="ev-chev">▾</span>` : ""}
           ${isAdmin ? `<button class="ev-alert" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
-          ${isAdmin && !e.fixed ? `<button class="ev-edit" data-id="${e.id}" title="수정">✏️</button>` : ""}
-          ${isAdmin && !e.fixed ? `<button class="ev-del" data-id="${e.id}" data-text="${esc(e.text)}" title="삭제">🗑</button>` : ""}
+          ${isAdmin ? `<button class="ev-edit" data-key="${e.eventKey}" title="수정">✏️</button>` : ""}
+          ${isAdmin ? `<button class="ev-del" data-key="${e.eventKey}" data-text="${esc(e.text)}" title="삭제">🗑</button>` : ""}
         </div>
         ${hasDetail ? `<div class="cm-ev-body">${body}</div>` : ""}
       </li>`;
@@ -207,9 +221,9 @@ document.addEventListener("DOMContentLoaded", () => {
     cmList.querySelectorAll(".ev-edit").forEach((b) => {
       b.addEventListener("click", (e) => {
         e.stopPropagation();
-        const event = (custom[activeKey] || []).find((item) => item.id === b.dataset.id);
+        const event = eventsOf(activeKey).find((item) => item.eventKey === b.dataset.key);
         if (!event) return;
-        editingEventId = event.id;
+        editingEvent = event;
         cmText.value = event.text || "";
         cmDetail.value = event.detail || "";
         cmType.value = event.type || "event";
@@ -222,7 +236,19 @@ document.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
         if (!confirm("이 일정을 삭제할까요?")) return;
         try {
-          await deleteDoc(doc(db, "calendarEvents", b.dataset.id));
+          const event = eventsOf(activeKey).find((item) => item.eventKey === b.dataset.key);
+          if (!event) return;
+          if (event.fixed) {
+            const values = {
+              kind: "defaultOverride", sourceId: event.sourceId, date: activeKey,
+              text: event.text, detail: event.detail || "", type: event.type, hidden: true,
+              by: ADMIN_NAME, updatedAt: serverTimestamp(),
+            };
+            if (event.overrideId) await updateDoc(doc(db, "calendarEvents", event.overrideId), values);
+            else await addDoc(collection(db, "calendarEvents"), values);
+          } else {
+            await deleteDoc(doc(db, "calendarEvents", event.id));
+          }
           await deleteCalAlerts(activeKey, b.dataset.text); // 일정 삭제 시 관련 알림도 삭제
         } catch (err) { alert("삭제 실패: " + err.message); }
       });
@@ -248,23 +274,31 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!text) return;
     try {
       const values = { date: activeKey, text, detail: cmDetail.value.trim(), type: cmType.value, by: ADMIN_NAME };
-      if (editingEventId) {
-        const previous = (custom[activeKey] || []).find((item) => item.id === editingEventId);
-        await updateDoc(doc(db, "calendarEvents", editingEventId), { ...values, updatedAt: serverTimestamp() });
-        if (previous) await deleteCalAlerts(activeKey, previous.text);
+      if (editingEvent) {
+        if (editingEvent.fixed) {
+          const overrideValues = {
+            ...values, kind: "defaultOverride", sourceId: editingEvent.sourceId,
+            hidden: false, updatedAt: serverTimestamp(),
+          };
+          if (editingEvent.overrideId) await updateDoc(doc(db, "calendarEvents", editingEvent.overrideId), overrideValues);
+          else await addDoc(collection(db, "calendarEvents"), overrideValues);
+        } else {
+          await updateDoc(doc(db, "calendarEvents", editingEvent.id), { ...values, updatedAt: serverTimestamp() });
+        }
+        await deleteCalAlerts(activeKey, editingEvent.text);
       } else {
         await addDoc(collection(db, "calendarEvents"), { ...values, createdAt: serverTimestamp() });
       }
       cmText.value = "";
       cmDetail.value = "";
-      editingEventId = null;
+      editingEvent = null;
       cmSubmit.textContent = "추가";
-    } catch (err) { alert("추가 실패: " + err.message); }
+    } catch (err) { alert("저장 실패: " + err.message); }
   });
 
   function closeModal() {
     modal.classList.remove("open");
-    editingEventId = null;
+    editingEvent = null;
     cmSubmit.textContent = "추가";
     cmForm.reset();
   }
