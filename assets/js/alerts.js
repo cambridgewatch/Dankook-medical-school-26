@@ -51,16 +51,24 @@ window.addEventListener("DOMContentLoaded", () => {
     if (unread > 0) { badge.textContent = unread > 99 ? "99+" : unread; badge.style.display = "grid"; }
     else badge.style.display = "none";
   }
+  function hrefOf(a) {
+    if (a.type === "calendar")
+      return `calendar.html?date=${encodeURIComponent(a.date || "")}&ev=${encodeURIComponent(a.text || "")}`;
+    return `notices.html?open=${encodeURIComponent(a.noticeId || "")}`;
+  }
   function render() {
     if (!alerts.length) { list.innerHTML = `<li class="bell-empty">알림이 없습니다.</li>`; updateBadge(); return; }
     list.innerHTML = alerts.map((a) => `
-      <li class="bell-item">
+      <li class="bell-item" data-href="${hrefOf(a)}" style="cursor:pointer;">
         <span class="bell-ic ${a.type === "calendar" ? "cal" : "notice"}">${a.type === "calendar" ? "📅" : "📢"}</span>
         <div class="bell-txt">
           <strong>${esc(a.title)}</strong>
           <small>${a.type === "calendar" ? "학사일정" : "공지사항"} · ${rel(a.ms)}</small>
         </div>
       </li>`).join("");
+    list.querySelectorAll(".bell-item").forEach((el) => {
+      el.addEventListener("click", () => { const h = el.dataset.href; if (h) location.href = h; });
+    });
     updateBadge();
   }
 
@@ -75,6 +83,9 @@ window.addEventListener("DOMContentLoaded", () => {
           return {
             title: v.title || "",
             type: v.type || "notice",
+            noticeId: v.noticeId || "",
+            date: v.date || "",
+            text: v.text || "",
             ms: v.createdAt && v.createdAt.toMillis ? v.createdAt.toMillis() : Date.now(),
           };
         });

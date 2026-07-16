@@ -20,6 +20,8 @@ window.addEventListener("DOMContentLoaded", () => {
   let isAdmin = false;
   let notices = [];
   let subscribed = false;
+  const openId = new URLSearchParams(location.search).get("open");
+  let openHandled = false;
 
   if (!isConfigured) { note.textContent = "Firebase 설정 후 공지를 볼 수 있습니다."; return; }
 
@@ -49,13 +51,13 @@ window.addEventListener("DOMContentLoaded", () => {
       const hasDetail = !!(n.detail && n.detail.trim());
       const body = hasDetail ? esc(n.detail).replace(/\n/g, "<br>") : "";
       return `
-        <div class="notice-card ${hasDetail ? "has-detail" : ""}">
+        <div class="notice-card ${hasDetail ? "has-detail" : ""}" data-id="${n.id}">
           <div class="notice-head">
             <span class="tag ${tag}">${TAG_LABEL[n.tag] || "공지"}</span>
             <span class="nt-title">${esc(n.title)}</span>
             <span class="nt-date">${date}</span>
             ${hasDetail ? `<span class="nt-chev">▾</span>` : ""}
-            ${isAdmin ? `<button class="notice-alert" data-title="${esc(n.title)}" title="알림 보내기">🔔</button>` : ""}
+            ${isAdmin ? `<button class="notice-alert" data-id="${n.id}" data-title="${esc(n.title)}" title="알림 보내기">🔔</button>` : ""}
             ${isAdmin ? `<button class="notice-del" data-id="${n.id}" title="삭제">🗑</button>` : ""}
           </div>
           ${hasDetail ? `<div class="notice-body">${body}</div>` : ""}
@@ -75,7 +77,7 @@ window.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
         if (!confirm("이 공지를 알림으로 보낼까요?")) return;
         try {
-          await addDoc(collection(db, "alerts"), { type: "notice", title: b.dataset.title, createdAt: serverTimestamp() });
+          await addDoc(collection(db, "alerts"), { type: "notice", title: b.dataset.title, noticeId: b.dataset.id, createdAt: serverTimestamp() });
           alert("🔔 알림을 보냈어요!");
         } catch (err) { alert("알림 실패: " + err.message); }
       });
@@ -89,6 +91,16 @@ window.addEventListener("DOMContentLoaded", () => {
         catch (err) { alert("삭제 실패: " + err.message); }
       });
     });
+
+    /* 알림에서 넘어왔을 때: 해당 공지 펼치고 스크롤 */
+    if (openId && !openHandled) {
+      const card = list.querySelector(`.notice-card[data-id="${openId}"]`);
+      if (card) {
+        openHandled = true;
+        card.classList.add("open");
+        setTimeout(() => card.scrollIntoView({ behavior: "smooth", block: "center" }), 120);
+      }
+    }
   }
 
   $("#naAdd").addEventListener("click", async () => {

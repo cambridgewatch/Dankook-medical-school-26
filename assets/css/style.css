@@ -632,12 +632,28 @@ body.locked { visibility: hidden; }
 .ev-text { flex: 1; color: var(--ink); font-size: 14px; }
 .ev-del { border: 0; background: none; cursor: pointer; font-size: 15px; opacity: 0.6; }
 .ev-del:hover { opacity: 1; }
-.cm-form { display: flex; gap: 8px; }
-.cm-form input {
+/* 캘린더 일정 아코디언(세부내용) */
+.cm-list li.cm-ev { display: block; padding: 0; overflow: hidden; }
+.cm-ev-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+.cm-ev.has-detail .cm-ev-head { cursor: pointer; }
+.cm-ev.has-detail .cm-ev-head:hover { background: #f7faff; }
+.ev-chev { margin-left: 2px; color: var(--gray); font-size: 11px; transition: transform 0.25s; }
+.cm-ev.open .ev-chev { transform: rotate(180deg); color: var(--navy); }
+.cm-ev-body {
+  max-height: 0; opacity: 0; overflow: hidden; padding: 0 12px;
+  color: var(--gray); font-size: 13.5px; line-height: 1.6;
+  border-top: 1px solid transparent; transition: all 0.25s ease;
+}
+.cm-ev.open .cm-ev-body { max-height: 400px; opacity: 1; padding: 10px 12px 12px; border-top-color: var(--line); }
+
+.cm-form { display: flex; flex-direction: column; gap: 8px; }
+.cm-row { display: flex; gap: 8px; }
+.cm-form input, #cmDetail {
   flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--line);
   border-radius: 10px; font-size: 14px; outline: none;
 }
-.cm-form input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+#cmDetail { width: 100%; font-family: inherit; resize: vertical; line-height: 1.5; }
+.cm-form input:focus, #cmDetail:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
 .cm-form select { border: 1px solid var(--line); border-radius: 10px; padding: 0 8px; font-size: 13px; }
 .cm-form .btn { padding: 10px 16px; }
 .cm-hint { margin-top: 12px; font-size: 13px; color: var(--gray); text-align: center; }

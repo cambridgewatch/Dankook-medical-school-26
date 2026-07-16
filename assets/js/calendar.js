@@ -74,9 +74,10 @@ document.addEventListener("DOMContentLoaded", () => {
       custom = {};
       snap.forEach((d) => {
         const v = d.data();
-        (custom[v.date] = custom[v.date] || []).push({ id: d.id, text: v.text, type: v.type });
+        (custom[v.date] = custom[v.date] || []).push({ id: d.id, text: v.text, type: v.type, detail: v.detail || "" });
       });
       render();
+      tryDeepLink();
     });
   } else {
     banner.textContent = "⚠️ 일정 편집은 Firebase 설정 후 사용할 수 있어요. (지금은 학사일정만 표시)";
@@ -132,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cmForm = document.querySelector("#cmForm");
   const cmText = document.querySelector("#cmText");
   const cmType = document.querySelector("#cmType");
+  const cmDetail = document.querySelector("#cmDetail");
   const cmHint = document.querySelector("#cmHint");
   let activeKey = null;
 
@@ -152,25 +154,43 @@ document.addEventListener("DOMContentLoaded", () => {
       cmList.innerHTML = `<li class="none">등록된 일정이 없어요.</li>`;
       return;
     }
-    cmList.innerHTML = evs.map((e) => `
-      <li>
-        <span class="ev-tag ${e.type}">${LABEL[e.type]}</span>
-        <span class="ev-text">${esc(e.text)}</span>
-        ${isAdmin ? `<button class="ev-alert" data-text="${esc(e.text)}" title="알림 보내기">🔔</button>` : ""}
-        ${isAdmin && !e.fixed ? `<button class="ev-del" data-id="${e.id}" title="삭제">🗑</button>` : ""}
-      </li>`).join("");
+    cmList.innerHTML = evs.map((e) => {
+      const hasDetail = !!(e.detail && e.detail.trim());
+      const body = hasDetail ? esc(e.detail).replace(/\n/g, "<br>") : "";
+      return `
+      <li class="cm-ev ${hasDetail ? "has-detail" : ""}">
+        <div class="cm-ev-head">
+          <span class="ev-tag ${e.type}">${LABEL[e.type]}</span>
+          <span class="ev-text">${esc(e.text)}</span>
+          ${hasDetail ? `<span class="ev-chev">▾</span>` : ""}
+          ${isAdmin ? `<button class="ev-alert" data-text="${esc(e.text)}" title="알림 보내기">🔔</button>` : ""}
+          ${isAdmin && !e.fixed ? `<button class="ev-del" data-id="${e.id}" title="삭제">🗑</button>` : ""}
+        </div>
+        ${hasDetail ? `<div class="cm-ev-body">${body}</div>` : ""}
+      </li>`;
+    }).join("");
+    cmList.querySelectorAll(".cm-ev.has-detail .cm-ev-head").forEach((h) => {
+      h.addEventListener("click", (e) => {
+        if (e.target.closest(".ev-del") || e.target.closest(".ev-alert")) return;
+        h.parentElement.classList.toggle("open");
+      });
+    });
     cmList.querySelectorAll(".ev-del").forEach((b) => {
-      b.addEventListener("click", async () => {
+      b.addEventListener("click", async (e) => {
+        e.stopPropagation();
         if (!confirm("이 일정을 삭제할까요?")) return;
         try { await deleteDoc(doc(db, "calendarEvents", b.dataset.id)); }
         catch (err) { alert("삭제 실패: " + err.message); }
       });
     });
     cmList.querySelectorAll(".ev-alert").forEach((b) => {
-      b.addEventListener("click", async () => {
+      b.addEventListener("click", async (e) => {
+        e.stopPropagation();
         if (!confirm("이 일정을 알림으로 보낼까요?")) return;
         try {
-          await addDoc(collection(db, "alerts"), { type: "calendar", title: b.dataset.text, createdAt: serverTimestamp() });
+          await addDoc(collection(db, "alerts"), {
+            type: "calendar", title: b.dataset.text, date: activeKey, text: b.dataset.text, createdAt: serverTimestamp(),
+          });
           alert("🔔 알림을 보냈어요!");
         } catch (err) { alert("알림 실패: " + err.message); }
       });
@@ -183,10 +203,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!text) return;
     try {
       await addDoc(collection(db, "calendarEvents"), {
-        date: activeKey, text, type: cmType.value,
+        date: activeKey, text, detail: cmDetail.value.trim(), type: cmType.value,
         by: ADMIN_NAME, createdAt: serverTimestamp(),
       });
       cmText.value = "";
+      cmDetail.value = "";
     } catch (err) { alert("추가 실패: " + err.message); }
   });
 
@@ -205,6 +226,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
+  /* 알림에서 넘어왔을 때: 해당 날짜 열고 해당 일정 펼치기 */
+  const _p = new URLSearchParams(location.search);
+  const linkDate = _p.get("date");
+  const linkEv = _p.get("ev");
+  let linkHandled = false;
+  function tryDeepLink() {
+    if (linkHandled || !linkDate || !/^\d{4}-\d{2}-\d{2}$/.test(linkDate)) return;
+    linkHandled = true;
+    const [y, m] = linkDate.split("-").map(Number);
+    view = new Date(y, m - 1, 1);
+    render();
+    openDay(linkDate);
+    if (linkEv) {
+      cmList.querySelectorAll(".cm-ev").forEach((li) => {
+        const t = li.querySelector(".ev-text");
+        if (t && t.textContent === linkEv) li.classList.add("open");
+      });
+    }
+  }
+
   updateBanner();
   render();
+  tryDeepLink();
 });
