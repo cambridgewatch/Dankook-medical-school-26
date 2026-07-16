@@ -24,6 +24,7 @@
         <li><a href="members.html">동기 명단</a></li>
         <li><a href="minigame.html">미니게임</a></li>
         <li><a href="login.html">로그인</a></li>
+        <li><a href="settings.html">설정</a></li>
       </ul>
     </div>
   </header>
@@ -43,16 +44,7 @@
         <div class="logged-box" id="loggedInBox">
           ✅ 현재 <strong id="loggedInName"></strong> 님으로 로그인되어 있습니다.
           <a href="index.html">홈으로 →</a>
-          <button id="logoutBtn" class="btn-mini">로그아웃</button>
-
-          <div class="pw-change">
-            <h4>🔑 비밀번호 변경</h4>
-            <input type="password" id="newPw" placeholder="새 비밀번호 (6자 이상)" autocomplete="new-password" />
-            <input type="password" id="newPw2" placeholder="새 비밀번호 확인" autocomplete="new-password" />
-            <input type="password" id="curPw" placeholder="현재 비밀번호 (로그인한 지 오래됐으면 필요)" autocomplete="current-password" />
-            <button id="changePwBtn" class="btn btn-solid">비밀번호 변경</button>
-            <div class="auth-msg" id="pwMsg"></div>
-          </div>
+          <a href="settings.html">계정 설정 →</a>
         </div>
 
         <div class="auth-card">
@@ -62,7 +54,6 @@
             <input type="text" id="liName" placeholder="홍길동" autocomplete="username" />
             <label for="liPw">비밀번호</label>
             <input type="password" id="liPw" placeholder="비밀번호" autocomplete="current-password" />
-            <label class="remember"><input type="checkbox" id="rememberMe" checked /> <span>이 기기에서 자동 로그인</span></label>
             <button type="submit" class="btn btn-solid">로그인</button>
             <p class="auth-hint">비밀번호를 모르면 대표(정지훈)에게 문의해 주세요.</p>
           </form>
@@ -94,7 +85,7 @@
   </footer>
 
   <script src="assets/js/main.js?v=11"></script>
-  <script type="module" src="assets/js/auth.js?v=18"></script>
+  <script type="module" src="assets/js/auth.js?v=31"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
 </body>
 </html>

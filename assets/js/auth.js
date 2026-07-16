@@ -1,24 +1,13 @@
 /* 회원가입 / 로그인 로직 (login.html 전용) */
 
+import { auth, isConfigured, nameToEmail } from "./firebase-init.js?v=11";
 import {
-  auth, db, isConfigured, ROSTER, nameToEmail, ADMIN_EMAIL,
-} from "./firebase-init.js?v=11";
-import {
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile,
   onAuthStateChanged,
-  signOut,
-  updatePassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
   setPersistence,
   browserLocalPersistence,
   browserSessionPersistence,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  doc, setDoc, getDoc, serverTimestamp,
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = (s) => document.querySelector(s);
 
@@ -37,19 +26,6 @@ if (!isConfigured) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  /* 탭 전환 (로그인 / 회원가입) */
-  const tabs = document.querySelectorAll(".auth-tab");
-  tabs.forEach((t) =>
-    t.addEventListener("click", () => {
-      tabs.forEach((x) => x.classList.remove("active"));
-      t.classList.add("active");
-      const mode = t.dataset.mode;
-      $("#loginForm").style.display = mode === "login" ? "block" : "none";
-      $("#signupForm").style.display = mode === "signup" ? "block" : "none";
-      $("#authMsg").style.display = "none";
-    })
-  );
-
   /* 이미 로그인돼 있으면 안내 */
   onAuthStateChanged(auth, (user) => {
     const status = $("#loggedInBox");
@@ -58,57 +34,6 @@ window.addEventListener("DOMContentLoaded", () => {
       $("#loggedInName").textContent = user.displayName || "동기";
     } else {
       status.style.display = "none";
-    }
-  });
-
-  /* 로그아웃 */
-  $("#logoutBtn").addEventListener("click", async () => {
-    await signOut(auth);
-    toast("로그아웃 되었습니다.", true);
-  });
-
-  /* 비밀번호 변경 */
-  const pwMsg = (msg, ok = false) => {
-    const box = $("#pwMsg");
-    box.textContent = msg;
-    box.className = "auth-msg " + (ok ? "ok" : "err");
-    box.style.display = "block";
-  };
-  $("#changePwBtn").addEventListener("click", async () => {
-    const user = auth.currentUser;
-    if (!user) return pwMsg("로그인 후 이용해 주세요.");
-    const nw = $("#newPw").value.normalize("NFC");
-    const nw2 = $("#newPw2").value.normalize("NFC");
-    const cur = $("#curPw").value.normalize("NFC");
-    if (nw.length < 6) return pwMsg("새 비밀번호는 6자 이상이어야 합니다.");
-    if (nw !== nw2) return pwMsg("새 비밀번호가 일치하지 않습니다.");
-    const pwSuccess = () => {
-      pwMsg("✅ 비밀번호가 성공적으로 변경되었습니다!", true);
-      $("#newPw").value = ""; $("#newPw2").value = ""; $("#curPw").value = "";
-      alert("✅ 비밀번호 변경 완료!\n새 비밀번호로 로그인해 주세요.");
-    };
-    try {
-      await updatePassword(user, nw);
-      pwSuccess();
-    } catch (err) {
-      if (err.code === "auth/requires-recent-login") {
-        /* 로그인한 지 오래됨 → 현재 비밀번호로 재인증 필요 */
-        if (!cur) return pwMsg("보안을 위해 '현재 비밀번호'를 입력해 주세요.");
-        try {
-          const cred = EmailAuthProvider.credential(user.email, cur);
-          await reauthenticateWithCredential(user, cred);
-          await updatePassword(user, nw);
-          pwSuccess();
-        } catch (e2) {
-          if (e2.code === "auth/wrong-password" || e2.code === "auth/invalid-credential")
-            pwMsg("현재 비밀번호가 올바르지 않습니다.");
-          else pwMsg("변경 실패: " + (e2.message || e2.code));
-        }
-      } else if (err.code === "auth/weak-password") {
-        pwMsg("비밀번호가 너무 약합니다. (6자 이상)");
-      } else {
-        pwMsg("변경 실패: " + (err.message || err.code));
-      }
     }
   });
 
@@ -123,8 +48,8 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!name || !pw) return toast("이름과 비밀번호를 입력해 주세요.");
 
     try {
-      /* 자동 로그인 선택: 체크 시 브라우저 닫아도 유지(local), 해제 시 세션(session) */
-      const remember = $("#rememberMe") ? $("#rememberMe").checked : true;
+      /* 설정 페이지에서 선택한 이 기기의 로그인 유지 방식을 적용 */
+      const remember = localStorage.getItem("dkuAutoLogin") !== "false";
       await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
       await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
       toast(`${name} 님, 환영합니다! 이동합니다…`, true);
@@ -135,7 +60,7 @@ window.addEventListener("DOMContentLoaded", () => {
         err.code === "auth/wrong-password" ||
         err.code === "auth/user-not-found"
       )
-        toast("이름 또는 비밀번호가 올바르지 않습니다. (가입을 안 했다면 회원가입을 먼저 해주세요)");
+        toast("이름 또는 비밀번호가 올바르지 않습니다.");
       else toast("로그인 오류: " + (err.message || err.code));
     }
   });

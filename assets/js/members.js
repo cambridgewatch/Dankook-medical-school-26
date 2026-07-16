@@ -2,14 +2,10 @@
    - 이름은 공개 코드에 없고, 로그인한 사람만 볼 수 있는 Firestore "members"에만 저장됨.
    - 추가/삭제는 관리자(정지훈)만 가능. */
 
-import { db, auth, isConfigured, ADMIN_EMAIL, ADMIN_NAME, firebaseConfig, nameToEmail } from "./firebase-init.js?v=11";
-import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=11";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  onAuthStateChanged, getAuth, createUserWithEmailAndPassword,
-  signInWithEmailAndPassword, deleteUser, signOut,
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  collection, addDoc, deleteDoc, updateDoc, doc, setDoc, onSnapshot, serverTimestamp,
+  collection, addDoc, deleteDoc, doc, onSnapshot, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = (s) => document.querySelector(s);
@@ -82,55 +78,6 @@ window.addEventListener("DOMContentLoaded", () => {
   $("#maBulkAdd").addEventListener("click", () => {
     addNames(($("#maBulk").value || "").split(/[\n,]/));
   });
-
-  /* 명단 전원 계정 생성 & 승인 (비번=이름2026). 이미 있으면 승인만 채움. */
-  const accBtn = $("#maAccounts");
-  if (accBtn) accBtn.addEventListener("click", ensureAllAccounts);
-
-  /* 전원 공통 비밀번호 (6자 이상 필수). 바꾸려면 이 값만 수정. */
-  const LOGIN_PW = "dku1842";
-
-  async function ensureAllAccounts() {
-    if (!isAdmin) return alert("관리자만 사용할 수 있습니다.");
-    /* 명단 이름 정리(중복 제거, 관리자 제외) */
-    const roster = [...new Set(
-      members.map((m) => (m.name || "").trim().normalize("NFC")).filter((n) => n && n !== ADMIN_NAME)
-    )];
-    if (!roster.length) return alert("명단이 비어 있어요. 먼저 이름을 넣어 주세요.");
-    if (!confirm(
-      `명단 ${roster.length}명의 로그인 계정을 확인/생성합니다.\n비밀번호는 전원 '${LOGIN_PW}'.\n(이미 있는 계정은 그대로 둡니다)\n\n계속할까요?`
-    )) return;
-
-    accBtn.disabled = true;
-    const orig = accBtn.textContent;
-    const secApp = getApps().some((a) => a.name === "secondary")
-      ? getApp("secondary")
-      : initializeApp(firebaseConfig, "secondary");
-    const secAuth = getAuth(secApp);
-
-    let created = 0, existed = 0, fail = 0;
-    const failNames = [];
-    for (let i = 0; i < roster.length; i++) {
-      const nm = roster[i];
-      accBtn.textContent = `확인/생성 중… (${i + 1}/${roster.length})`;
-      try {
-        await createUserWithEmailAndPassword(secAuth, nameToEmail(nm), LOGIN_PW);
-        created++; // 새로 만들어짐
-      } catch (err) {
-        if (err.code === "auth/email-already-in-use") existed++; // 이미 있음 → 그대로 로그인 가능
-        else { fail++; failNames.push(nm); }
-      }
-    }
-    try { await signOut(secAuth); } catch (e) {}
-
-    accBtn.disabled = false;
-    accBtn.textContent = orig;
-    let msg = `완료!\n새로 만든 계정: ${created}명\n이미 있던 계정: ${existed}명\n실패: ${fail}명`;
-    if (failNames.length) msg += `\n\n실패: ${failNames.slice(0, 12).join(", ")}${failNames.length > 12 ? " 외" : ""}`;
-    if (fail) msg += `\n\n※ '요청 과다(too many requests)'로 실패했다면 5~10분 뒤 한 번 더 눌러 주세요.`;
-    msg += `\n\n로그인: 이름 + 비밀번호 '${LOGIN_PW}'`;
-    alert(msg);
-  }
 
   async function addNames(arr) {
     if (!isAdmin) return alert("관리자만 추가할 수 있습니다.");

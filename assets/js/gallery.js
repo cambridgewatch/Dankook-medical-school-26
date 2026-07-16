@@ -3,9 +3,7 @@
    - 사진 파일 저장: ImgBB (무료, 카드 불필요) */
 
 import { auth, db, isConfigured, IMGBB_API_KEY, imgbbReady } from "./firebase-init.js?v=11";
-import {
-  onAuthStateChanged, signOut,
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   collection, addDoc, deleteDoc, doc, query, orderBy, onSnapshot, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -31,9 +29,8 @@ window.addEventListener("DOMContentLoaded", () => {
     if (user) {
       authBar.innerHTML =
         `👤 <strong>${user.displayName || "동기"}</strong> 님으로 로그인됨 ` +
-        `<button id="logoutBtn" class="btn-mini">로그아웃</button>`;
+        `<a href="settings.html" class="btn-mini">계정 설정</a>`;
       uploadBox.style.display = "block";
-      $("#logoutBtn").addEventListener("click", () => signOut(auth));
     } else {
       authBar.innerHTML =
         '사진을 올리려면 <a href="login.html"><strong>로그인</strong></a>이 필요합니다.';

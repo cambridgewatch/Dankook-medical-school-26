@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>설정 · 단국대 의대 26학번</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=30" />
+</head>
+<body class="locked">
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="logo"><img src="assets/img/logo.png" alt="단국대학교 의과대학 26" /></span>
+        <span class="brand-text"><small>DANKOOK MEDICINE</small><strong>의과대학 26학번</strong></span>
+      </a>
+      <button class="nav-toggle" aria-label="메뉴 열기"><span></span><span></span><span></span></button>
+      <ul class="nav-menu">
+        <li><a href="index.html">홈</a></li>
+        <li><a href="about.html">학번 정보</a></li>
+        <li><a href="notices.html">공지사항</a></li>
+        <li><a href="calendar.html">학사일정</a></li>
+        <li><a href="gallery.html">갤러리</a></li>
+        <li><a href="members.html">동기 명단</a></li>
+        <li><a href="minigame.html">미니게임</a></li>
+        <li><a href="login.html">로그인</a></li>
+        <li><a href="settings.html">설정</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <section class="page-head">
+    <div class="container">
+      <span class="eyebrow">SETTINGS</span>
+      <h1>설정</h1>
+      <p>이 기기의 로그인 방식과 계정 정보를 관리합니다.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container settings-wrap">
+      <div class="settings-card">
+        <div class="settings-card-head">
+          <div><span class="settings-icon">✓</span><h2>로그인 유지</h2></div>
+          <label class="switch" aria-label="자동 로그인 설정">
+            <input type="checkbox" id="autoLoginToggle" />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <p>켜면 브라우저를 닫았다가 다시 열어도 이 기기에서 로그인이 유지됩니다. 공용 기기에서는 꺼주세요.</p>
+        <div class="settings-status" id="autoLoginStatus"></div>
+      </div>
+
+      <div class="settings-card">
+        <div class="settings-card-head">
+          <div><span class="settings-icon">🔑</span><h2>비밀번호 변경</h2></div>
+        </div>
+        <div class="settings-form">
+          <label for="currentPassword">현재 비밀번호</label>
+          <input type="password" id="currentPassword" autocomplete="current-password" placeholder="현재 비밀번호" />
+          <label for="newPassword">새 비밀번호</label>
+          <input type="password" id="newPassword" autocomplete="new-password" placeholder="새 비밀번호 (6자 이상)" />
+          <label for="newPasswordConfirm">새 비밀번호 확인</label>
+          <input type="password" id="newPasswordConfirm" autocomplete="new-password" placeholder="새 비밀번호 다시 입력" />
+          <button class="btn btn-solid" id="changePasswordBtn">비밀번호 변경</button>
+          <div class="auth-msg" id="settingsMsg"></div>
+        </div>
+      </div>
+
+      <div class="settings-card danger-zone">
+        <div>
+          <h2>로그아웃</h2>
+          <p>현재 기기에서 계정 연결을 종료합니다.</p>
+        </div>
+        <button class="btn settings-logout" id="settingsLogoutBtn">로그아웃</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand"><strong>단국대학교 의과대학 26학번</strong><p>Dankook University College of Medicine, Class of 2026.</p></div>
+        <div class="footer-links">
+          <div><h5>단국대 링크</h5><a href="https://med.dankook.ac.kr/home" target="_blank" rel="noopener">의과대학 홈페이지 ↗</a><a href="https://portal.dankook.ac.kr/login.jsp" target="_blank" rel="noopener">단국대 포털 ↗</a><a href="https://nlms.dankook.ac.kr/" target="_blank" rel="noopener">이러닝 캠퍼스 ↗</a></div>
+          <div><h5>바로가기</h5><a href="about.html">학번 정보</a><a href="notices.html">공지사항</a><a href="calendar.html">학사일정</a></div>
+          <div><h5>커뮤니티</h5><a href="gallery.html">갤러리</a><a href="members.html">동기 명단</a><a href="settings.html">설정</a></div>
+        </div>
+      </div>
+      <div class="footer-bottom"><span>© 2026 Dankook Medicine '26. All rights reserved.</span><span>Made with ♥ by 26학번</span></div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js?v=11"></script>
+  <script type="module" src="assets/js/settings.js?v=1"></script>
+  <script type="module" src="assets/js/alerts.js?v=28"></script>
+  <script type="module" src="assets/js/gate.js?v=14"></script>
+</body>
+</html>
