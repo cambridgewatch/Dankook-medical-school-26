@@ -136,8 +136,8 @@ body.locked { visibility: hidden; }
 .hero {
   position: relative;
   background:
-    radial-gradient(1200px 400px at 80% -10%, rgba(0, 87, 184, 0.35), transparent 60%),
-    linear-gradient(135deg, var(--navy-dark), var(--navy) 55%, var(--blue));
+    linear-gradient(135deg, rgba(0,22,64,0.90), rgba(0,32,91,0.80) 50%, rgba(0,87,184,0.62)),
+    url("../img/campus.jpg") center 42% / cover no-repeat;
   color: #fff;
   overflow: hidden;
 }
