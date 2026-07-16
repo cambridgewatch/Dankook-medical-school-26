@@ -25,11 +25,29 @@ window.addEventListener("DOMContentLoaded", () => {
   const list = $("#noticeList");
   const note = $("#noticeNote");
   const adminBar = $("#noticeAdmin");
+  const pagerEl = $("#noticePager");
+  const PER_PAGE = 10;
+  let page = 1;
   let isAdmin = false;
   let notices = [];
   let subscribed = false;
   const openId = new URLSearchParams(location.search).get("open");
   let openHandled = false;
+
+  function renderPager(totalPages) {
+    if (!pagerEl) return;
+    if (totalPages <= 1) { pagerEl.innerHTML = ""; return; }
+    let h = `<button ${page === 1 ? "disabled" : ""} data-p="${page - 1}">‹</button>`;
+    for (let i = 1; i <= totalPages; i++) h += `<button class="${i === page ? "active" : ""}" data-p="${i}">${i}</button>`;
+    h += `<button ${page === totalPages ? "disabled" : ""} data-p="${page + 1}">›</button>`;
+    pagerEl.innerHTML = h;
+    pagerEl.querySelectorAll("button[data-p]").forEach((b) => {
+      b.addEventListener("click", () => {
+        const p = Number(b.dataset.p);
+        if (p >= 1 && p <= totalPages && p !== page) { page = p; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      });
+    });
+  }
 
   if (!isConfigured) { note.textContent = "Firebase 설정 후 공지를 볼 수 있습니다."; return; }
 
@@ -50,10 +68,18 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!notices.length) {
       list.innerHTML = "";
       note.textContent = isAdmin ? "아직 공지가 없어요. 위에서 등록해 보세요." : "등록된 공지가 없습니다.";
+      if (pagerEl) pagerEl.innerHTML = "";
       return;
     }
     note.textContent = "";
-    list.innerHTML = notices.map((n) => {
+    if (openId && !openHandled) {
+      const idx = notices.findIndex((n) => n.id === openId);
+      if (idx >= 0) page = Math.floor(idx / PER_PAGE) + 1;
+    }
+    const totalPages = Math.ceil(notices.length / PER_PAGE);
+    if (page > totalPages) page = totalPages;
+    const pageItems = notices.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+    list.innerHTML = pageItems.map((n) => {
       const tag = TAG_CLASS[n.tag] || "";
       const date = fmt(n.createdAt);
       const hasDetail = !!(n.detail && n.detail.trim());
@@ -112,6 +138,8 @@ window.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => card.scrollIntoView({ behavior: "smooth", block: "center" }), 120);
       }
     }
+
+    renderPager(totalPages);
   }
 
   $("#naAdd").addEventListener("click", async () => {

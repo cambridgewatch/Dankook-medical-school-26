@@ -12,24 +12,33 @@ import {
 const RKEY = "alertsRead";
 const getRead = () => { try { return new Set(JSON.parse(localStorage.getItem(RKEY) || "[]")); } catch { return new Set(); } };
 const saveRead = (s) => localStorage.setItem(RKEY, JSON.stringify([...s]));
+/* 다른 사람(비관리자)이 삭제한 알림 = 그 사람 기기에서만 숨김 */
+const HKEY = "alertsHidden";
+const getHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(HKEY) || "[]")); } catch { return new Set(); } };
+const saveHidden = (s) => localStorage.setItem(HKEY, JSON.stringify([...s]));
+
+const PER_PAGE = 10;
 
 window.addEventListener("DOMContentLoaded", () => {
   const listEl = document.querySelector("#alertList");
   const noteEl = document.querySelector("#alertNote");
   const clearBtn = document.querySelector("#alertClear");
+  const pagerEl = document.querySelector("#alertPager");
   if (!listEl) return;
 
   let alerts = [];
   let subscribed = false;
   let isAdmin = false;
+  let page = 1;
   const readSet = getRead();
+  const hiddenSet = getHidden();
 
   if (!isConfigured) { noteEl.textContent = "Firebase 설정 후 알림을 볼 수 있습니다."; return; }
 
   onAuthStateChanged(auth, (user) => {
     if (!user) return;
     isAdmin = user.email === ADMIN_EMAIL;
-    clearBtn.style.display = isAdmin ? "inline-block" : "none";
+    clearBtn.style.display = "inline-block"; // 삭제(모두)는 누구나 가능(비관리자는 본인만 숨김)
     if (!subscribed) {
       subscribed = true;
       onSnapshot(
@@ -54,8 +63,22 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       const d = ts && ts.toDate ? ts.toDate() : new Date();
       const p = (n) => String(n).padStart(2, "0");
-      return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+      return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())}`;
     } catch { return ""; }
+  }
+
+  function renderPager(totalPages) {
+    if (totalPages <= 1) { pagerEl.innerHTML = ""; return; }
+    let h = `<button ${page === 1 ? "disabled" : ""} data-p="${page - 1}">‹</button>`;
+    for (let i = 1; i <= totalPages; i++) h += `<button class="${i === page ? "active" : ""}" data-p="${i}">${i}</button>`;
+    h += `<button ${page === totalPages ? "disabled" : ""} data-p="${page + 1}">›</button>`;
+    pagerEl.innerHTML = h;
+    pagerEl.querySelectorAll("button[data-p]").forEach((b) => {
+      b.addEventListener("click", () => {
+        const p = Number(b.dataset.p);
+        if (p >= 1 && p <= totalPages && p !== page) { page = p; render(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      });
+    });
   }
 
   /* 원본(공지/일정)에서 최신 세부내용을 가져옴. 없으면 알림에 저장된 값 사용. */
@@ -74,9 +97,12 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function render() {
-    const shown = dedupe(alerts);
-    if (!shown.length) { listEl.innerHTML = ""; noteEl.textContent = "받은 알림이 없습니다."; return; }
+    const all = dedupe(alerts).filter((a) => !hiddenSet.has(a.id));
+    if (!all.length) { listEl.innerHTML = ""; noteEl.textContent = "받은 알림이 없습니다."; pagerEl.innerHTML = ""; return; }
     noteEl.textContent = "";
+    const totalPages = Math.ceil(all.length / PER_PAGE);
+    if (page > totalPages) page = totalPages;
+    const shown = all.slice((page - 1) * PER_PAGE, page * PER_PAGE);
     listEl.innerHTML = shown.map((a) => {
       const read = readSet.has(a.id);
       /* 저장된 세부내용이 있거나, 원본에서 가져올 수 있으면 펼치기 가능 */
@@ -91,7 +117,7 @@ window.addEventListener("DOMContentLoaded", () => {
               <small>${src} · ${fmt(a.createdAt)}</small>
             </div>
             ${expandable ? `<span class="alert-chev">▾</span>` : `<span class="alert-dot"></span>`}
-            ${isAdmin ? `<button class="alert-del" data-id="${a.id}" title="이 알림 삭제" style="border:0;background:none;cursor:pointer;font-size:15px;opacity:.55;">🗑</button>` : ""}
+            <button class="alert-del" data-id="${a.id}" title="삭제" style="border:0;background:none;cursor:pointer;font-size:15px;opacity:.55;">🗑</button>
           </div>
           ${expandable ? `<div class="alert-body">불러오는 중…</div>` : ""}
         </div>`;
@@ -116,23 +142,37 @@ window.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    /* 개별 삭제 (관리자) */
+    /* 개별 삭제: 관리자=전원에게서 삭제(원본), 그 외=본인만 숨김 */
     listEl.querySelectorAll(".alert-del").forEach((b) => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
         if (!confirm("이 알림을 삭제할까요?")) return;
-        try { await deleteDoc(doc(db, "alerts", b.dataset.id)); }
-        catch (err) { alert("삭제 실패: " + err.message); }
+        const id = b.dataset.id;
+        if (isAdmin) {
+          try { await deleteDoc(doc(db, "alerts", id)); }
+          catch (err) { alert("삭제 실패: " + err.message); }
+        } else {
+          hiddenSet.add(id); saveHidden(hiddenSet); render();
+        }
       });
     });
+
+    renderPager(totalPages);
   }
 
   clearBtn.addEventListener("click", async () => {
-    if (!confirm("모든 알림을 삭제할까요? (모든 사람의 알림이 사라집니다)")) return;
-    try {
-      const snap = await getDocs(collection(db, "alerts"));
-      await Promise.all(snap.docs.map((d) => deleteDoc(doc(db, "alerts", d.id))));
-    } catch (e) { alert("삭제 실패: " + e.message); }
+    if (isAdmin) {
+      if (!confirm("모든 알림을 삭제할까요? (모든 사람의 알림이 사라집니다)")) return;
+      try {
+        const snap = await getDocs(collection(db, "alerts"));
+        await Promise.all(snap.docs.map((d) => deleteDoc(doc(db, "alerts", d.id))));
+      } catch (e) { alert("삭제 실패: " + e.message); }
+    } else {
+      if (!confirm("내 화면에서 모든 알림을 지울까요? (다른 사람에겐 그대로 남아요)")) return;
+      dedupe(alerts).forEach((a) => hiddenSet.add(a.id));
+      saveHidden(hiddenSet);
+      render();
+    }
   });
 
   function esc(s) {

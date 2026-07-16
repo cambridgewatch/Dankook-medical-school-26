@@ -10,6 +10,7 @@ import {
 
 const RKEY = "alertsRead";
 const getRead = () => { try { return new Set(JSON.parse(localStorage.getItem(RKEY) || "[]")); } catch { return new Set(); } };
+const getHidden = () => { try { return new Set(JSON.parse(localStorage.getItem("alertsHidden") || "[]")); } catch { return new Set(); } };
 
 window.addEventListener("DOMContentLoaded", () => {
   const menu = document.querySelector(".nav-menu");
@@ -47,7 +48,8 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   function updateBadge() {
     const read = getRead();
-    const unread = dedupe(alerts).filter((a) => !read.has(a.id)).length;
+    const hidden = getHidden();
+    const unread = dedupe(alerts).filter((a) => !read.has(a.id) && !hidden.has(a.id)).length;
     if (unread > 0) { badge.textContent = unread > 99 ? "99+" : unread; badge.style.display = "grid"; }
     else badge.style.display = "none";
   }
