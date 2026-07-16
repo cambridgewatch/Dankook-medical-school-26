@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>갤러리 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=21" />
+  <link rel="stylesheet" href="assets/css/style.css?v=22" />
 </head>
 <body class="locked">
 
@@ -42,6 +42,10 @@
 
       <!-- 로그인 상태 / 안내 바 -->
       <div class="gallery-authbar" id="galleryAuthBar">불러오는 중…</div>
+      <div class="gallery-upload-guide">
+        <strong>누구나 사진을 올릴 수 있어요</strong>
+        <span>로그인한 26학번 구성원이라면 사진과 설명, 해시태그를 자유롭게 공유할 수 있습니다.</span>
+      </div>
 
       <!-- 업로드 영역 (로그인 시에만 표시) -->
       <div class="upload-box" id="uploadBox">
@@ -50,6 +54,7 @@
           <div class="upload-row">
             <input type="file" id="photoFile" accept="image/*" />
             <input type="text" id="photoCaption" placeholder="사진 설명 (선택)" maxlength="40" />
+            <input type="text" id="photoHashtags" placeholder="해시태그 (예: MT 추억 봄)" maxlength="80" />
             <button type="submit" class="btn btn-solid" id="uploadBtn">사진 올리기</button>
           </div>
         </form>
@@ -92,7 +97,7 @@
 
   <script src="assets/js/main.js?v=11"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
-  <script type="module" src="assets/js/gallery.js?v=31"></script>
+  <script type="module" src="assets/js/gallery.js?v=32"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=14"></script>
 </body>

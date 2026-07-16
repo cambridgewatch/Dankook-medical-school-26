@@ -786,6 +786,13 @@ body.locked { visibility: hidden; }
   padding: 14px 18px; margin-bottom: 18px; font-size: 15px; box-shadow: var(--shadow-sm);
 }
 .gallery-authbar a { color: var(--blue); }
+.gallery-upload-guide {
+  display: flex; gap: 8px 14px; align-items: center; flex-wrap: wrap;
+  margin: -4px 0 18px; padding: 14px 18px; border-radius: 12px;
+  color: var(--navy); background: var(--blue-light); font-size: 14px;
+}
+.gallery-upload-guide strong { font-size: 15px; }
+.gallery-upload-guide span { color: var(--gray); }
 .btn-mini {
   margin-left: 10px; padding: 5px 12px; border: 1px solid var(--line);
   border-radius: 8px; background: #fff; font-weight: 600; cursor: pointer; font-size: 13px;
@@ -803,6 +810,10 @@ body.locked { visibility: hidden; }
   border-radius: 10px; font-size: 14px; outline: none;
 }
 .upload-row input[type="text"]:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.photo-hashtags {
+  display: block; margin-bottom: 5px; color: #bcd8ff; font-size: 12px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .del-btn {
   background: rgba(0,0,0,0.45); border: 0; color: #fff; cursor: pointer;
   border-radius: 6px; padding: 2px 7px; font-size: 13px; margin-left: 8px;
