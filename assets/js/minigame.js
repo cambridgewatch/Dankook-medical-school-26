@@ -176,7 +176,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const ladderRun = document.querySelector("#ladderRun");
   const ladderResult = document.querySelector("#ladderResult");
 
-  if (ladderInputs && ladderSvg) {
+  /* 사다리타기는 Firebase 모듈과 독립적으로 ladder.js에서 실행 */
+  if (false && ladderInputs && ladderSvg) {
     let ladderNames = [];
     let ladderResults = [];
     let ladderBridges = [];
