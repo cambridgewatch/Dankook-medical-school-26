@@ -8,8 +8,17 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, addDoc, deleteDoc, doc, onSnapshot, serverTimestamp,
+  collection, addDoc, deleteDoc, doc, onSnapshot, query, where, getDocs, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* 특정 날짜+내용의 캘린더 알림 모두 삭제 */
+async function deleteCalAlerts(date, text) {
+  try {
+    const snap = await getDocs(query(collection(db, "alerts"), where("date", "==", date)));
+    const toDel = snap.docs.filter((d) => (d.data().text || "") === text);
+    await Promise.all(toDel.map((d) => deleteDoc(doc(db, "alerts", d.id))));
+  } catch (e) {}
+}
 
 /* 분류별 라벨 */
 const LABEL = {
@@ -164,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="ev-text">${esc(e.text)}</span>
           ${hasDetail ? `<span class="ev-chev">▾</span>` : ""}
           ${isAdmin ? `<button class="ev-alert" data-text="${esc(e.text)}" title="알림 보내기">🔔</button>` : ""}
-          ${isAdmin && !e.fixed ? `<button class="ev-del" data-id="${e.id}" title="삭제">🗑</button>` : ""}
+          ${isAdmin && !e.fixed ? `<button class="ev-del" data-id="${e.id}" data-text="${esc(e.text)}" title="삭제">🗑</button>` : ""}
         </div>
         ${hasDetail ? `<div class="cm-ev-body">${body}</div>` : ""}
       </li>`;
@@ -179,8 +188,10 @@ document.addEventListener("DOMContentLoaded", () => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
         if (!confirm("이 일정을 삭제할까요?")) return;
-        try { await deleteDoc(doc(db, "calendarEvents", b.dataset.id)); }
-        catch (err) { alert("삭제 실패: " + err.message); }
+        try {
+          await deleteDoc(doc(db, "calendarEvents", b.dataset.id));
+          await deleteCalAlerts(activeKey, b.dataset.text); // 일정 삭제 시 관련 알림도 삭제
+        } catch (err) { alert("삭제 실패: " + err.message); }
       });
     });
     cmList.querySelectorAll(".ev-alert").forEach((b) => {
@@ -188,6 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
         if (!confirm("이 일정을 알림으로 보낼까요?")) return;
         try {
+          await deleteCalAlerts(activeKey, b.dataset.text); // 같은 일정의 기존 알림 정리
           await addDoc(collection(db, "alerts"), {
             type: "calendar", title: b.dataset.text, date: activeKey, text: b.dataset.text, createdAt: serverTimestamp(),
           });

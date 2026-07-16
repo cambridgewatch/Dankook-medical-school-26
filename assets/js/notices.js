@@ -6,8 +6,16 @@
 import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp,
+  collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* 특정 공지에 연결된 알림 모두 삭제 */
+async function deleteAlertsByNotice(id) {
+  try {
+    const snap = await getDocs(query(collection(db, "alerts"), where("noticeId", "==", id)));
+    await Promise.all(snap.docs.map((d) => deleteDoc(doc(db, "alerts", d.id))));
+  } catch (e) {}
+}
 
 const $ = (s) => document.querySelector(s);
 const TAG_LABEL = { notice: "필독", event: "행사", acad: "학사", info: "안내" };
@@ -77,6 +85,7 @@ window.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
         if (!confirm("이 공지를 알림으로 보낼까요?")) return;
         try {
+          await deleteAlertsByNotice(b.dataset.id); // 같은 공지의 기존 알림 정리(중복/누적 방지)
           await addDoc(collection(db, "alerts"), { type: "notice", title: b.dataset.title, noticeId: b.dataset.id, createdAt: serverTimestamp() });
           alert("🔔 알림을 보냈어요!");
         } catch (err) { alert("알림 실패: " + err.message); }
@@ -87,8 +96,10 @@ window.addEventListener("DOMContentLoaded", () => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
         if (!confirm("이 공지를 삭제할까요?")) return;
-        try { await deleteDoc(doc(db, "notices", b.dataset.id)); }
-        catch (err) { alert("삭제 실패: " + err.message); }
+        try {
+          await deleteDoc(doc(db, "notices", b.dataset.id));
+          await deleteAlertsByNotice(b.dataset.id); // 공지 삭제 시 관련 알림도 삭제
+        } catch (err) { alert("삭제 실패: " + err.message); }
       });
     });
 

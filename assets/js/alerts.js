@@ -3,10 +3,10 @@
    - 알림 자체는 관리자가 공지/캘린더의 🔔 버튼을 눌러 생성(notices.js / calendar.js).
    - 여기서는 읽기 전용으로 표시만 함. */
 
-import { db, auth, isConfigured } from "./firebase-init.js?v=11";
+import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, query, orderBy, limit, onSnapshot,
+  collection, query, orderBy, limit, onSnapshot, getDocs, deleteDoc, doc,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -26,7 +26,10 @@ window.addEventListener("DOMContentLoaded", () => {
       <span class="bell-badge" id="bellBadge" style="display:none;">0</span>
     </button>
     <div class="bell-panel" id="bellPanel">
-      <div class="bell-head">🔔 알림</div>
+      <div class="bell-head" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>🔔 알림</span>
+        <button class="bell-clear" id="bellClear" style="display:none;border:0;background:none;color:#8a94a6;font-size:12px;font-weight:600;cursor:pointer;">전체 지우기</button>
+      </div>
       <ul class="bell-list" id="bellList"><li class="bell-empty">알림이 없습니다.</li></ul>
     </div>`;
   menu.appendChild(li);
@@ -35,6 +38,16 @@ window.addEventListener("DOMContentLoaded", () => {
   const badge = li.querySelector("#bellBadge");
   const panel = li.querySelector("#bellPanel");
   const list = li.querySelector("#bellList");
+  const clearBtn = li.querySelector("#bellClear");
+
+  clearBtn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (!confirm("모든 알림을 지울까요? (모든 사람의 알림 목록에서 사라져요)")) return;
+    try {
+      const snap = await getDocs(collection(db, "alerts"));
+      await Promise.all(snap.docs.map((d) => deleteDoc(doc(db, "alerts", d.id))));
+    } catch (err) { alert("지우기 실패: " + err.message); }
+  });
   let alerts = [];
   let shown = [];
   const LS = "alertsLastSeen";
@@ -72,7 +85,7 @@ window.addEventListener("DOMContentLoaded", () => {
     return `notices.html?open=${encodeURIComponent(a.noticeId || "")}`;
   }
   function render() {
-    shown = dedupe(alerts);
+    shown = dedupe(alerts).slice(0, 20); // 최근 20개만 표시(길이 제한)
     if (!shown.length) { list.innerHTML = `<li class="bell-empty">알림이 없습니다.</li>`; updateBadge(); return; }
     list.innerHTML = shown.map((a) => `
       <li class="bell-item" data-href="${hrefOf(a)}" style="cursor:pointer;">
@@ -91,6 +104,7 @@ window.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, (user) => {
     if (!user) { li.style.display = "none"; return; }
     li.style.display = "";
+    clearBtn.style.display = user.email === ADMIN_EMAIL ? "inline-block" : "none";
     onSnapshot(
       query(collection(db, "alerts"), orderBy("createdAt", "desc"), limit(50)),
       (snap) => {
