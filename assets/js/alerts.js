@@ -36,8 +36,23 @@ window.addEventListener("DOMContentLoaded", () => {
   const panel = li.querySelector("#bellPanel");
   const list = li.querySelector("#bellList");
   let alerts = [];
+  let shown = [];
   const LS = "alertsLastSeen";
   const lastSeen = () => Number(localStorage.getItem(LS) || 0);
+
+  /* 같은 내용은 최신 1개만 남김 (alerts는 최신순 정렬).
+     내용 키: 공지=noticeId, 캘린더=date+text. 읽은 뒤 다시 보내면 최신 시각이 갱신돼 다시 '안 읽음'이 됨. */
+  function dedupe(listArr) {
+    const seen = new Set();
+    const out = [];
+    for (const a of listArr) {
+      const key = a.type === "calendar" ? `c:${a.date}:${a.text || a.title}` : `n:${a.noticeId || a.title}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(a);
+    }
+    return out;
+  }
 
   bellBtn.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -47,7 +62,7 @@ window.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", (e) => { if (!li.contains(e.target)) panel.classList.remove("open"); });
 
   function updateBadge() {
-    const unread = alerts.filter((a) => a.ms > lastSeen()).length;
+    const unread = shown.filter((a) => a.ms > lastSeen()).length;
     if (unread > 0) { badge.textContent = unread > 99 ? "99+" : unread; badge.style.display = "grid"; }
     else badge.style.display = "none";
   }
@@ -57,8 +72,9 @@ window.addEventListener("DOMContentLoaded", () => {
     return `notices.html?open=${encodeURIComponent(a.noticeId || "")}`;
   }
   function render() {
-    if (!alerts.length) { list.innerHTML = `<li class="bell-empty">알림이 없습니다.</li>`; updateBadge(); return; }
-    list.innerHTML = alerts.map((a) => `
+    shown = dedupe(alerts);
+    if (!shown.length) { list.innerHTML = `<li class="bell-empty">알림이 없습니다.</li>`; updateBadge(); return; }
+    list.innerHTML = shown.map((a) => `
       <li class="bell-item" data-href="${hrefOf(a)}" style="cursor:pointer;">
         <span class="bell-ic ${a.type === "calendar" ? "cal" : "notice"}">${a.type === "calendar" ? "📅" : "📢"}</span>
         <div class="bell-txt">
