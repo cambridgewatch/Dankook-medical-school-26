@@ -156,6 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <li>
         <span class="ev-tag ${e.type}">${LABEL[e.type]}</span>
         <span class="ev-text">${esc(e.text)}</span>
+        ${isAdmin ? `<button class="ev-alert" data-text="${esc(e.text)}" title="알림 보내기">🔔</button>` : ""}
         ${isAdmin && !e.fixed ? `<button class="ev-del" data-id="${e.id}" title="삭제">🗑</button>` : ""}
       </li>`).join("");
     cmList.querySelectorAll(".ev-del").forEach((b) => {
@@ -163,6 +164,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!confirm("이 일정을 삭제할까요?")) return;
         try { await deleteDoc(doc(db, "calendarEvents", b.dataset.id)); }
         catch (err) { alert("삭제 실패: " + err.message); }
+      });
+    });
+    cmList.querySelectorAll(".ev-alert").forEach((b) => {
+      b.addEventListener("click", async () => {
+        if (!confirm("이 일정을 알림으로 보낼까요?")) return;
+        try {
+          await addDoc(collection(db, "alerts"), { type: "calendar", title: b.dataset.text, createdAt: serverTimestamp() });
+          alert("🔔 알림을 보냈어요!");
+        } catch (err) { alert("알림 실패: " + err.message); }
       });
     });
   }

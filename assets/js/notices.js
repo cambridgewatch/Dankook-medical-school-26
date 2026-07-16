@@ -55,6 +55,7 @@ window.addEventListener("DOMContentLoaded", () => {
             <span class="nt-title">${esc(n.title)}</span>
             <span class="nt-date">${date}</span>
             ${hasDetail ? `<span class="nt-chev">▾</span>` : ""}
+            ${isAdmin ? `<button class="notice-alert" data-title="${esc(n.title)}" title="알림 보내기">🔔</button>` : ""}
             ${isAdmin ? `<button class="notice-del" data-id="${n.id}" title="삭제">🗑</button>` : ""}
           </div>
           ${hasDetail ? `<div class="notice-body">${body}</div>` : ""}
@@ -64,8 +65,19 @@ window.addEventListener("DOMContentLoaded", () => {
     /* 제목 클릭 → 상세 펼치기/접기 */
     list.querySelectorAll(".notice-card.has-detail .notice-head").forEach((h) => {
       h.addEventListener("click", (e) => {
-        if (e.target.closest(".notice-del")) return;
+        if (e.target.closest(".notice-del") || e.target.closest(".notice-alert")) return;
         h.parentElement.classList.toggle("open");
+      });
+    });
+    /* 알림 보내기 (관리자) */
+    list.querySelectorAll(".notice-alert").forEach((b) => {
+      b.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm("이 공지를 알림으로 보낼까요?")) return;
+        try {
+          await addDoc(collection(db, "alerts"), { type: "notice", title: b.dataset.title, createdAt: serverTimestamp() });
+          alert("🔔 알림을 보냈어요!");
+        } catch (err) { alert("알림 실패: " + err.message); }
       });
     });
     /* 삭제 (관리자) */
