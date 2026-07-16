@@ -131,10 +131,11 @@ window.addEventListener("DOMContentLoaded", () => {
         const id = card.dataset.id;
         if (!readSet.has(id)) { readSet.add(id); saveRead(readSet); card.classList.add("read"); }
         if (!card.classList.contains("has-detail")) return;
-        /* 처음 펼칠 때 세부내용 로드 */
-        if (card.dataset.loaded === "0") {
-          card.dataset.loaded = "1";
+        const willOpen = !card.classList.contains("open");
+        if (willOpen) {
+          /* 펼칠 때마다 원본에서 최신 내용을 다시 가져옴(내용 변경 반영) */
           const bodyEl = card.querySelector(".alert-body");
+          bodyEl.textContent = "불러오는 중…";
           const d = await fetchDetail(byId[id]);
           bodyEl.innerHTML = d && d.trim() ? esc(d).replace(/\n/g, "<br>") : "세부 내용이 없습니다.";
         }
