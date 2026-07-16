@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="ev-tag ${e.type}">${LABEL[e.type]}</span>
           <span class="ev-text">${esc(e.text)}</span>
           ${hasDetail ? `<span class="ev-chev">▾</span>` : ""}
-          ${isAdmin ? `<button class="ev-alert" data-text="${esc(e.text)}" title="알림 보내기">🔔</button>` : ""}
+          ${isAdmin ? `<button class="ev-alert" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
           ${isAdmin && !e.fixed ? `<button class="ev-del" data-id="${e.id}" data-text="${esc(e.text)}" title="삭제">🗑</button>` : ""}
         </div>
         ${hasDetail ? `<div class="cm-ev-body">${body}</div>` : ""}
@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           await deleteCalAlerts(activeKey, b.dataset.text); // 같은 일정의 기존 알림 정리
           await addDoc(collection(db, "alerts"), {
-            type: "calendar", title: b.dataset.text, date: activeKey, text: b.dataset.text, createdAt: serverTimestamp(),
+            type: "calendar", title: b.dataset.text, detail: b.dataset.detail || "", date: activeKey, text: b.dataset.text, createdAt: serverTimestamp(),
           });
           alert("🔔 알림을 보냈어요!");
         } catch (err) { alert("알림 실패: " + err.message); }

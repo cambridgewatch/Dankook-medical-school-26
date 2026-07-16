@@ -65,7 +65,7 @@ window.addEventListener("DOMContentLoaded", () => {
             <span class="nt-title">${esc(n.title)}</span>
             <span class="nt-date">${date}</span>
             ${hasDetail ? `<span class="nt-chev">▾</span>` : ""}
-            ${isAdmin ? `<button class="notice-alert" data-id="${n.id}" data-title="${esc(n.title)}" title="알림 보내기">🔔</button>` : ""}
+            ${isAdmin ? `<button class="notice-alert" data-id="${n.id}" data-title="${esc(n.title)}" data-detail="${esc(n.detail || "")}" title="알림 보내기">🔔</button>` : ""}
             ${isAdmin ? `<button class="notice-del" data-id="${n.id}" title="삭제">🗑</button>` : ""}
           </div>
           ${hasDetail ? `<div class="notice-body">${body}</div>` : ""}
@@ -86,7 +86,7 @@ window.addEventListener("DOMContentLoaded", () => {
         if (!confirm("이 공지를 알림으로 보낼까요?")) return;
         try {
           await deleteAlertsByNotice(b.dataset.id); // 같은 공지의 기존 알림 정리(중복/누적 방지)
-          await addDoc(collection(db, "alerts"), { type: "notice", title: b.dataset.title, noticeId: b.dataset.id, createdAt: serverTimestamp() });
+          await addDoc(collection(db, "alerts"), { type: "notice", title: b.dataset.title, detail: b.dataset.detail || "", noticeId: b.dataset.id, createdAt: serverTimestamp() });
           alert("🔔 알림을 보냈어요!");
         } catch (err) { alert("알림 실패: " + err.message); }
       });

@@ -932,6 +932,36 @@ body.locked { visibility: hidden; }
 .wheel-result { min-height: 30px; margin: 12px 0 8px; font-size: 20px; color: var(--navy); }
 .wheel-result strong { color: var(--gold); font-size: 24px; }
 
+/* ---------- 알림 페이지 ---------- */
+.alert-list { display: flex; flex-direction: column; gap: 12px; max-width: 820px; margin: 0 auto; }
+.alert-card {
+  background: #fff; border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: var(--shadow-sm); overflow: hidden;
+  transition: opacity 0.2s, box-shadow 0.15s, border-color 0.15s;
+}
+.alert-card:hover { border-color: #cdd9ee; box-shadow: var(--shadow); }
+.alert-card.read { opacity: 0.5; }
+.alert-head { display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; }
+.alert-ic {
+  flex: 0 0 auto; width: 42px; height: 42px; border-radius: 11px;
+  display: grid; place-items: center; font-size: 18px; background: var(--blue-light);
+}
+.alert-ic.cal { background: #e0f5ea; }
+.alert-txt { flex: 1; min-width: 0; }
+.alert-txt strong { display: block; color: var(--ink); font-size: 16px; font-weight: 700; }
+.alert-card.read .alert-txt strong { font-weight: 500; }
+.alert-txt small { color: var(--gray); font-size: 13px; }
+.alert-chev { color: var(--gray); font-size: 12px; transition: transform 0.25s; }
+.alert-card.open .alert-chev { transform: rotate(180deg); color: var(--navy); }
+.alert-dot { width: 9px; height: 9px; border-radius: 50%; background: #e2574c; flex: 0 0 auto; }
+.alert-card.read .alert-dot { display: none; }
+.alert-body {
+  max-height: 0; opacity: 0; overflow: hidden; padding: 0 20px;
+  color: var(--gray); font-size: 14.5px; line-height: 1.7;
+  border-top: 1px solid transparent; transition: all 0.28s ease;
+}
+.alert-card.open .alert-body { max-height: 600px; opacity: 1; padding: 14px 20px 18px; border-top-color: var(--line); }
+
 /* ---------- 푸터 ---------- */
 .site-footer {
   background: var(--navy-dark);
