@@ -23,10 +23,10 @@ async function deleteCalAlerts(date, text) {
 /* 분류별 라벨 */
 const LABEL = {
   acad: "학사", exam: "시험", event: "행사", vac: "방학", holi: "공휴일",
-  todo: "할 일", meet: "모임", etc: "기타",
+  todo: "할 일", assignment: "과제", meet: "모임", etc: "기타",
 };
 /* 관리자가 추가할 때 고를 수 있는 분류 */
-const ADD_TYPES = ["acad", "exam", "event", "vac", "holi", "todo", "meet", "etc"];
+const ADD_TYPES = ["acad", "exam", "event", "vac", "holi", "assignment", "todo", "meet", "etc"];
 
 /* 단국대/의과대학 학사일정 (기본 표시, 수정 불가) */
 const DEFAULTS = {
@@ -70,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const titleEl = document.querySelector("#calTitle");
   const banner = document.querySelector("#calBanner");
   const ddayList = document.querySelector("#ddayList");
+  const assignmentDdayList = document.querySelector("#assignmentDdayList");
   const calendarSearch = document.querySelector("#calendarSearch");
   const calendarSearchResults = document.querySelector("#calendarSearchResults");
 
@@ -142,6 +143,33 @@ document.addEventListener("DOMContentLoaded", () => {
         <small>${event.date.replaceAll("-", ".")} · ${LABEL[event.type] || "일정"}</small>
       </button>`).join("");
     ddayList.querySelectorAll(".dday-item").forEach((button) => {
+      button.addEventListener("click", () => goToEvent(button.dataset.date));
+    });
+  }
+
+  function renderAssignmentDdays() {
+    if (!assignmentDdayList) return;
+    const base = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const assignments = allCalendarEvents()
+      .filter((event) => event.type === "assignment")
+      .map((event) => ({
+        ...event,
+        days: Math.round((new Date(`${event.date}T00:00:00`) - base) / 86400000),
+      }))
+      .filter((event) => event.days >= 0)
+      .sort((a, b) => a.days - b.days || a.date.localeCompare(b.date))
+      .slice(0, 6);
+    if (!assignments.length) {
+      assignmentDdayList.innerHTML = `<p class="dday-empty">등록된 과제가 없습니다. 일정을 추가할 때 분류를 ‘과제’로 선택하세요.</p>`;
+      return;
+    }
+    assignmentDdayList.innerHTML = assignments.map((event) => `
+      <button type="button" class="dday-item assignment-dday-item" data-date="${event.date}">
+        <strong>${event.days === 0 ? "D-Day" : `D-${event.days}`}</strong>
+        <span>${esc(event.text)}</span>
+        <small>${event.date.replaceAll("-", ".")} · 과제</small>
+      </button>`).join("");
+    assignmentDdayList.querySelectorAll(".dday-item").forEach((button) => {
       button.addEventListener("click", () => goToEvent(button.dataset.date));
     });
   }
@@ -225,6 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
       render();
       tryDeepLink();
       renderDdays();
+      renderAssignmentDdays();
       renderCalendarSearch();
       migrateAllToEditable();
     });

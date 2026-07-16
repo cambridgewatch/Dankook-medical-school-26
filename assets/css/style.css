@@ -534,6 +534,10 @@ body.locked { visibility: hidden; }
 .dday-item span { display: block; position: relative; z-index: 1; font-size: 14px; font-weight: 750; }
 .dday-item small { display: block; position: relative; z-index: 1; margin-top: 7px; color: var(--gray); font-size: 12px; }
 .dday-empty { color: var(--gray); font-size: 14px; }
+.assignment-dday-panel { background: linear-gradient(145deg, #fff 35%, #fff8ed); border-color: #f0dfc1; }
+.assignment-dday-panel .dday-head span { color: #bd7620; }
+.assignment-dday-item::after { background: #fff0d8; }
+.assignment-dday-item strong { background: #a85f18; }
 .calendar-search-wrap { max-width: 960px; margin: 0 auto 20px; position: relative; }
 .calendar-search-wrap .content-search { max-width: none; margin-bottom: 0; }
 .calendar-search-results { display: none; margin-top: 8px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
@@ -611,6 +615,7 @@ body.locked { visibility: hidden; }
 .chip.exam { background: #fce8e6; color: #b5362b; }
 .chip.event{ background: #fdf3da; color: #876312; }
 .chip.todo { background: #e7e9f7; color: #2a2f7a; }
+.chip.assignment { background: #fff0d8; color: #8a4b10; }
 .chip.meet { background: #dcf4f7; color: #0c6b75; }
 .chip.vac  { background: #e0f5ea; color: #1c7a4d; }
 .chip.holi { background: #eef0f3; color: #5b6473; }
@@ -622,6 +627,7 @@ body.locked { visibility: hidden; }
 .d.exam { background: #e2574c; }
 .d.event { background: var(--gold); }
 .d.todo { background: var(--navy); }
+.d.assignment { background: #d68428; }
 .d.meet { background: #14b8c4; }
 .d.vac { background: #2bb673; }
 .d.holi { background: #9aa3b2; }
@@ -663,6 +669,7 @@ body.locked { visibility: hidden; }
 .ev-tag.exam { background: #e2574c; }
 .ev-tag.event { background: var(--gold); }
 .ev-tag.todo { background: var(--navy); }
+.ev-tag.assignment { background: #c77420; }
 .ev-tag.meet { background: #14b8c4; }
 .ev-tag.vac { background: #2bb673; }
 .ev-tag.holi { background: #9aa3b2; }
