@@ -9,6 +9,9 @@ window.addEventListener("DOMContentLoaded", function () {
   var playerSelect = document.querySelector("#ladderPlayer");
   var runButton = document.querySelector("#ladderRun");
   var resultBox = document.querySelector("#ladderResult");
+  var tableToggle = document.querySelector("#ladderTableToggle");
+  var tableWrap = document.querySelector("#ladderTableWrap");
+  var tableBody = document.querySelector("#ladderTableBody");
   if (!countInput || !inputsBox || !svg) return;
 
   var names = [];
@@ -76,6 +79,8 @@ window.addEventListener("DOMContentLoaded", function () {
     svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#8a94a6" font-size="15">이름과 결과를 입력한 뒤 사다리 만들기를 눌러주세요</text>';
     playerSelect.innerHTML = "";
     resultBox.textContent = "";
+    tableWrap.hidden = true;
+    tableToggle.textContent = "결과표 보기";
     board = null;
   }
 
@@ -144,6 +149,8 @@ window.addEventListener("DOMContentLoaded", function () {
       return '<option value="' + i + '">' + escapeHtml(name) + '</option>';
     }).join("");
     resultBox.textContent = "참가자를 선택하고 결과 확인을 눌러주세요.";
+    tableWrap.hidden = true;
+    tableToggle.textContent = "결과표 보기";
   }
 
   function trace(start) {
@@ -183,6 +190,25 @@ window.addEventListener("DOMContentLoaded", function () {
     svg.insertAdjacentHTML("beforeend", '<polyline points="' + pointText + '" class="ladder-path"/>');
     resultBox.innerHTML = "<strong>" + escapeHtml(names[start]) + "</strong> → <strong>" + escapeHtml(results[traced.end]) + "</strong>";
     scrollBox.scrollTo({ left: Math.max(0, board.x(start) - 80), behavior: "smooth" });
+  });
+
+  tableToggle.addEventListener("click", function () {
+    if (!board) {
+      resultBox.textContent = "먼저 사다리를 만들어주세요.";
+      return;
+    }
+    if (!tableWrap.hidden) {
+      tableWrap.hidden = true;
+      tableToggle.textContent = "결과표 보기";
+      return;
+    }
+    tableBody.innerHTML = names.map(function (name, index) {
+      var destination = trace(index).end;
+      return "<tr><td>" + (index + 1) + "</td><td>" + escapeHtml(name) + "</td><td>" + escapeHtml(results[destination]) + "</td></tr>";
+    }).join("");
+    tableWrap.hidden = false;
+    tableToggle.textContent = "결과표 닫기";
+    tableWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
 
   makeInputs();

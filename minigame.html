@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>미니게임 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=33" />
+  <link rel="stylesheet" href="assets/css/style.css?v=34" />
 </head>
 <body class="locked">
 
@@ -102,8 +102,15 @@
         <div class="ladder-play">
           <select id="ladderPlayer" aria-label="결과를 확인할 참가자"></select>
           <button class="btn btn-solid" id="ladderRun">결과 확인</button>
+          <button class="btn btn-ghost-dark" id="ladderTableToggle">결과표 보기</button>
         </div>
         <div class="ladder-result" id="ladderResult"></div>
+        <div class="ladder-table-wrap" id="ladderTableWrap" hidden>
+          <table class="ladder-table">
+            <thead><tr><th>번호</th><th>참가자</th><th>도착 결과</th></tr></thead>
+            <tbody id="ladderTableBody"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="game-card game-soon">
@@ -137,7 +144,7 @@
   <script src="assets/js/main.js?v=17"></script>
   <script src="assets/js/effects3d.js?v=17"></script>
   <script type="module" src="assets/js/minigame.js?v=34"></script>
-  <script src="assets/js/ladder.js?v=3"></script>
+  <script src="assets/js/ladder.js?v=4"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=17"></script>
 </body>

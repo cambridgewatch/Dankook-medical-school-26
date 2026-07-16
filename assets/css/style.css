@@ -985,6 +985,17 @@ body.locked { visibility: hidden; }
 .ladder-play select { min-width: 160px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; background: #fff; }
 .ladder-result { min-height: 34px; margin-top: 14px; color: var(--navy); font-size: 20px; }
 .ladder-result strong:last-child { color: #b78923; }
+.ladder-table-wrap {
+  max-width: 620px; margin: 14px auto 0; overflow-x: auto;
+  border: 1px solid var(--line); border-radius: 13px; background: #fff;
+}
+.ladder-table-wrap[hidden] { display: none; }
+.ladder-table { width: 100%; min-width: 460px; border-collapse: collapse; text-align: left; }
+.ladder-table th, .ladder-table td { padding: 12px 15px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.ladder-table th { background: var(--blue-light); color: var(--navy); font-weight: 800; }
+.ladder-table td:first-child { width: 70px; color: var(--gray); text-align: center; }
+.ladder-table tbody tr:last-child td { border-bottom: 0; }
+.ladder-table tbody tr:nth-child(even) { background: #fafcff; }
 @media (max-width: 620px) {
   .ladder-game { padding-left: 18px; padding-right: 18px; }
   .ladder-scroll-hint { display: block; }
