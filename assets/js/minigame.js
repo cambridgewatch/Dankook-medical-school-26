@@ -164,4 +164,148 @@ window.addEventListener("DOMContentLoaded", () => {
 
     drawWheel(wheelList);
   }
+
+  /* ===== 게임 3: 사다리타기 ===== */
+  const ladderCount = document.querySelector("#ladderCount");
+  const ladderSetup = document.querySelector("#ladderSetup");
+  const ladderInputs = document.querySelector("#ladderInputs");
+  const ladderCreate = document.querySelector("#ladderCreate");
+  const ladderSvg = document.querySelector("#ladderSvg");
+  const ladderStage = document.querySelector("#ladderStage");
+  const ladderPlayer = document.querySelector("#ladderPlayer");
+  const ladderRun = document.querySelector("#ladderRun");
+  const ladderResult = document.querySelector("#ladderResult");
+
+  if (ladderInputs && ladderSvg) {
+    let ladderNames = [];
+    let ladderResults = [];
+    let ladderBridges = [];
+    let ladderBoard = null;
+
+    const clampCount = () => Math.max(2, Math.min(20, Number(ladderCount.value) || 2));
+    const ladderLabel = (value) => value.length > 7 ? value.slice(0, 7) + "…" : value;
+
+    function makeLadderInputs() {
+      const count = clampCount();
+      ladderCount.value = count;
+      const oldNames = [...ladderInputs.querySelectorAll(".ladder-name")].map((el) => el.value);
+      const oldResults = [...ladderInputs.querySelectorAll(".ladder-dest")].map((el) => el.value);
+      const minWidth = Math.max(520, count * 112);
+      ladderInputs.style.minWidth = `${minWidth}px`;
+      ladderInputs.innerHTML = `
+        <div class="ladder-input-label">참가자</div>
+        <div class="ladder-input-row" style="grid-template-columns:repeat(${count},minmax(96px,1fr))">
+          ${Array.from({ length: count }, (_, i) => `<input class="ladder-name" maxlength="12" value="${esc(oldNames[i] || `참가자 ${i + 1}`)}" aria-label="${i + 1}번 참가자" />`).join("")}
+        </div>
+        <div class="ladder-input-label result-label">도착 결과</div>
+        <div class="ladder-input-row" style="grid-template-columns:repeat(${count},minmax(96px,1fr))">
+          ${Array.from({ length: count }, (_, i) => `<input class="ladder-dest" maxlength="16" value="${esc(oldResults[i] || `결과 ${i + 1}`)}" aria-label="${i + 1}번 결과" />`).join("")}
+        </div>`;
+      ladderResult.textContent = "";
+      ladderSvg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" fill="#8a94a6" font-size="15">입력 후 사다리 만들기를 눌러주세요</text>`;
+      ladderSvg.setAttribute("viewBox", "0 0 600 240");
+      ladderStage.style.width = `${minWidth}px`;
+      ladderBoard = null;
+    }
+
+    function readLadderValues() {
+      ladderNames = [...ladderInputs.querySelectorAll(".ladder-name")]
+        .map((el, i) => el.value.trim() || `참가자 ${i + 1}`);
+      ladderResults = [...ladderInputs.querySelectorAll(".ladder-dest")]
+        .map((el, i) => el.value.trim() || `결과 ${i + 1}`);
+    }
+
+    function generateBridges(count, levels) {
+      let rows;
+      do {
+        rows = [];
+        for (let level = 0; level < levels; level++) {
+          const row = new Set();
+          for (let col = 0; col < count - 1; col++) {
+            if (!row.has(col - 1) && Math.random() < 0.38) {
+              row.add(col);
+              col++;
+            }
+          }
+          rows.push(row);
+        }
+      } while (rows.reduce((sum, row) => sum + row.size, 0) < count - 1);
+      return rows;
+    }
+
+    function drawLadder() {
+      readLadderValues();
+      const count = ladderNames.length;
+      const spacing = 104;
+      const side = 58;
+      const width = side * 2 + (count - 1) * spacing;
+      const height = 490;
+      const topY = 62;
+      const bottomY = 408;
+      const levels = Math.max(12, Math.min(20, count + 8));
+      ladderBridges = generateBridges(count, levels);
+      const x = (i) => side + i * spacing;
+      const y = (i) => topY + ((i + 1) * (bottomY - topY)) / (levels + 1);
+      let html = `<rect width="100%" height="100%" rx="18" fill="#fbfcff"/>`;
+
+      for (let i = 0; i < count; i++) {
+        html += `<line x1="${x(i)}" y1="${topY}" x2="${x(i)}" y2="${bottomY}" class="ladder-line"/>`;
+        html += `<text x="${x(i)}" y="28" class="ladder-name-text">${esc(ladderLabel(ladderNames[i]))}</text>`;
+        html += `<text x="${x(i)}" y="449" class="ladder-result-text">${esc(ladderLabel(ladderResults[i]))}</text>`;
+        html += `<circle cx="${x(i)}" cy="${topY}" r="5" class="ladder-node"/>`;
+        html += `<circle cx="${x(i)}" cy="${bottomY}" r="5" class="ladder-node bottom"/>`;
+      }
+      ladderBridges.forEach((row, level) => {
+        row.forEach((col) => {
+          html += `<line x1="${x(col)}" y1="${y(level)}" x2="${x(col + 1)}" y2="${y(level)}" class="ladder-line bridge"/>`;
+        });
+      });
+
+      ladderSvg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      ladderSvg.setAttribute("width", width);
+      ladderSvg.setAttribute("height", height);
+      ladderStage.style.width = `${Math.max(600, width)}px`;
+      ladderSvg.innerHTML = html;
+      ladderBoard = { count, levels, width, height, topY, bottomY, x, y };
+      ladderPlayer.innerHTML = ladderNames.map((name, i) => `<option value="${i}">${esc(name)}</option>`).join("");
+      ladderResult.textContent = "참가자를 선택하고 결과 확인을 눌러주세요.";
+    }
+
+    function traceLadder(start) {
+      if (!ladderBoard) return null;
+      const { levels, topY, bottomY, x, y } = ladderBoard;
+      let col = start;
+      const points = [[x(col), topY]];
+      for (let level = 0; level < levels; level++) {
+        const rowY = y(level);
+        points.push([x(col), rowY]);
+        if (ladderBridges[level].has(col)) {
+          col++;
+          points.push([x(col), rowY]);
+        } else if (ladderBridges[level].has(col - 1)) {
+          col--;
+          points.push([x(col), rowY]);
+        }
+      }
+      points.push([x(col), bottomY]);
+      return { end: col, points };
+    }
+
+    ladderSetup.addEventListener("click", makeLadderInputs);
+    ladderCreate.addEventListener("click", drawLadder);
+    ladderRun.addEventListener("click", () => {
+      if (!ladderBoard) return ladderResult.textContent = "먼저 사다리를 만들어주세요.";
+      const start = Number(ladderPlayer.value);
+      const traced = traceLadder(start);
+      ladderSvg.querySelectorAll(".ladder-path").forEach((el) => el.remove());
+      const pointText = traced.points.map(([px, py]) => `${px},${py}`).join(" ");
+      ladderSvg.insertAdjacentHTML("beforeend", `<polyline points="${pointText}" class="ladder-path"/>`);
+      ladderResult.innerHTML = `<strong>${esc(ladderNames[start])}</strong> → <strong>${esc(ladderResults[traced.end])}</strong>`;
+
+      const targetX = ladderBoard.x(start) - 80;
+      document.querySelector("#ladderScroll").scrollTo({ left: Math.max(0, targetX), behavior: "smooth" });
+    });
+
+    makeLadderInputs();
+  }
 });

@@ -932,6 +932,66 @@ body.locked { visibility: hidden; }
 .wheel-result { min-height: 30px; margin: 12px 0 8px; font-size: 20px; color: var(--navy); }
 .wheel-result strong { color: var(--gold); font-size: 24px; }
 
+/* 사다리타기 */
+.ladder-game { max-width: 900px; }
+.ladder-controls {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.ladder-controls label { font-size: 14px; font-weight: 800; color: var(--navy); }
+.ladder-controls input {
+  width: 78px; padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: 10px; font: inherit; text-align: center; outline: none;
+}
+.ladder-controls input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.ladder-input-scroll, .ladder-scroll {
+  width: 100%; overflow-x: auto; overflow-y: hidden; overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch; scrollbar-color: #aebdd5 #edf2f9;
+}
+.ladder-input-scroll { padding: 2px 2px 12px; margin-bottom: 10px; }
+.ladder-inputs { display: grid; gap: 7px; }
+.ladder-input-label { text-align: left; font-size: 12px; font-weight: 800; color: var(--blue); }
+.ladder-input-label.result-label { margin-top: 4px; color: #8a6d1f; }
+.ladder-input-row { display: grid; gap: 8px; }
+.ladder-input-row input {
+  min-width: 0; width: 100%; padding: 10px 8px; border: 1px solid var(--line);
+  border-radius: 9px; font: inherit; font-size: 13px; text-align: center; outline: none;
+}
+.ladder-input-row input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.ladder-create { margin: 4px auto 18px; justify-content: center; }
+.ladder-scroll {
+  border: 1px solid var(--line); border-radius: 16px; background: #fbfcff;
+  box-shadow: inset 0 2px 8px rgba(0,32,91,.05);
+}
+.ladder-stage { min-width: 600px; height: 490px; }
+#ladderSvg { display: block; width: 100%; height: 490px; }
+.ladder-scroll-hint { display: none; margin: 8px 0 0; color: var(--gray); font-size: 12px; }
+.ladder-line { stroke: #8fa2bf; stroke-width: 3; stroke-linecap: round; }
+.ladder-line.bridge { stroke: #6f86a9; }
+.ladder-node { fill: var(--blue); }
+.ladder-node.bottom { fill: var(--gold); }
+.ladder-name-text, .ladder-result-text {
+  text-anchor: middle; dominant-baseline: middle; font-family: inherit;
+  font-size: 13px; font-weight: 800; fill: var(--navy);
+}
+.ladder-result-text { fill: #8a6d1f; }
+.ladder-path {
+  fill: none; stroke: #e2574c; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round;
+  opacity: .9; stroke-dasharray: 10000; stroke-dashoffset: 10000;
+  animation: ladderTrace 1.6s ease-out forwards;
+}
+@keyframes ladderTrace { to { stroke-dashoffset: 0; } }
+.ladder-play { display: flex; justify-content: center; gap: 9px; margin-top: 16px; }
+.ladder-play select { min-width: 160px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; background: #fff; }
+.ladder-result { min-height: 34px; margin-top: 14px; color: var(--navy); font-size: 20px; }
+.ladder-result strong:last-child { color: #b78923; }
+@media (max-width: 620px) {
+  .ladder-game { padding-left: 18px; padding-right: 18px; }
+  .ladder-scroll-hint { display: block; }
+  .ladder-play { align-items: stretch; flex-direction: column; }
+  .ladder-play select, .ladder-play .btn { width: 100%; }
+}
+
 /* ---------- 페이지네이션 ---------- */
 .pager { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 24px; flex-wrap: wrap; }
 .pager button {
