@@ -990,6 +990,7 @@ body.locked { visibility: hidden; }
   border: 1px solid var(--line); border-radius: 13px; background: #fff;
 }
 .ladder-table-wrap[hidden] { display: none; }
+.ladder-table-wrap.show { display: block; }
 .ladder-table { width: 100%; min-width: 460px; border-collapse: collapse; text-align: left; }
 .ladder-table th, .ladder-table td { padding: 12px 15px; border-bottom: 1px solid var(--line); font-size: 14px; }
 .ladder-table th { background: var(--blue-light); color: var(--navy); font-weight: 800; }

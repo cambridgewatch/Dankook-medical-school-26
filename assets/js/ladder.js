@@ -19,6 +19,20 @@ window.addEventListener("DOMContentLoaded", function () {
   var bridges = [];
   var board = null;
 
+  function closeResultTable() {
+    tableWrap.hidden = true;
+    tableWrap.classList.remove("show");
+    tableToggle.setAttribute("aria-expanded", "false");
+    tableToggle.textContent = "결과표 보기";
+  }
+
+  function openResultTable() {
+    tableWrap.hidden = false;
+    tableWrap.classList.add("show");
+    tableToggle.setAttribute("aria-expanded", "true");
+    tableToggle.textContent = "결과표 닫기";
+  }
+
   function escapeHtml(value) {
     return String(value).replace(/[&<>"]/g, function (char) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[char];
@@ -79,8 +93,7 @@ window.addEventListener("DOMContentLoaded", function () {
     svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" fill="#8a94a6" font-size="15">이름과 결과를 입력한 뒤 사다리 만들기를 눌러주세요</text>';
     playerSelect.innerHTML = "";
     resultBox.textContent = "";
-    tableWrap.hidden = true;
-    tableToggle.textContent = "결과표 보기";
+    closeResultTable();
     board = null;
   }
 
@@ -149,8 +162,7 @@ window.addEventListener("DOMContentLoaded", function () {
       return '<option value="' + i + '">' + escapeHtml(name) + '</option>';
     }).join("");
     resultBox.textContent = "참가자를 선택하고 결과 확인을 눌러주세요.";
-    tableWrap.hidden = true;
-    tableToggle.textContent = "결과표 보기";
+    closeResultTable();
   }
 
   function trace(start) {
@@ -197,18 +209,18 @@ window.addEventListener("DOMContentLoaded", function () {
       resultBox.textContent = "먼저 사다리를 만들어주세요.";
       return;
     }
-    if (!tableWrap.hidden) {
-      tableWrap.hidden = true;
-      tableToggle.textContent = "결과표 보기";
+    if (tableWrap.classList.contains("show")) {
+      closeResultTable();
       return;
     }
     tableBody.innerHTML = names.map(function (name, index) {
       var destination = trace(index).end;
       return "<tr><td>" + (index + 1) + "</td><td>" + escapeHtml(name) + "</td><td>" + escapeHtml(results[destination]) + "</td></tr>";
     }).join("");
-    tableWrap.hidden = false;
-    tableToggle.textContent = "결과표 닫기";
-    tableWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    openResultTable();
+    requestAnimationFrame(function () {
+      tableWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
   });
 
   makeInputs();
