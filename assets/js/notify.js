@@ -6,7 +6,7 @@
 import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, query, orderBy, limit, onSnapshot, getDocs, deleteDoc, doc,
+  collection, query, orderBy, limit, where, onSnapshot, getDocs, getDoc, deleteDoc, doc,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const RKEY = "alertsRead";
@@ -21,13 +21,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
   let alerts = [];
   let subscribed = false;
+  let isAdmin = false;
   const readSet = getRead();
 
   if (!isConfigured) { noteEl.textContent = "Firebase 설정 후 알림을 볼 수 있습니다."; return; }
 
   onAuthStateChanged(auth, (user) => {
     if (!user) return;
-    clearBtn.style.display = user.email === ADMIN_EMAIL ? "inline-block" : "none";
+    isAdmin = user.email === ADMIN_EMAIL;
+    clearBtn.style.display = isAdmin ? "inline-block" : "none";
     if (!subscribed) {
       subscribed = true;
       onSnapshot(
@@ -56,34 +58,71 @@ window.addEventListener("DOMContentLoaded", () => {
     } catch { return ""; }
   }
 
+  /* 원본(공지/일정)에서 최신 세부내용을 가져옴. 없으면 알림에 저장된 값 사용. */
+  async function fetchDetail(a) {
+    try {
+      if (a.type === "notice" && a.noticeId) {
+        const s = await getDoc(doc(db, "notices", a.noticeId));
+        if (s.exists() && s.data().detail) return s.data().detail;
+      } else if (a.type === "calendar" && a.date) {
+        const s = await getDocs(query(collection(db, "calendarEvents"), where("date", "==", a.date)));
+        const m = s.docs.find((d) => (d.data().text || "") === (a.text || a.title));
+        if (m && m.data().detail) return m.data().detail;
+      }
+    } catch (e) {}
+    return a.detail || "";
+  }
+
   function render() {
     const shown = dedupe(alerts);
     if (!shown.length) { listEl.innerHTML = ""; noteEl.textContent = "받은 알림이 없습니다."; return; }
     noteEl.textContent = "";
     listEl.innerHTML = shown.map((a) => {
       const read = readSet.has(a.id);
-      const hasDetail = !!(a.detail && a.detail.trim());
-      const body = hasDetail ? esc(a.detail).replace(/\n/g, "<br>") : "";
+      /* 저장된 세부내용이 있거나, 원본에서 가져올 수 있으면 펼치기 가능 */
+      const expandable = !!(a.detail && a.detail.trim()) || (a.type === "notice" ? !!a.noticeId : !!a.date);
       const src = a.type === "calendar" ? "학사일정" : "공지사항";
       return `
-        <div class="alert-card ${read ? "read" : ""} ${hasDetail ? "has-detail" : ""}" data-id="${a.id}">
+        <div class="alert-card ${read ? "read" : ""} ${expandable ? "has-detail" : ""}" data-id="${a.id}" data-loaded="0">
           <div class="alert-head">
             <span class="alert-ic ${a.type === "calendar" ? "cal" : "notice"}">${a.type === "calendar" ? "📅" : "📢"}</span>
             <div class="alert-txt">
               <strong>${esc(a.title)}</strong>
               <small>${src} · ${fmt(a.createdAt)}</small>
             </div>
-            ${hasDetail ? `<span class="alert-chev">▾</span>` : `<span class="alert-dot"></span>`}
+            ${expandable ? `<span class="alert-chev">▾</span>` : `<span class="alert-dot"></span>`}
+            ${isAdmin ? `<button class="alert-del" data-id="${a.id}" title="이 알림 삭제" style="border:0;background:none;cursor:pointer;font-size:15px;opacity:.55;">🗑</button>` : ""}
           </div>
-          ${hasDetail ? `<div class="alert-body">${body}</div>` : ""}
+          ${expandable ? `<div class="alert-body">불러오는 중…</div>` : ""}
         </div>`;
     }).join("");
 
+    const byId = Object.fromEntries(shown.map((a) => [a.id, a]));
+
     listEl.querySelectorAll(".alert-card").forEach((card) => {
-      card.querySelector(".alert-head").addEventListener("click", () => {
-        if (card.classList.contains("has-detail")) card.classList.toggle("open");
+      card.querySelector(".alert-head").addEventListener("click", async (e) => {
+        if (e.target.closest(".alert-del")) return;
         const id = card.dataset.id;
         if (!readSet.has(id)) { readSet.add(id); saveRead(readSet); card.classList.add("read"); }
+        if (!card.classList.contains("has-detail")) return;
+        /* 처음 펼칠 때 세부내용 로드 */
+        if (card.dataset.loaded === "0") {
+          card.dataset.loaded = "1";
+          const bodyEl = card.querySelector(".alert-body");
+          const d = await fetchDetail(byId[id]);
+          bodyEl.innerHTML = d && d.trim() ? esc(d).replace(/\n/g, "<br>") : "세부 내용이 없습니다.";
+        }
+        card.classList.toggle("open");
+      });
+    });
+
+    /* 개별 삭제 (관리자) */
+    listEl.querySelectorAll(".alert-del").forEach((b) => {
+      b.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm("이 알림을 삭제할까요?")) return;
+        try { await deleteDoc(doc(db, "alerts", b.dataset.id)); }
+        catch (err) { alert("삭제 실패: " + err.message); }
       });
     });
   }
