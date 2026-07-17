@@ -12,12 +12,26 @@ import {
 
 const $ = (s) => document.querySelector(s);
 const PREF_KEY = "dkuAutoLogin";
+const BANNER_THEME_KEY = "dkuBannerTheme";
+const BANNER_THEME_LABELS = { navy: "단국 네이비", purple: "보라", green: "초록", burgundy: "버건디", orange: "주황", charcoal: "차콜" };
 
 window.addEventListener("DOMContentLoaded", () => {
   const toggle = $("#autoLoginToggle");
   const status = $("#autoLoginStatus");
   const msg = $("#settingsMsg");
   let user = null;
+
+  const themeButtons = [...document.querySelectorAll(".banner-theme")];
+  const themeStatus = $("#bannerThemeStatus");
+  const selectTheme = (theme) => {
+    const selected = BANNER_THEME_LABELS[theme] ? theme : "navy";
+    localStorage.setItem(BANNER_THEME_KEY, selected);
+    document.documentElement.dataset.bannerTheme = selected;
+    themeButtons.forEach((button) => button.classList.toggle("active", button.dataset.theme === selected));
+    themeStatus.textContent = `${BANNER_THEME_LABELS[selected]} 배너를 사용 중입니다.`;
+  };
+  selectTheme(localStorage.getItem(BANNER_THEME_KEY) || "navy");
+  themeButtons.forEach((button) => button.addEventListener("click", () => selectTheme(button.dataset.theme)));
 
   const showMessage = (text, ok = false) => {
     msg.textContent = text;

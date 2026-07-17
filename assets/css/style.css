@@ -18,7 +18,18 @@
   --shadow: 0 10px 30px rgba(0, 32, 91, 0.08);
   --shadow-sm: 0 4px 14px rgba(0, 32, 91, 0.06);
   --max: 1120px;
+  --banner-start: #001640;
+  --banner-end: #00205b;
+  --hero-a: 0, 22, 64;
+  --hero-b: 0, 32, 91;
+  --hero-c: 0, 87, 184;
 }
+
+html[data-banner-theme="purple"] { --banner-start:#32155f; --banner-end:#7040a8; --hero-a:50,21,95; --hero-b:80,39,132; --hero-c:133,79,180; }
+html[data-banner-theme="green"] { --banner-start:#0b4539; --banner-end:#16745c; --hero-a:8,55,45; --hero-b:14,83,66; --hero-c:34,132,99; }
+html[data-banner-theme="burgundy"] { --banner-start:#521525; --banner-end:#8b2943; --hero-a:76,15,31; --hero-b:112,27,50; --hero-c:155,54,79; }
+html[data-banner-theme="orange"] { --banner-start:#7b3513; --banner-end:#c26925; --hero-a:104,40,13; --hero-b:146,66,22; --hero-c:205,116,45; }
+html[data-banner-theme="charcoal"] { --banner-start:#1c2530; --banner-end:#485666; --hero-a:24,32,41; --hero-b:42,53,65; --hero-c:83,99,114; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -175,7 +186,7 @@ body.locked { visibility: hidden; }
 .hero {
   position: relative;
   background:
-    linear-gradient(135deg, rgba(0,22,64,0.90), rgba(0,32,91,0.80) 50%, rgba(0,87,184,0.62)),
+    linear-gradient(135deg, rgba(var(--hero-a),0.90), rgba(var(--hero-b),0.80) 50%, rgba(var(--hero-c),0.62)),
     url("../img/campus.jpg") center 42% / cover no-repeat;
   color: #fff;
   overflow: hidden;
@@ -255,7 +266,7 @@ body.locked { visibility: hidden; }
 
 /* ---------- 페이지 섹션 공통 ---------- */
 .page-head {
-  background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+  background: linear-gradient(135deg, var(--banner-start), var(--banner-end));
   color: #fff;
   padding: 64px 0 56px;
   text-align: center;
@@ -1202,6 +1213,19 @@ body.locked { visibility: hidden; }
 .switch input:checked + .switch-track::after { transform: translateX(22px); }
 .settings-status { margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--gray); }
 .settings-status.on { color: #16845b; }
+.banner-themes { display: grid; grid-template-columns: repeat(6, minmax(54px, 1fr)); gap: 12px; margin-top: 18px; }
+.banner-theme {
+  border: 2px solid transparent; border-radius: 14px; padding: 6px; background: #fff;
+  cursor: pointer; color: var(--gray); font-size: 12px; font-weight: 700;
+}
+.banner-theme span { display: block; height: 38px; margin-bottom: 6px; border-radius: 9px; background: linear-gradient(135deg, var(--swatch-a), var(--swatch-b)); }
+.banner-theme.active { border-color: var(--blue); color: var(--navy); box-shadow: 0 0 0 3px var(--blue-light); }
+.banner-theme[data-theme="navy"] { --swatch-a:#001640; --swatch-b:#0057b8; }
+.banner-theme[data-theme="purple"] { --swatch-a:#32155f; --swatch-b:#8a55bd; }
+.banner-theme[data-theme="green"] { --swatch-a:#0b4539; --swatch-b:#24906e; }
+.banner-theme[data-theme="burgundy"] { --swatch-a:#521525; --swatch-b:#a83b58; }
+.banner-theme[data-theme="orange"] { --swatch-a:#7b3513; --swatch-b:#d98236; }
+.banner-theme[data-theme="charcoal"] { --swatch-a:#1c2530; --swatch-b:#657486; }
 .settings-form { display: grid; gap: 9px; margin-top: 18px; }
 .settings-form label { color: var(--ink); font-size: 13px; font-weight: 700; margin-top: 4px; }
 .settings-form input { width: 100%; padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; font: inherit; outline: none; }
@@ -1210,4 +1234,4 @@ body.locked { visibility: hidden; }
 .danger-zone { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .settings-logout { border: 1px solid #e7a5a5; color: #b52f38; background: #fff6f6; font-weight: 800; }
 .settings-logout:hover { background: #b52f38; color: #fff; }
-@media (max-width: 560px) { .settings-card { padding: 20px; } .danger-zone { align-items: stretch; flex-direction: column; } }
+@media (max-width: 560px) { .settings-card { padding: 20px; } .danger-zone { align-items: stretch; flex-direction: column; } .banner-themes { grid-template-columns: repeat(3, 1fr); } }

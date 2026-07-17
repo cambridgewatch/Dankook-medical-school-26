@@ -1,5 +1,10 @@
 /* 단국대 의대 26학번 — 공통 스크립트 */
 
+const BANNER_THEME_KEY = "dkuBannerTheme";
+const BANNER_THEMES = new Set(["navy", "purple", "green", "burgundy", "orange", "charcoal"]);
+const savedBannerTheme = localStorage.getItem(BANNER_THEME_KEY) || "navy";
+document.documentElement.dataset.bannerTheme = BANNER_THEMES.has(savedBannerTheme) ? savedBannerTheme : "navy";
+
 document.addEventListener("DOMContentLoaded", () => {
   /* 모바일 메뉴 토글 */
   const toggle = document.querySelector(".nav-toggle");

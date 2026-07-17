@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>설정 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=30" />
+  <link rel="stylesheet" href="assets/css/style.css?v=37" />
 </head>
 <body class="locked">
   <header class="site-header">
@@ -38,6 +38,22 @@
 
   <section class="section">
     <div class="container settings-wrap">
+      <div class="settings-card">
+        <div class="settings-card-head">
+          <div><span class="settings-icon">🎨</span><h2>배너 색상</h2></div>
+        </div>
+        <p>홈 화면과 각 페이지 상단 배너에 사용할 색상을 선택하세요. 이 기기에만 저장됩니다.</p>
+        <div class="banner-themes" id="bannerThemes" aria-label="배너 색상 선택">
+          <button type="button" class="banner-theme" data-theme="navy"><span></span>네이비</button>
+          <button type="button" class="banner-theme" data-theme="purple"><span></span>보라</button>
+          <button type="button" class="banner-theme" data-theme="green"><span></span>초록</button>
+          <button type="button" class="banner-theme" data-theme="burgundy"><span></span>버건디</button>
+          <button type="button" class="banner-theme" data-theme="orange"><span></span>주황</button>
+          <button type="button" class="banner-theme" data-theme="charcoal"><span></span>차콜</button>
+        </div>
+        <div class="settings-status on" id="bannerThemeStatus"></div>
+      </div>
+
       <div class="settings-card">
         <div class="settings-card-head">
           <div><span class="settings-icon">✓</span><h2>로그인 유지</h2></div>
@@ -90,8 +106,8 @@
     </div>
   </footer>
 
-  <script src="assets/js/main.js?v=11"></script>
-  <script type="module" src="assets/js/settings.js?v=1"></script>
+  <script src="assets/js/main.js?v=18"></script>
+  <script type="module" src="assets/js/settings.js?v=2"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=14"></script>
 </body>
