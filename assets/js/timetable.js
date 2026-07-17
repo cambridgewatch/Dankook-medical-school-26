@@ -12,6 +12,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const head = $("#ttHead");
   const grid = $("#ttGrid");
   const status = $("#ttStatus");
+  const subjectInput = $("#ttSubject");
+  const colorInput = $("#ttColor");
+  const confirmButton = $("#ttConfirm");
+  const applyAllButton = $("#ttApplyAll");
   if (!head || !grid) return;
 
   let user = null;
@@ -22,6 +26,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let activePointerId = null;
   let startCell = null;
   let currentCell = null;
+  let preparedCourse = null;
 
   const timeText = (slot) => {
     const minutes = 8 * 60 + slot * 30;
@@ -37,6 +42,42 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
   grid.innerHTML = cells;
+
+  function resetPreparedCourse() {
+    if (!preparedCourse) return;
+    preparedCourse = null;
+    grid.classList.remove("ready");
+    status.textContent = "입력 내용이 변경되었습니다. 입력 확인을 다시 눌러 주세요.";
+  }
+
+  subjectInput.addEventListener("input", resetPreparedCourse);
+  colorInput.addEventListener("input", resetPreparedCourse);
+
+  applyAllButton.addEventListener("click", () => {
+    const next = applyAllButton.getAttribute("aria-pressed") !== "true";
+    applyAllButton.setAttribute("aria-pressed", String(next));
+    applyAllButton.textContent = next ? "✓ 전체 학생에게 반영" : "전체 학생에게 반영";
+    resetPreparedCourse();
+  });
+
+  confirmButton.addEventListener("click", () => {
+    const subject = subjectInput.value.trim();
+    if (!subject) {
+      status.textContent = "먼저 과목명을 입력해 주세요.";
+      subjectInput.focus();
+      return;
+    }
+    const applyToAll = isAdmin && applyAllButton.getAttribute("aria-pressed") === "true";
+    preparedCourse = {
+      subject,
+      color: colorInput.value,
+      scope: applyToAll ? "global" : "personal",
+    };
+    grid.classList.add("ready");
+    status.textContent = applyToAll
+      ? `${subject}: 모든 학생에게 반영할 시간대를 드래그하세요.`
+      : `${subject}: 내 시간표에 넣을 시간대를 드래그하세요.`;
+  });
 
   function clearSelection() {
     grid.querySelectorAll(".tt-cell.selecting").forEach((cell) => cell.classList.remove("selecting"));
@@ -58,9 +99,9 @@ window.addEventListener("DOMContentLoaded", () => {
       const cell = event.target.closest(".tt-cell");
       if (!cell) return;
       if (!user) return;
-      if (!$("#ttSubject").value.trim()) {
-        status.textContent = "먼저 과목명을 입력해 주세요.";
-        $("#ttSubject").focus();
+      if (!preparedCourse) {
+        status.textContent = "과목명과 색상을 정하고 입력 확인을 먼저 눌러 주세요.";
+        subjectInput.focus();
         return;
       }
       event.preventDefault();
@@ -91,15 +132,15 @@ window.addEventListener("DOMContentLoaded", () => {
     const startSlot = Math.min(Number(startCell.dataset.slot), Number(currentCell.dataset.slot));
     const endSlot = Math.max(Number(startCell.dataset.slot), Number(currentCell.dataset.slot)) + 1;
     clearSelection();
-    const subject = $("#ttSubject").value.trim();
-    const color = $("#ttColor").value;
-    const scope = isAdmin ? $("#ttScope").value : "personal";
+    const { subject, color, scope } = preparedCourse;
     try {
       const target = scope === "global"
         ? collection(db, "timetableGlobal")
         : collection(db, "timetablePersonal", user.uid, "entries");
       await addDoc(target, { subject, color, day, startSlot, endSlot, createdAt: serverTimestamp() });
-      status.textContent = `${DAYS[day]}요일 ${timeText(startSlot)}–${timeText(endSlot)}에 ${subject}을(를) 추가했습니다.`;
+      status.textContent = scope === "global"
+        ? `${DAYS[day]}요일 ${timeText(startSlot)}–${timeText(endSlot)}에 ${subject}을(를) 모든 학생에게 추가했습니다. 같은 과목은 계속 드래그할 수 있습니다.`
+        : `${DAYS[day]}요일 ${timeText(startSlot)}–${timeText(endSlot)}에 ${subject}을(를) 내 시간표에 추가했습니다. 같은 과목은 계속 드래그할 수 있습니다.`;
     } catch (err) {
       status.textContent = "수업을 추가하지 못했습니다: " + err.message;
     }
@@ -149,15 +190,16 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!user) return;
     isAdmin = user.email === ADMIN_EMAIL;
     if (isAdmin) {
-      $("#ttScope").value = "global";
+      applyAllButton.hidden = false;
     } else {
-      $("#ttScope").value = "personal";
-      $("#ttScopeLabel").style.display = "none";
+      applyAllButton.hidden = true;
+      applyAllButton.setAttribute("aria-pressed", "false");
+      applyAllButton.textContent = "전체 학생에게 반영";
     }
     onSnapshot(collection(db, "timetableGlobal"), (snap) => {
       globalEntries = snap.docs.map((item) => ({ id: item.id, ...item.data() }));
       renderEntries();
-      status.textContent = "과목명과 색상을 정한 뒤 시간대를 드래그하세요.";
+      if (!preparedCourse) status.textContent = "과목명과 색상을 정하고 입력 확인을 눌러 주세요.";
     }, (err) => { status.textContent = "전체 시간표를 불러오지 못했습니다: " + err.message; });
     onSnapshot(collection(db, "timetablePersonal", user.uid, "entries"), (snap) => {
       personalEntries = snap.docs.map((item) => ({ id: item.id, ...item.data() }));

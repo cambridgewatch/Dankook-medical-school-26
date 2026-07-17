@@ -362,20 +362,26 @@ body.locked { visibility: hidden; }
 .jstep.grad { background: linear-gradient(135deg, #fff6da, #fff); border-color: #f0deb8; }
 .jstep.grad .yr { background: linear-gradient(135deg, var(--gold), #d9b45f); }
 
-/* ---------- 학번 정보: 시간표 ---------- */
+/* ---------- 수업 정보: 시간표 ---------- */
 .timetable-section { background: #f5f7fb; border-top: 1px solid var(--line); }
 .timetable-tools {
-  display: grid; grid-template-columns: minmax(180px, 1fr) 100px minmax(150px, .65fr);
+  display: grid; grid-template-columns: minmax(180px, 1fr) 100px minmax(230px, auto);
   gap: 12px; max-width: 940px; margin: 0 auto 14px; padding: 18px;
   border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: var(--shadow-sm);
 }
 .timetable-tools label { color: var(--gray); font-size: 12px; font-weight: 800; }
-.timetable-tools input[type="text"], .timetable-tools select {
+.timetable-tools input[type="text"] {
   display: block; width: 100%; height: 42px; margin-top: 5px; padding: 0 12px;
   border: 1px solid var(--line); border-radius: 10px; background: #fff; font: inherit; outline: none;
 }
-.timetable-tools input[type="text"]:focus, .timetable-tools select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.timetable-tools input[type="text"]:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
 .timetable-tools input[type="color"] { display: block; width: 100%; height: 42px; margin-top: 5px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer; }
+.tt-tool-actions { display: flex; align-items: end; justify-content: flex-end; gap: 8px; }
+.tt-tool-actions button { min-height: 42px; padding: 0 15px; border-radius: 11px; font: inherit; font-size: 13px; font-weight: 850; cursor: pointer; }
+.tt-all-btn { border: 1px solid #aeb9c8; background: #fff; color: var(--navy); }
+.tt-all-btn[aria-pressed="true"] { border-color: var(--navy); background: var(--navy); color: #fff; box-shadow: 0 4px 12px rgba(23,34,47,.18); }
+.tt-confirm-btn { border: 1px solid var(--navy); background: var(--navy); color: #fff; }
+.timetable-grid.ready { cursor: crosshair; box-shadow: inset 0 0 0 2px rgba(66,103,169,.18); }
 .timetable-guide { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; max-width: 940px; margin: 0 auto 12px; color: var(--gray); font-size: 13px; }
 .timetable-guide span { display: inline-flex; align-items: center; gap: 6px; }
 .timetable-guide small { margin-left: auto; }
@@ -403,7 +409,8 @@ body.locked { visibility: hidden; }
 .timetable-status { min-height: 22px; max-width: 940px; margin: 10px auto 0; color: var(--gray); font-size: 13px; text-align: center; }
 @media (max-width: 620px) {
   .timetable-tools { grid-template-columns: 1fr 86px; padding: 14px; }
-  .timetable-tools #ttScopeLabel { grid-column: 1 / -1; }
+  .tt-tool-actions { grid-column: 1 / -1; }
+  .tt-tool-actions button { flex: 1; padding-inline: 10px; }
   .timetable-guide small { width: 100%; margin-left: 0; }
   .timetable-scroll { border-radius: 14px; }
 }
