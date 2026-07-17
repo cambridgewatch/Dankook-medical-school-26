@@ -52,8 +52,15 @@ window.addEventListener("DOMContentLoaded", () => {
   updateMascotStatus(savedMascotDisplay);
   mascotToggle.addEventListener("change", () => {
     const enabled = mascotToggle.checked;
+    localStorage.setItem(MASCOT_DISPLAY_KEY, String(enabled));
+    document.documentElement.dataset.mascots = enabled ? "show" : "hide";
+    document.querySelectorAll(".danwoong-walk-canvas").forEach((canvas) => {
+      canvas.hidden = !enabled;
+      if (enabled) canvas.style.removeProperty("display");
+      else canvas.style.setProperty("display", "none", "important");
+    });
     if (typeof window.setMascotDisplay === "function") window.setMascotDisplay(enabled);
-    else localStorage.setItem(MASCOT_DISPLAY_KEY, String(enabled));
+    else window.dispatchEvent(new CustomEvent("dkuMascotVisibility", { detail: { visible: enabled } }));
     updateMascotStatus(enabled);
   });
 

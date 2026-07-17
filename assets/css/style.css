@@ -87,6 +87,9 @@ body.locked { visibility: hidden; }
   height: 68px;
   pointer-events: none;
 }
+html[data-mascots="hide"] .danwoong-walk-canvas {
+  display: none !important;
+}
 .nav {
   position: relative;
   z-index: 2;

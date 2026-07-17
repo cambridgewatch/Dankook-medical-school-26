@@ -250,7 +250,16 @@ export function mountDanwoongWalk() {
   window.addEventListener("dkuMascotVisibility", (event) => {
     const visible = event.detail?.visible !== false;
     canvas.hidden = !visible;
-    canvas.style.display = visible ? "" : "none";
+    if (visible) canvas.style.removeProperty("display");
+    else canvas.style.setProperty("display", "none", "important");
+    if (visible) {
+      const now = performance.now() / 1000;
+      resize();
+      chooseHands(now);
+      poseHands();
+      approach(0);
+      renderer.render(scene, camera);
+    }
     running = visible && !document.hidden;
   });
   document.addEventListener("visibilitychange", () => {
