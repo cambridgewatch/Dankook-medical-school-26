@@ -73,6 +73,14 @@
          allow read: if isAdmin() || isApproved();
          allow write: if isAdmin();
        }
+       match /timetableGlobal/{entryId} {
+         allow read: if request.auth != null;
+         allow create, update, delete: if isAdmin();
+       }
+       match /timetablePersonal/{uid}/entries/{entryId} {
+         allow read, create, update, delete: if request.auth != null
+                                            && request.auth.uid == uid;
+       }
        match /polls/{pollId} {
          function poll() {
            return get(/databases/$(database)/documents/polls/$(pollId)).data;

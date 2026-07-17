@@ -362,6 +362,52 @@ body.locked { visibility: hidden; }
 .jstep.grad { background: linear-gradient(135deg, #fff6da, #fff); border-color: #f0deb8; }
 .jstep.grad .yr { background: linear-gradient(135deg, var(--gold), #d9b45f); }
 
+/* ---------- 학번 정보: 시간표 ---------- */
+.timetable-section { background: #f5f7fb; border-top: 1px solid var(--line); }
+.timetable-tools {
+  display: grid; grid-template-columns: minmax(180px, 1fr) 100px minmax(150px, .65fr);
+  gap: 12px; max-width: 940px; margin: 0 auto 14px; padding: 18px;
+  border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: var(--shadow-sm);
+}
+.timetable-tools label { color: var(--gray); font-size: 12px; font-weight: 800; }
+.timetable-tools input[type="text"], .timetable-tools select {
+  display: block; width: 100%; height: 42px; margin-top: 5px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff; font: inherit; outline: none;
+}
+.timetable-tools input[type="text"]:focus, .timetable-tools select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.timetable-tools input[type="color"] { display: block; width: 100%; height: 42px; margin-top: 5px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: #fff; cursor: pointer; }
+.timetable-guide { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; max-width: 940px; margin: 0 auto 12px; color: var(--gray); font-size: 13px; }
+.timetable-guide span { display: inline-flex; align-items: center; gap: 6px; }
+.timetable-guide small { margin-left: auto; }
+.tt-legend { width: 13px; height: 13px; border-radius: 4px; background: #4267a9; }
+.tt-legend.personal { background: #fff; border: 2px dashed #4267a9; }
+.timetable-scroll { max-width: 940px; margin: 0 auto; overflow-x: auto; border: 1px solid #dbe2ec; border-radius: 18px; background: #fff; box-shadow: var(--shadow); }
+.timetable-head, .timetable-grid { min-width: 680px; display: grid; grid-template-columns: 68px repeat(5, minmax(115px, 1fr)); }
+.timetable-head { position: sticky; top: 0; z-index: 5; background: #f8faff; border-bottom: 1px solid var(--line); }
+.timetable-head span { display: grid; place-items: center; height: 46px; color: var(--navy); font-size: 13px; font-weight: 850; border-left: 1px solid var(--line); }
+.timetable-head span:first-child { border-left: 0; color: var(--gray); }
+.timetable-grid { position: relative; grid-template-rows: repeat(24, 32px); user-select: none; }
+.tt-time { grid-column: 1; padding: 2px 8px 0 0; color: #8791a0; font-size: 10px; text-align: right; border-top: 1px solid #edf0f5; }
+.tt-cell { border-left: 1px solid #e4e8ef; border-top: 1px solid #edf0f5; background: #fff; touch-action: none; }
+.tt-cell.hour { border-top-color: #cfd7e3; }
+.tt-cell.selecting { background: #dce9fb; }
+.tt-block {
+  z-index: 3; position: relative; margin: 2px 3px; padding: 6px 23px 5px 8px;
+  border-radius: 9px; color: #fff; box-shadow: 0 3px 9px rgba(20,40,70,.16);
+  overflow: hidden; font-size: 11px; line-height: 1.3; pointer-events: auto;
+}
+.tt-block.personal { border: 2px dashed rgba(255,255,255,.9); }
+.tt-block strong { display: block; font-size: 12px; overflow-wrap: anywhere; }
+.tt-block small { display: block; margin-top: 3px; color: rgba(255,255,255,.85); }
+.tt-block button { position: absolute; right: 5px; top: 4px; width: 18px; height: 18px; border: 0; border-radius: 50%; background: rgba(0,0,0,.2); color: #fff; cursor: pointer; line-height: 1; }
+.timetable-status { min-height: 22px; max-width: 940px; margin: 10px auto 0; color: var(--gray); font-size: 13px; text-align: center; }
+@media (max-width: 620px) {
+  .timetable-tools { grid-template-columns: 1fr 86px; padding: 14px; }
+  .timetable-tools #ttScopeLabel { grid-column: 1 / -1; }
+  .timetable-guide small { width: 100%; margin-left: 0; }
+  .timetable-scroll { border-radius: 14px; }
+}
+
 /* ---------- 다짐 배너 ---------- */
 .pledge {
   position: relative; overflow: hidden; border-radius: 22px; margin-top: 8px;

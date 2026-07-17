@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>학번 정보 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=41" />
+  <link rel="stylesheet" href="assets/css/style.css?v=43" />
 </head>
 <body class="locked">
 
@@ -57,6 +57,40 @@
     </div>
   </section>
 
+  <!-- 시간표 -->
+  <section class="section timetable-section">
+    <div class="container">
+      <div class="section-title">
+        <span class="eyebrow">TIMETABLE</span>
+        <h2>시간표</h2>
+        <p>과목 정보를 입력한 뒤 원하는 요일의 시간대를 세로로 드래그하세요.</p>
+      </div>
+
+      <div class="timetable-tools">
+        <label>과목명<input type="text" id="ttSubject" maxlength="30" placeholder="예: 일반화학" /></label>
+        <label>색상<input type="color" id="ttColor" value="#4267a9" /></label>
+        <label id="ttScopeLabel">저장 범위
+          <select id="ttScope">
+            <option value="personal">내 시간표</option>
+            <option value="global">전체 공통 시간표</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="timetable-guide">
+        <span><i class="tt-legend global"></i>전체 공통 수업</span>
+        <span><i class="tt-legend personal"></i>내 개인 수업</span>
+        <small>30분 단위 · 수업 블록의 × 버튼으로 삭제</small>
+      </div>
+
+      <div class="timetable-scroll" aria-label="시간표. 모바일에서는 좌우로 스크롤할 수 있습니다.">
+        <div class="timetable-head" id="ttHead"></div>
+        <div class="timetable-grid" id="ttGrid"></div>
+      </div>
+      <p class="timetable-status" id="ttStatus">시간표를 불러오는 중…</p>
+    </div>
+  </section>
+
   <footer class="site-footer">
     <div class="container">
       <div class="footer-top">
@@ -79,6 +113,7 @@
 
   <script src="assets/js/main.js?v=19"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
+  <script type="module" src="assets/js/timetable.js?v=1"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=14"></script>
 </body>
