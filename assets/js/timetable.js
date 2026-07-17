@@ -19,6 +19,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let globalEntries = [];
   let personalEntries = [];
   let dragging = false;
+  let activePointerId = null;
   let startCell = null;
   let currentCell = null;
 
@@ -53,8 +54,9 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  grid.querySelectorAll(".tt-cell").forEach((cell) => {
-    cell.addEventListener("pointerdown", (event) => {
+  grid.addEventListener("pointerdown", (event) => {
+      const cell = event.target.closest(".tt-cell");
+      if (!cell) return;
       if (!user) return;
       if (!$("#ttSubject").value.trim()) {
         status.textContent = "먼저 과목명을 입력해 주세요.";
@@ -63,14 +65,15 @@ window.addEventListener("DOMContentLoaded", () => {
       }
       event.preventDefault();
       dragging = true;
+      activePointerId = event.pointerId;
       startCell = cell;
       currentCell = cell;
+      grid.setPointerCapture?.(event.pointerId);
       drawSelection();
-    });
   });
 
   window.addEventListener("pointermove", (event) => {
-    if (!dragging) return;
+    if (!dragging || event.pointerId !== activePointerId) return;
     event.preventDefault();
     const cell = document.elementFromPoint(event.clientX, event.clientY)?.closest(".tt-cell");
     if (cell && cell.dataset.day === startCell.dataset.day) {
@@ -79,9 +82,11 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }, { passive: false });
 
-  window.addEventListener("pointerup", async () => {
+  window.addEventListener("pointerup", async (event) => {
+    if (event.pointerId !== activePointerId) return;
     if (!dragging || !startCell || !currentCell) return;
     dragging = false;
+    activePointerId = null;
     const day = Number(startCell.dataset.day);
     const startSlot = Math.min(Number(startCell.dataset.slot), Number(currentCell.dataset.slot));
     const endSlot = Math.max(Number(startCell.dataset.slot), Number(currentCell.dataset.slot)) + 1;
@@ -100,6 +105,14 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     startCell = null;
     currentCell = null;
+  });
+
+  window.addEventListener("pointercancel", () => {
+    dragging = false;
+    activePointerId = null;
+    startCell = null;
+    currentCell = null;
+    clearSelection();
   });
 
   function renderEntries() {
@@ -135,7 +148,9 @@ window.addEventListener("DOMContentLoaded", () => {
     user = signedUser;
     if (!user) return;
     isAdmin = user.email === ADMIN_EMAIL;
-    if (!isAdmin) {
+    if (isAdmin) {
+      $("#ttScope").value = "global";
+    } else {
       $("#ttScope").value = "personal";
       $("#ttScopeLabel").style.display = "none";
     }

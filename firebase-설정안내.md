@@ -78,7 +78,7 @@
          allow create, update, delete: if isAdmin();
        }
        match /timetablePersonal/{uid}/entries/{entryId} {
-         allow read, create, update, delete: if request.auth != null
+         allow read, create, update, delete: if (isAdmin() || isApproved())
                                             && request.auth.uid == uid;
        }
        match /polls/{pollId} {
