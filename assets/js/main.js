@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* 상단 헤더의 단웅이 3D 걷기 애니메이션 */
   if (document.querySelector(".site-header")) {
-    import(new URL("assets/js/danwoong-walk.js?v=5", document.baseURI).href)
+    import(new URL("assets/js/danwoong-walk.js?v=6", document.baseURI).href)
       .then(({ mountDanwoongWalk }) => mountDanwoongWalk())
       .catch((error) => console.warn("단웅이 애니메이션을 불러오지 못했습니다.", error));
   }

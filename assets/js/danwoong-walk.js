@@ -70,6 +70,7 @@ export function mountDanwoongWalk() {
   let approachDuration = APPROACH_SECONDS;
   let highFiveDuration = HIGH_FIVE_SECONDS;
   let exitDuration = EXIT_SECONDS;
+  let gaitSpeed = 9;
   const testPattern = new URLSearchParams(location.search).get("danwoongTest");
 
   function chooseHands(now) {
@@ -107,9 +108,10 @@ export function mountDanwoongWalk() {
     const modelScale = width <= 820 ? 0.86 : 0.82;
     blue.scale.setScalar(modelScale);
     navy.scale.setScalar(modelScale);
-    approachDuration = width <= 820 ? APPROACH_SECONDS : 9.6;
-    highFiveDuration = width <= 820 ? HIGH_FIVE_SECONDS : 1.5;
-    exitDuration = width <= 820 ? EXIT_SECONDS : 7.4;
+    approachDuration = width <= 820 ? APPROACH_SECONDS : 13.5;
+    highFiveDuration = width <= 820 ? HIGH_FIVE_SECONDS : 1.8;
+    exitDuration = width <= 820 ? EXIT_SECONDS : 10.5;
+    gaitSpeed = width <= 820 ? 9 : 6;
   }
 
   function poseHandAngles(blueAngle, navyAngle) {
@@ -126,8 +128,8 @@ export function mountDanwoongWalk() {
   }
 
   function walkMotion(walker, elapsed, strength = 1) {
-    const stride = Math.sin(elapsed * 9 + walker.phase) * strength;
-    const bounce = Math.abs(Math.cos(elapsed * 9 + walker.phase)) * strength;
+    const stride = Math.sin(elapsed * gaitSpeed + walker.phase) * strength;
+    const bounce = Math.abs(Math.cos(elapsed * gaitSpeed + walker.phase)) * strength;
     walker.parts.leftLeg.rotation.z = stride * 0.28;
     walker.parts.rightLeg.rotation.z = -stride * 0.28;
     walker.model.position.y = -2.53 + bounce * 0.09;
