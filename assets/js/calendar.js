@@ -443,6 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cmDate.textContent = `${m}월 ${d}일`;
     drawList();
     cmForm.style.display = currentUser && !modalReadOnly ? "flex" : "none";
+    cmHint.hidden = modalReadOnly;
     cmHint.textContent = modalReadOnly
       ? ""
       : (isAdmin ? "개인 일정을 켜지 않으면 모든 학생에게 반영됩니다." : "추가한 일정은 내 캘린더에만 표시됩니다.");
@@ -640,7 +641,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (linkHandled || !linkDate || !/^\d{4}-\d{2}-\d{2}$/.test(linkDate)) return;
     linkHandled = true;
     goToEvent(linkDate, _p.get("view") === "1");
-    if (linkEv) {
+    if (linkEv && _p.get("view") !== "1") {
       cmList.querySelectorAll(".cm-ev").forEach((li) => {
         const t = li.querySelector(".ev-text");
         if (t && t.textContent === linkEv) li.classList.add("open");
