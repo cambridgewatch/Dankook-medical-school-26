@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>수업 정보 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=44" />
+  <link rel="stylesheet" href="assets/css/style.css?v=45" />
 </head>
 <body class="locked">
 
@@ -50,13 +50,14 @@
         <label class="tt-subject-label">과목명
           <span class="tt-subject-row">
             <input type="text" id="ttSubject" maxlength="30" placeholder="예: 일반화학" />
-            <button type="button" class="tt-confirm-btn" id="ttConfirm">확인</button>
+            <button type="button" class="tt-confirm-btn" id="ttConfirm"><span>확인</span><b aria-hidden="true">→</b></button>
           </span>
         </label>
         <label>색상<input type="color" id="ttColor" value="#4267a9" /></label>
         <div class="tt-tool-actions" id="ttAdminActions" hidden>
           <button type="button" class="tt-all-btn" id="ttApplyAll" aria-pressed="false">전체 학생에게 반영</button>
         </div>
+        <p class="tt-quick-help">과목명과 색상 선택 → <strong>확인</strong> → 원하는 요일의 시간대를 드래그하세요. 관리자는 전체 반영을 켜면 모든 학생에게 추가됩니다.</p>
       </div>
 
       <div class="timetable-guide">
