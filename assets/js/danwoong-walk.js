@@ -194,7 +194,8 @@ export function mountDanwoongWalk() {
     exitDuration = width <= 820 ? EXIT_SECONDS : 10.5;
     gaitSpeed = width <= 820 ? 9 : 6;
     triggerLeft = hasHeaderGap ? gapLeft + 2 : meetingPixel - 28;
-    triggerWidth = hasHeaderGap ? Math.max(24, gapRight - gapLeft - 4) : 56;
+    const triggerRightGap = width <= 820 ? 4 : 14;
+    triggerWidth = hasHeaderGap ? Math.max(24, gapRight - gapLeft - triggerRightGap) : 56;
     triggerWorldWidth = triggerWidth * 5.3 / height;
     poseButton.style.left = `${Math.round(triggerLeft)}px`;
     poseButton.style.width = `${Math.round(triggerWidth)}px`;
@@ -1159,7 +1160,19 @@ export function mountDanwoongWalk() {
   if (!Number.isInteger(poseTest)) {
     poseButton.setAttribute("aria-label", `다음 동작: ${POSE_NAMES[getSequencedPose(sequenceCursor)]}`);
   }
-  poseButton.addEventListener("click", beginNextPose);
+  poseButton.addEventListener("click", (event) => {
+    if (!compactHeader) {
+      const homeLink = header.querySelector('.nav-menu a[href="index.html"]');
+      const homeRect = homeLink?.getBoundingClientRect();
+      if (homeLink && homeRect
+        && event.clientX >= homeRect.left && event.clientX <= homeRect.right
+        && event.clientY >= homeRect.top && event.clientY <= homeRect.bottom) {
+        location.assign(homeLink.href);
+        return;
+      }
+    }
+    beginNextPose();
+  });
   resize();
   restartFromEdges();
   if (Number.isInteger(poseTest) && poseTest >= 1 && poseTest <= POSE_NAMES.length) {
