@@ -65,6 +65,10 @@
          allow read: if isAdmin() || isApproved();
          allow write: if isAdmin();
        }
+       match /calendarPersonal/{uid}/events/{doc} {
+         allow read, create, update, delete: if (isAdmin() || isApproved())
+                                            && request.auth.uid == uid;
+       }
        match /members/{doc} {
          allow read: if isAdmin() || isApproved();
          allow write: if isAdmin();

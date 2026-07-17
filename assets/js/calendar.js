@@ -1,7 +1,7 @@
 /* 학사일정 캘린더 (calendar.html 전용)
-   - 모든 사람: 일정 보기
-   - 관리자(정지훈)만: 날짜를 눌러 일정/할 일 추가·삭제
-   - 데이터: Firebase Firestore (calendarEvents) */
+   - 전체 일정과 로그인한 사용자의 개인 일정을 한 달력에 표시
+   - 관리자는 전체 일정 관리 및 개인 일정 추가, 일반 사용자는 개인 일정 관리
+   - 데이터: Firebase Firestore (calendarEvents, calendarPersonal) */
 
 import { db, auth, isConfigured, ADMIN_EMAIL, ADMIN_NAME } from "./firebase-init.js?v=11";
 import {
@@ -78,9 +78,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const todayKey = key(today.getFullYear(), today.getMonth(), today.getDate());
   let view = new Date(today.getFullYear(), today.getMonth(), 1);
   let custom = {};        // Firestore 일정 { "YYYY-MM-DD": [{id,text,type}] }
+  let personal = {};      // 로그인한 사용자의 개인 일정
   let overrides = {};     // 기본 일정의 수정·삭제 상태 { sourceId: {...} }
   let useDefaults = true;
   let isAdmin = false;
+  let currentUser = null;
+  let stopPersonalSnapshot = null;
   let latestCalendarSnap = null;
   let migrationStarted = false;
   const MIGRATION_ID = "editable-reset-v1";
@@ -112,7 +115,8 @@ document.addEventListener("DOMContentLoaded", () => {
       };
     }).filter(Boolean);
     const cus = (custom[k] || []).map((e) => ({ ...e, eventKey: `custom:${e.id}` }));
-    return [...def, ...cus];
+    const mine = (personal[k] || []).map((e) => ({ ...e, personal: true, eventKey: `personal:${e.id}` }));
+    return [...def, ...cus, ...mine];
   }
 
   function overrideRef(sourceId) {
@@ -120,12 +124,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function allCalendarEvents() {
-    const events = [...new Set([...Object.keys(DEFAULTS), ...Object.keys(custom)])]
+    const events = [...new Set([...Object.keys(DEFAULTS), ...Object.keys(custom), ...Object.keys(personal)])]
       .sort()
       .flatMap((date) => eventsOf(date).map((event) => ({ date, ...event })));
     const seen = new Set();
     return events.filter((event) => {
-      const id = event.fixed ? event.eventKey : `custom:${event.id}`;
+      const id = event.eventKey;
       if (seen.has(id)) return false;
       seen.add(id);
       return true;
@@ -231,7 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (latestCalendarSnap.docs.some((d) => d.id === MIGRATION_ID)) return;
     migrationStarted = true;
     try {
-      const visible = allCalendarEvents().map((event) => ({
+      const visible = allCalendarEvents().filter((event) => !event.personal).map((event) => ({
         date: event.date, endDate: event.endDate || "", text: event.text,
         detail: event.detail || "", type: event.type || "etc",
       }));
@@ -256,7 +260,34 @@ document.addEventListener("DOMContentLoaded", () => {
   /* 로그인 상태 → 관리자 여부 */
   if (isConfigured) {
     onAuthStateChanged(auth, (user) => {
+      currentUser = user;
       isAdmin = !!user && user.email === ADMIN_EMAIL;
+      if (stopPersonalSnapshot) stopPersonalSnapshot();
+      stopPersonalSnapshot = null;
+      personal = {};
+      if (user) {
+        stopPersonalSnapshot = onSnapshot(
+          collection(db, "calendarPersonal", user.uid, "events"),
+          (snap) => {
+            personal = {};
+            snap.forEach((item) => {
+              const value = item.data();
+              const event = {
+                id: item.id, date: value.date, endDate: value.endDate || "",
+                text: value.text, type: value.type, detail: value.detail || "",
+              };
+              datesInRange(value.date, value.endDate).forEach((date) => {
+                (personal[date] = personal[date] || []).push(event);
+              });
+            });
+            render();
+            renderDdays();
+            renderAssignmentDdays();
+            renderCalendarSearch();
+          },
+          (err) => { banner.textContent = "개인 일정을 불러오지 못했습니다: " + err.message; }
+        );
+      }
       updateBanner();
       render();
       migrateAllToEditable();
@@ -292,8 +323,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateBanner() {
-    if (isAdmin) banner.innerHTML = `✏️ <strong>${ADMIN_NAME}</strong> 님(관리자) — 날짜를 클릭해 모든 일정을 추가·수정·삭제하세요.`;
-    else banner.innerHTML = `날짜를 클릭하면 그날의 일정을 볼 수 있어요. (일정 등록은 대표만 가능)`;
+    if (isAdmin) banner.innerHTML = `✏️ <strong>${ADMIN_NAME}</strong> 님(관리자) — 기본은 전체 일정이며, 필요할 때 개인 일정으로 저장할 수 있어요.`;
+    else banner.innerHTML = `날짜를 클릭해 전체 일정과 내 개인 일정을 확인하고 개인 일정을 추가하세요.`;
   }
 
   function render() {
@@ -317,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (evs.length) cls.push("has");
 
       const shown = evs.slice(0, 3)
-        .map((e) => `<span class="chip ${e.type}">${esc(e.text)}</span>`).join("");
+        .map((e) => `<span class="chip ${e.type} ${e.personal ? "personal" : ""}">${esc(e.text)}</span>`).join("");
       const more = evs.length > 3 ? `<span class="chip more">+${evs.length - 3}</span>` : "";
       const dots = evs.map((e) => `<i class="d ${e.type}"></i>`).join("");
 
@@ -345,25 +376,40 @@ document.addEventListener("DOMContentLoaded", () => {
   const cmStartDate = document.querySelector("#cmStartDate");
   const cmEndDate = document.querySelector("#cmEndDate");
   const cmHint = document.querySelector("#cmHint");
+  const cmPersonalToggle = document.querySelector("#cmPersonalToggle");
   const cmSubmit = cmForm.querySelector("button[type='submit']");
   let activeKey = null;
   let editingEvent = null;
 
   cmType.innerHTML = ADD_TYPES.map((t) => `<option value="${t}">${LABEL[t]}</option>`).join("");
 
+  function setPersonalMode(enabled, locked = false) {
+    const personalMode = isAdmin && enabled;
+    cmPersonalToggle.hidden = !isAdmin;
+    cmPersonalToggle.disabled = locked;
+    cmPersonalToggle.setAttribute("aria-pressed", String(personalMode));
+    cmPersonalToggle.textContent = personalMode ? "✓ 개인 일정" : "개인 일정";
+  }
+
+  cmPersonalToggle.addEventListener("click", () => {
+    if (!isAdmin || cmPersonalToggle.disabled) return;
+    setPersonalMode(cmPersonalToggle.getAttribute("aria-pressed") !== "true");
+  });
+
   function openDay(k) {
     activeKey = k;
     editingEvent = null;
     cmSubmit.textContent = "추가";
     cmForm.reset();
+    setPersonalMode(false);
     cmStartDate.value = k;
     cmEndDate.value = k;
     cmEndDate.min = k;
     const [y, m, d] = k.split("-").map(Number);
     cmDate.textContent = `${m}월 ${d}일`;
     drawList();
-    cmForm.style.display = isAdmin ? "flex" : "none";
-    cmHint.textContent = isAdmin ? "" : (isConfigured ? "일정 등록은 대표(관리자)만 할 수 있어요." : "");
+    cmForm.style.display = currentUser ? "flex" : "none";
+    cmHint.textContent = isAdmin ? "개인 일정을 켜지 않으면 모든 학생에게 반영됩니다." : "추가한 일정은 내 캘린더에만 표시됩니다.";
     modal.classList.add("open");
   }
   function drawList() {
@@ -376,16 +422,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const hasDetail = !!(e.detail && e.detail.trim());
       const body = hasDetail ? esc(e.detail).replace(/\n/g, "<br>") : "";
       const period = e.endDate && e.endDate > e.date ? `${e.date.replaceAll("-", ".")} – ${e.endDate.replaceAll("-", ".")}` : "";
+      const canManage = isAdmin || e.personal;
       return `
       <li class="cm-ev ${hasDetail ? "has-detail" : ""}">
         <div class="cm-ev-head">
           <span class="ev-tag ${e.type}">${LABEL[e.type]}</span>
           <span class="ev-text">${esc(e.text)}</span>
+          ${e.personal ? `<span class="ev-private">개인</span>` : ""}
           ${period ? `<span class="ev-period">${period}</span>` : ""}
           ${hasDetail ? `<span class="ev-chev">▾</span>` : ""}
-          ${isAdmin ? `<button class="ev-alert" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
-          ${isAdmin ? `<button class="ev-edit" data-key="${e.eventKey}" title="수정">✏️</button>` : ""}
-          ${isAdmin ? `<button class="ev-del" data-key="${e.eventKey}" data-text="${esc(e.text)}" title="삭제">🗑</button>` : ""}
+          ${isAdmin && !e.personal ? `<button class="ev-alert" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
+          ${canManage ? `<button class="ev-edit" data-key="${e.eventKey}" title="수정">✏️</button>` : ""}
+          ${canManage ? `<button class="ev-del" data-key="${e.eventKey}" data-text="${esc(e.text)}" title="삭제">🗑</button>` : ""}
         </div>
         ${hasDetail ? `<div class="cm-ev-body">${body}</div>` : ""}
       </li>`;
@@ -408,6 +456,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cmStartDate.value = event.date || activeKey;
         cmEndDate.value = event.endDate || event.date || activeKey;
         cmEndDate.min = cmStartDate.value;
+        setPersonalMode(!!event.personal, true);
         cmSubmit.textContent = "수정 저장";
         cmText.focus();
       });
@@ -419,7 +468,9 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           const event = eventsOf(activeKey).find((item) => item.eventKey === b.dataset.key);
           if (!event) return;
-          if (event.fixed) {
+          if (event.personal) {
+            await deleteDoc(doc(db, "calendarPersonal", currentUser.uid, "events", event.id));
+          } else if (event.fixed) {
             const values = {
               kind: "defaultOverride", sourceId: event.sourceId, date: activeKey,
               text: event.text, detail: event.detail || "", type: event.type, hidden: true,
@@ -430,7 +481,7 @@ document.addEventListener("DOMContentLoaded", () => {
           } else {
             await deleteDoc(doc(db, "calendarEvents", event.id));
           }
-          await deleteCalAlerts(activeKey, b.dataset.text); // 일정 삭제 시 관련 알림도 삭제
+          if (!event.personal) await deleteCalAlerts(activeKey, b.dataset.text); // 전체 일정 삭제 시 관련 알림도 삭제
           alert("일정을 삭제했습니다.");
         } catch (err) { alert("삭제 실패: " + err.message); }
       });
@@ -451,16 +502,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   cmForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (!isAdmin) return;
+    if (!currentUser) return;
     const text = cmText.value.trim();
     if (!text) return;
     const startDate = cmStartDate.value || activeKey;
     const endDate = cmEndDate.value || startDate;
     if (endDate < startDate) return alert("종료일은 시작일보다 빠를 수 없습니다.");
     try {
-      const values = { date: startDate, endDate: endDate > startDate ? endDate : "", text, detail: cmDetail.value.trim(), type: cmType.value, by: ADMIN_NAME };
+      const savePersonal = editingEvent
+        ? !!editingEvent.personal
+        : (!isAdmin || cmPersonalToggle.getAttribute("aria-pressed") === "true");
+      const values = {
+        date: startDate, endDate: endDate > startDate ? endDate : "", text,
+        detail: cmDetail.value.trim(), type: cmType.value,
+        by: currentUser.displayName || (isAdmin ? ADMIN_NAME : "개인"),
+      };
       if (editingEvent) {
-        if (editingEvent.fixed) {
+        if (editingEvent.personal) {
+          await updateDoc(doc(db, "calendarPersonal", currentUser.uid, "events", editingEvent.id), { ...values, updatedAt: serverTimestamp() });
+        } else if (editingEvent.fixed) {
           const overrideValues = {
             ...values, kind: "defaultOverride", sourceId: editingEvent.sourceId,
             hidden: false, updatedAt: serverTimestamp(),
@@ -470,14 +530,18 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           await updateDoc(doc(db, "calendarEvents", editingEvent.id), { ...values, updatedAt: serverTimestamp() });
         }
-        await deleteCalAlerts(activeKey, editingEvent.text);
+        if (!editingEvent.personal) await deleteCalAlerts(activeKey, editingEvent.text);
       } else {
-        await addDoc(collection(db, "calendarEvents"), { ...values, createdAt: serverTimestamp() });
+        const target = savePersonal
+          ? collection(db, "calendarPersonal", currentUser.uid, "events")
+          : collection(db, "calendarEvents");
+        await addDoc(target, { ...values, createdAt: serverTimestamp() });
       }
       cmText.value = "";
       cmDetail.value = "";
       editingEvent = null;
       cmSubmit.textContent = "추가";
+      setPersonalMode(false);
       alert("일정을 저장했습니다.");
     } catch (err) { alert("저장 실패: " + err.message); }
   });
@@ -487,6 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
     editingEvent = null;
     cmSubmit.textContent = "추가";
     cmForm.reset();
+    setPersonalMode(false);
   }
   document.querySelector("#cmClose").addEventListener("click", closeModal);
   modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });

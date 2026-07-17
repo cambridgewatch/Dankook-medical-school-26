@@ -715,6 +715,7 @@ body.locked { visibility: hidden; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .chip.more { background: #eef0f3; color: var(--gray); font-weight: 700; }
+.chip.personal { outline: 1px dashed currentColor; outline-offset: -2px; }
 .cal-cell .dotrow { display: none; gap: 3px; flex-wrap: wrap; }
 
 /* 분류별 색 (칩) */
@@ -783,6 +784,7 @@ body.locked { visibility: hidden; }
 .ev-tag.holi { background: #9aa3b2; }
 .ev-tag.etc { background: #7a8699; }
 .ev-text { flex: 1; color: var(--ink); font-size: 14px; }
+.ev-private { flex: 0 0 auto; padding: 2px 6px; border-radius: 999px; background: #edf4fb; color: #47759c; font-size: 10px; font-weight: 850; }
 .ev-del, .ev-edit { border: 0; background: none; cursor: pointer; font-size: 15px; opacity: 0.6; }
 .ev-del:hover, .ev-edit:hover { opacity: 1; }
 /* 캘린더 일정 아코디언(세부내용) */
@@ -813,9 +815,17 @@ body.locked { visibility: hidden; }
 .cm-form input:focus, #cmDetail:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
 .cm-form select { border: 1px solid var(--line); border-radius: 10px; padding: 0 8px; font-size: 13px; }
 .cm-form .btn { padding: 10px 16px; }
+.cm-personal-toggle { height: 40px; padding: 0 12px; border: 1px solid #b9c7d5; border-radius: 10px; background: #fff; color: #526273; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.cm-personal-toggle[aria-pressed="true"] { border-color: #5793c5; background: #e6f2fc; color: #245f91; box-shadow: inset 0 0 0 1px #8db9dd; }
+.cm-personal-toggle[hidden] { display: none !important; }
+.cm-personal-toggle:disabled { cursor: default; opacity: .55; }
 .cm-hint { margin-top: 12px; font-size: 13px; color: var(--gray); text-align: center; }
 
 @media (max-width: 620px) {
+  .cm-row { display: grid; grid-template-columns: 1fr 1fr; }
+  .cm-row #cmText { grid-column: 1 / -1; }
+  .cm-row select, .cm-row .cm-personal-toggle { width: 100%; }
+  .cm-row .btn { grid-column: 1 / -1; justify-content: center; }
   .notice-search-box { min-height: 52px; padding: 0 14px; border-radius: 15px; margin-bottom: 16px; }
   .notice-search-box input { height: 50px; font-size: 14px; }
   .notice-head {
