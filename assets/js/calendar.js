@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let stopPersonalSnapshot = null;
   let latestCalendarSnap = null;
   let migrationStarted = false;
+  let nextDateClickReadOnly = false;
   const MIGRATION_ID = "editable-reset-v1";
 
   function key(y, m, d) {
@@ -159,11 +160,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function goToEvent(date) {
+  function goToEvent(date, readOnly = true) {
     const [y, m] = date.split("-").map(Number);
     view = new Date(y, m - 1, 1);
     render();
-    openDay(date, true);
+    const dateCell = grid.querySelector(`.cal-cell[data-key="${date}"]`);
+    if (!dateCell) return;
+    nextDateClickReadOnly = readOnly;
+    document.querySelector(".cal-card")?.scrollIntoView({ block: "start", behavior: "auto" });
+    dateCell.click();
   }
 
   function eventDateLabel(event, short = false) {
@@ -384,7 +389,11 @@ document.addEventListener("DOMContentLoaded", () => {
     grid.innerHTML = html;
 
     grid.querySelectorAll(".cal-cell:not(.empty)").forEach((cell) => {
-      cell.addEventListener("click", () => openDay(cell.dataset.key));
+      cell.addEventListener("click", () => {
+        const readOnly = nextDateClickReadOnly;
+        nextDateClickReadOnly = false;
+        openDay(cell.dataset.key, readOnly);
+      });
     });
   }
 
@@ -630,10 +639,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function tryDeepLink() {
     if (linkHandled || !linkDate || !/^\d{4}-\d{2}-\d{2}$/.test(linkDate)) return;
     linkHandled = true;
-    const [y, m] = linkDate.split("-").map(Number);
-    view = new Date(y, m - 1, 1);
-    render();
-    openDay(linkDate, _p.get("view") === "1");
+    goToEvent(linkDate, _p.get("view") === "1");
     if (linkEv) {
       cmList.querySelectorAll(".cm-ev").forEach((li) => {
         const t = li.querySelector(".ev-text");
