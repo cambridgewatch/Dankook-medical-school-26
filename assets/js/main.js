@@ -1,9 +1,42 @@
 /* 단국대 의대 26학번 — 공통 스크립트 */
 
-const BANNER_THEME_KEY = "dkuBannerTheme";
-const BANNER_THEMES = new Set(["navy", "purple", "green", "burgundy", "orange", "charcoal"]);
-const savedBannerTheme = localStorage.getItem(BANNER_THEME_KEY) || "charcoal";
-document.documentElement.dataset.bannerTheme = BANNER_THEMES.has(savedBannerTheme) ? savedBannerTheme : "charcoal";
+const BANNER_COLOR_KEY = "dkuBannerColor";
+const DEFAULT_BANNER_COLOR = "#334150";
+const LEGACY_BANNER_COLORS = {
+  navy: "#003b78", purple: "#62378f", green: "#146a55",
+  burgundy: "#7b263e", orange: "#a95620", charcoal: DEFAULT_BANNER_COLOR,
+};
+
+function bannerRgb(hex) {
+  const match = /^#([0-9a-f]{6})$/i.exec(hex || "");
+  if (!match) return null;
+  const value = Number.parseInt(match[1], 16);
+  return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+}
+
+function bannerMix(rgb, target, amount) {
+  return rgb.map((value, index) => Math.round(value + (target[index] - value) * amount));
+}
+
+function bannerHex(rgb) {
+  return `#${rgb.map((value) => value.toString(16).padStart(2, "0")).join("")}`;
+}
+
+function applyBannerColor(hex) {
+  const base = bannerRgb(hex) || bannerRgb(DEFAULT_BANNER_COLOR);
+  const root = document.documentElement.style;
+  root.setProperty("--banner-start", bannerHex(bannerMix(base, [0, 0, 0], .42)));
+  root.setProperty("--banner-end", bannerHex(bannerMix(base, [255, 255, 255], .18)));
+  root.setProperty("--hero-a", bannerMix(base, [0, 0, 0], .48).join(", "));
+  root.setProperty("--hero-b", bannerMix(base, [0, 0, 0], .20).join(", "));
+  root.setProperty("--hero-c", bannerMix(base, [255, 255, 255], .22).join(", "));
+}
+window.applyBannerColor = applyBannerColor;
+
+const legacyBannerColor = LEGACY_BANNER_COLORS[localStorage.getItem("dkuBannerTheme")];
+const savedBannerColor = localStorage.getItem(BANNER_COLOR_KEY) || legacyBannerColor || DEFAULT_BANNER_COLOR;
+if (!localStorage.getItem(BANNER_COLOR_KEY)) localStorage.setItem(BANNER_COLOR_KEY, savedBannerColor);
+applyBannerColor(savedBannerColor);
 
 document.addEventListener("DOMContentLoaded", () => {
   /* 모바일 메뉴 토글 */
