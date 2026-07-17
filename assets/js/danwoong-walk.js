@@ -173,10 +173,18 @@ export function mountDanwoongWalk() {
 
   const POSE_NAMES = [
     "청진기 진찰", "의학책 공부", "현미경 관찰", "DNA 모형", "흰 가운 영웅", "심전도 하트", "구급상자 출동", "심장 모형", "시험지 깜짝", "의료 가방 별",
-    "노트북 강의", "칠판 설명", "큰 연필", "책가방 등교", "종이비행기", "카메라 사진", "폴라로이드", "이어폰 나눔", "커피 건배", "간식 나눔", "우산 함께", "담요 함께", "소풍", "지도 찾기", "알람 깜짝",
-    "트로피", "응원 깃발", "색종이 하이파이브", "생일 케이크", "꽃다발", "별 풍선", "금메달", "선물 상자", "야광봉", "작은 북",
-    "벚꽃 사진", "선글라스 부채", "튜브 물놀이", "낙엽 던지기", "목도리", "눈사람 만세", "눈 하트", "크리스마스", "달빛 랜턴", "뒤집힌 우산",
-    "점프 하이파이브", "영웅 착지", "어깨동무 춤", "회전 하트", "축하 폭발"
+    "자동차 드라이브", "버스 여행", "자전거 타기", "비행기 비행", "배 타기", "로켓 발사", "기차 여행", "스케이트보드", "킥보드", "열기구",
+    "축구", "농구", "야구", "볼링", "줄넘기", "스키", "스케이트", "서핑", "배드민턴", "탁구",
+    "기타 연주", "드럼 연주", "피아노 연주", "마이크 듀엣", "무대 춤", "캠핑", "낚시", "요리", "소풍", "기념사진",
+    "빗속 우산", "눈사람", "썰매", "바다 튜브", "벚꽃놀이", "트로피", "생일 파티", "선물 상자", "영웅 등장", "폭죽 하이파이브"
+  ];
+  const POSE_DURATIONS = [
+    3.6,3.8,4.0,4.0,3.5,3.8,3.5,3.7,3.4,4.0,
+    4.2,4.5,4.3,4.2,4.0,4.5,4.5,3.8,4.0,4.5,
+    3.8,3.8,4.0,3.6,3.8,4.2,4.0,4.2,4.0,3.8,
+    4.0,3.8,4.2,4.0,4.3,
+    4.5,4.3,4.0,4.2,4.0,4.3,4.5,4.0,4.2,4.3,
+    3.8,4.2,4.0,3.8,4.5
   ];
 
   function clearPoseProps() {
@@ -220,7 +228,9 @@ export function mountDanwoongWalk() {
 
   function buildPoseProps(index) {
     clearPoseProps();
-    poseProps.position.x = meetCenter;
+    poseProps.position.set(meetCenter, 0, 0);
+    poseProps.rotation.set(0, 0, 0);
+    poseProps.scale.setScalar(1);
     const accent = new THREE.Color().setHSL((index * 0.087) % 1, 0.72, 0.56).getHex();
     const gold = 0xf3c64f;
     const white = 0xf5f7fb;
@@ -239,54 +249,129 @@ export function mountDanwoongWalk() {
       case 7: addBall(red, -0.2, 0.15, 0.34); addBall(red, 0.2, 0.15, 0.34); addBox(red, 0, -0.15, 0.35, 0.45, 0.18, Math.PI/4); break;
       case 8: addBox(white, 0, 0.1, 0.75, 0.52, 0.04); for(let i=0;i<3;i++) addBox(dark, 0, 0.3-i*0.18, 0.45, 0.025, 0.06); break;
       case 9: addBox(0x426f96, 0, -0.05, 0.72, 0.55); addRing(gold, 0, 0.55, 0.25); addBurst(gold, 7, 1.05); break;
-      case 10: addBox(dark, 0, 0.05, 0.82, 0.5, 0.08); addBox(0x7fb6d7, 0, 0.1, 0.65, 0.34, 0.04); break;
-      case 11: addBox(0x315f47, 0, 0.15, 1.0, 0.68, 0.08); addBox(white, 0.15, 0.2, 0.4, 0.025, 0.1, 0.2); break;
-      case 12: addBox(gold, 0, 0.05, 0.12, 1.05, 0.12, -0.5); addBall(0xf0a0a0, -0.48, 0.78, 0.15); break;
-      case 13: addBox(accent, 0, -0.05, 0.68, 0.62); addRing(dark, 0, 0.52, 0.32); break;
-      case 14: addBox(white, 0, 0.15, 0.9, 0.02, 0.42, 0.18); addBox(accent, -0.35, 0.12, 0.12, 0.5, 0.03, -0.5); break;
-      case 15: addBox(dark, 0, 0, 0.72, 0.52); addRing(0x8cc7df, 0, 0.06, 0.24); break;
-      case 16: addBox(white, 0, 0.05, 0.62, 0.68, 0.04); addBox(accent, 0, 0.28, 0.45, 0.18, 0.05); break;
-      case 17: addRing(dark, -0.38, 0.25, 0.27, 0.06); addRing(dark, 0.38, 0.25, 0.27, 0.06); addBox(dark, 0, 0.25, 0.32, 0.035); break;
-      case 18: addBox(0xf8f5ec, -0.35, 0.05, 0.3, 0.42); addBox(0xf8f5ec, 0.35, 0.05, 0.3, 0.42); addBall(brown, -0.35, 0.16, 0.18); addBall(brown, 0.35, 0.16, 0.18); break;
-      case 19: addBox(accent, 0, 0, 0.7, 0.58); addBurst(gold, 6, 0.7); break;
-      case 20: addRing(0x6b85a3, 0, 0.25, 0.72, 0.06); addBox(0x6b85a3, 0, -0.18, 0.06, 0.68); break;
-      case 21: addBox(0x9cc5df, 0, 0.05, 1.0, 0.62, 0.06); break;
-      case 22: addBox(0x78a85d, 0, -0.4, 1.0, 0.08); addBall(red, -0.35, 0, 0.18); addBall(gold, 0.35, 0.05, 0.18); break;
-      case 23: addBox(0xe8d7a8, 0, 0.05, 1.05, 0.7, 0.04); addBox(red, -0.25, 0.05, 0.04, 0.55, 0.06); addBox(0x4f91c5, 0.25, 0.05, 0.04, 0.55, 0.06); break;
-      case 24: addRing(red, 0, 0.08, 0.52, 0.1); addBox(dark, 0, 0.08, 0.04, 0.35); break;
-      case 25: addBox(gold, 0, -0.2, 0.55, 0.14); addBox(gold, 0, 0.15, 0.35, 0.55); addRing(gold, -0.42, 0.25, 0.22); addRing(gold, 0.42, 0.25, 0.22); break;
-      case 26: addBox(brown, 0, -0.15, 0.08, 1.0); addBox(accent, 0.42, 0.42, 0.72, 0.4, 0.04, -0.15); break;
-      case 27: addBurst(accent, 12, 1.5); break;
-      case 28: addBox(0xf4c58a, 0, -0.15, 0.72, 0.42); addBall(white, -0.3, 0.22, 0.16); addBall(white, 0, 0.28, 0.16); addBall(white, 0.3, 0.22, 0.16); break;
-      case 29: for(let i=0;i<7;i++){addBall(i%2?red:gold,(i-3)*0.16,-0.05+Math.abs(i-3)*0.09,0.12);} break;
-      case 30: addBall(gold, 0, 0.35, 0.45); addBox(gold, 0, -0.35, 0.035, 0.68); break;
-      case 31: addRing(gold, 0, 0.25, 0.38, 0.13); addBox(0x386ab3, 0, -0.32, 0.28, 0.45); break;
-      case 32: addBox(accent, 0, 0, 0.72, 0.62); addBox(gold, 0, 0, 0.08, 0.62); addBox(gold, 0, 0, 0.72, 0.08); break;
-      case 33: addBox(red, -0.35, 0.05, 0.12, 0.75, 0.1, -0.35); addBox(0x60d0ff, 0.35, 0.05, 0.12, 0.75, 0.1, 0.35); break;
-      case 34: addBox(brown, 0, -0.3, 0.62, 0.28); addRing(white, 0, 0.12, 0.42, 0.06); break;
-      case 35: addBurst(0xf3a8bf, 12, 1.35); addBox(dark, 0, 0, 0.72, 0.5); break;
-      case 36: addRing(dark, -0.32, 0.35, 0.28, 0.08); addRing(dark, 0.32, 0.35, 0.28, 0.08); addBox(gold, 0, -0.15, 0.48, 0.08, 0.05, 0.5); break;
-      case 37: addRing(accent, 0, -0.05, 0.72, 0.2); addBall(white, 0, 0.2, 0.18); break;
-      case 38: addBurst(0xd97736, 12, 1.35); break;
-      case 39: addRing(red, 0, 0.1, 0.82, 0.12); break;
-      case 40: addBall(white, 0, -0.3, 0.48); addBall(white, 0, 0.35, 0.34); addBall(dark, -0.11, 0.42, 0.045); addBall(dark, 0.11, 0.42, 0.045); break;
-      case 41: addBall(white, -0.25, 0.1, 0.36); addBall(white, 0.25, 0.1, 0.36); addBox(white, 0, -0.18, 0.38, 0.45, 0.15, Math.PI/4); break;
-      case 42: addBox(red, -0.55, 0.38, 0.38, 0.26); addBox(red, 0.55, 0.38, 0.38, 0.26); addBox(green, 0, -0.1, 0.72, 0.52); break;
-      case 43: addBox(brown, -0.38, 0.05, 0.08, 0.72); addBox(brown, 0.38, 0.05, 0.08, 0.72); addBall(gold, -0.38, 0.55, 0.18); addBall(gold, 0.38, 0.55, 0.18); break;
-      case 44: addRing(0x6b85a3, 0, 0.15, 0.75, 0.06); addBox(0x6b85a3, 0.2, -0.25, 0.06, 0.7, 0.06, -0.4); break;
-      case 45: addBurst(gold, 8, 1.2); break;
-      case 46: addBurst(0x88c7ff, 10, 1.45); break;
-      case 47: addRing(accent, 0, 0.1, 0.72, 0.08); break;
-      case 48: addBall(red, -0.22, 0.15, 0.3); addBall(red, 0.22, 0.15, 0.3); addBox(red, 0, -0.12, 0.32, 0.4, 0.15, Math.PI/4); break;
-      case 49: addBurst(gold, 16, 1.6); addRing(red, 0, 0.08, 0.55, 0.07); break;
+      case 10: addBox(red, 0, -0.55, 1.45, 0.38); addBox(0x9ed7f2, 0, -0.15, 0.72, 0.3); addRing(dark,-0.85,-0.82,0.24); addRing(dark,0.85,-0.82,0.24); break;
+      case 11: addBox(gold, 0, -0.25, 1.55, 0.72); for(let i=-2;i<=2;i++) addBox(0x9ed7f2,i*0.48,-0.08,0.18,0.22); addRing(dark,-1,-0.75,0.2); addRing(dark,1,-0.75,0.2); break;
+      case 12: addRing(dark,-0.62,-0.45,0.38); addRing(dark,0.62,-0.45,0.38); addBox(accent,0,-0.18,0.75,0.05,0.08,-0.12); addBox(dark,0.05,0.18,0.05,0.5); break;
+      case 13: addBox(white,0,-0.05,1.5,0.12); addBox(0x74a9d8,0,-0.05,0.18,0.85); addBox(red,0.85,-0.05,0.35,0.05,0.06,0.45); break;
+      case 14: addBox(0x6da8cf,0,-0.55,1.35,0.3,0.2,0.08); addBox(white,0,-0.25,0.75,0.3); addBox(brown,0,0.1,0.04,0.65); break;
+      case 15: propMesh(new THREE.CylinderGeometry(.38,.55,1.6,18),white,[0,-0.05,1.25],[1,1,1],[0,0,0]); propMesh(new THREE.ConeGeometry(.5,.65,18),red,[0,1.05,1.25]); addBurst(gold,8,.85); break;
+      case 16: addBox(0x3f78b5,0,-0.35,1.45,0.5); addBox(dark,-0.95,0.05,0.42,0.62); addRing(dark,-.75,-.75,.22); addRing(dark,.75,-.75,.22); break;
+      case 17: addBox(accent,0,-0.6,1.0,0.08,0.18,0.04); for(let i=-1;i<=1;i+=2){addRing(dark,i*.65,-.78,.12);} break;
+      case 18: addRing(dark,-.45,-.5,.28); addBox(accent,.15,-.35,.65,.05); addBox(dark,.48,.15,.04,.65); addBox(dark,.25,.48,.28,.04); break;
+      case 19: addBall(accent,0,.85,.72); addBox(brown,0,-.28,.35,.26); for(let i=-2;i<=2;i++) addBox(gold,i*.12,.22,.025,.55,.03,i*.04); break;
+      case 20: addBall(white,.3,-.25,.32); addBox(green,-.4,-.6,.05,.7,.05,-.45); break;
+      case 21: addRing(red,0,-.05,.52,.07); addBall(gold,-.55,-.35,.28); break;
+      case 22: addBox(brown,0,-.05,.06,.95,.08,-.2); addBall(white,.55,.25,.22); break;
+      case 23: addBall(accent,.55,-.5,.28); for(let i=-2;i<=2;i++) addBox(white,-.45+i*.18,-.58,.08,.26,.08); break;
+      case 24: addRing(red,0,0,.72,.055); addBox(red,0,-.62,.7,.035); break;
+      case 25: addBox(0x7fb6d7,-.45,-.5,.08,.75,.08,-.28); addBox(0x7fb6d7,.45,-.5,.08,.75,.08,.28); addBurst(white,7,.8); break;
+      case 26: addRing(0x9ed7f2,-.48,-.48,.3,.06); addRing(0x9ed7f2,.48,-.48,.3,.06); addBox(dark,0,-.5,.85,.045); break;
+      case 27: addBox(0x5fa8d3,0,-.48,1.25,.08,.2,.04); addRing(white,0,.25,.48,.08); break;
+      case 28: addBox(dark,0,.2,.04,1.15); addBox(dark,0,.72,.9,.035); addBall(white,-.45,.55,.12); addBall(white,.45,.3,.12); break;
+      case 29: addBox(0x3a78a8,0,-.25,1.0,.42); addBox(white,0,-.25,.02,.42,.05); addBall(white,-.38,-.05,.11); addBall(white,.38,-.45,.11); break;
+      case 30: addBox(brown,-.25,-.05,.28,.85,.12,-.28); addRing(gold,-.25,.28,.28,.05); break;
+      case 31: addBox(brown,0,-.3,.65,.38); addRing(white,0,.12,.38,.05); addBox(white,0,.1,.55,.04); break;
+      case 32: addBox(dark,0,-.25,1.15,.45); for(let i=-3;i<=3;i++) addBox(i%2?dark:white,i*.14,-.05,.06,.25,.03); break;
+      case 33: addBall(0x444444,0,.1,.24); addBox(dark,0,-.45,.05,.65); addBurst(accent,6,.75); break;
+      case 34: addBurst(accent,12,1.35); addRing(gold,0,.05,.55,.07); break;
+      case 35: addBox(0x486b42,0,-.25,1.0,.72,.06); addBox(brown,0,-.6,.9,.05); addBall(gold,0,-.15,.18); break;
+      case 36: addBox(brown,.15,-.1,.04,1.0,.04,-.45); addBox(0x8fcbe6,.65,-.58,.75,.04); addBall(white,.8,-.45,.09); break;
+      case 37: addBox(0x888888,0,-.45,.72,.18); addBox(brown,-.5,.05,.08,.8); addBox(brown,.5,.05,.08,.8); addBurst(0xff9f43,6,.55); break;
+      case 38: addBox(0x76a65e,0,-.58,1.2,.08); addBall(red,-.4,-.2,.16); addBall(gold,.4,-.15,.16); break;
+      case 39: addBox(dark,0,-.05,.72,.5); addRing(0x9ed7f2,0,-.02,.22,.05); addBurst(white,6,.85); break;
+      case 40: addRing(0x6b85a3,0,.18,.78,.06); addBox(0x6b85a3,0,-.28,.05,.72); addBurst(0x73b9e6,10,1.25); break;
+      case 41: addBall(white,0,-.38,.5); addBall(white,0,.28,.34); addBall(dark,-.11,.36,.045); addBall(dark,.11,.36,.045); break;
+      case 42: addBox(red,0,-.5,1.15,.12,.2,.08); addBox(brown,0,-.72,.75,.05); addBurst(white,8,1.05); break;
+      case 43: addRing(accent,0,-.3,.78,.22); addBall(white,0,.12,.16); addBurst(0x80d7f2,8,1.1); break;
+      case 44: addBurst(0xf3a8bf,14,1.35); addBox(dark,0,-.1,.72,.48); break;
+      case 45: addBox(gold,0,-.28,.55,.14); addBox(gold,0,.1,.35,.55); addRing(gold,-.42,.2,.22); addRing(gold,.42,.2,.22); break;
+      case 46: addBox(0xf4c58a,0,-.2,.72,.42); for(let i=-1;i<=1;i++) addBall(white,i*.3,.22,.16); addBurst(gold,8,1.05); break;
+      case 47: addBox(accent,0,-.08,.75,.65); addBox(gold,0,-.08,.08,.65); addBox(gold,0,-.08,.75,.08); break;
+      case 48: addBurst(0x88c7ff,12,1.45); addBox(gold,0,.05,.85,.08,0.05); break;
+      case 49: addBurst(gold,18,1.65); addRing(red,0,.08,.55,.07); break;
       default: addBall(accent, 0, 0, 0.4);
+    }
+  }
+
+  function sceneScale(factor) {
+    blue.scale.setScalar(modelScale * factor);
+    navy.scale.setScalar(modelScale * factor);
+  }
+
+  function scenePlace(gap, y, blueY = 0, navyY = 0) {
+    blue.position.x = meetCenter - gap;
+    navy.position.x = meetCenter + gap;
+    blue.position.y = y + blueY;
+    navy.position.y = y + navyY;
+  }
+
+  function applySceneLayout(index, elapsed) {
+    const wave = Math.sin(elapsed * 5);
+    const slow = Math.sin(elapsed * 2.4);
+    const hop = Math.abs(Math.sin(elapsed * 4.5));
+    switch (index) {
+      case 0: scenePlace(1.25,-2.48); blue.rotation.y=.55; navy.rotation.y=-.25; poseHandAngles(1.55,-.1); break;
+      case 1: scenePlace(1.2,-2.48); sceneScale(.86); poseHandAngles(1.58,-.1); blue.rotation.z=-.05; navy.rotation.z=.05; break;
+      case 2: scenePlace(1.25,-2.48); sceneScale(.82); navy.rotation.y=.55; blue.rotation.z=-.08; poseHandAngles(1.3,-.05); break;
+      case 3: scenePlace(1.3,-2.48); sceneScale(.82); blue.rotation.y=.45; navy.rotation.y=-.45; blue.rotation.z=wave*.05; navy.rotation.z=-wave*.05; break;
+      case 4: scenePlace(.85,-2.48,hop*.14,hop*.14); sceneScale(.88); poseHandAngles(2.15,-.78); walkers.blue.parts.leftArm.rotation.z=-1.25; walkers.navy.parts.rightArm.rotation.z=1.25; break;
+      case 5: scenePlace(1.3,-2.48); sceneScale(.82); poseHandAngles(1.72,-.25); poseProps.scale.setScalar(1+slow*.08); break;
+      case 6: scenePlace(1.05,-2.48); sceneScale(.8); poseHandAngles(1.6,-.1); blue.rotation.z=-.04; navy.rotation.z=.04; break;
+      case 7: scenePlace(1.3,-2.48); sceneScale(.82); poseHandAngles(1.65,-.2); poseProps.scale.setScalar(1+Math.abs(slow)*.12); break;
+      case 8: scenePlace(1.15,-2.48); blue.position.x-=.25*hop; navy.position.x+=.25*hop; blue.rotation.z=-hop*.12; navy.rotation.z=hop*.12; poseHandAngles(2.05,-.7); break;
+      case 9: scenePlace(1.25,-2.48,hop*.18,hop*.18); sceneScale(.82); poseHandAngles(2.05,-.7); poseProps.rotation.y=elapsed*1.2; break;
+
+      case 10: sceneScale(.48); scenePlace(.45,-1.98,Math.abs(wave)*.04,Math.abs(wave)*.04); poseHandAngles(1.25,.05); poseProps.position.x=meetCenter+slow*.45; break;
+      case 11: sceneScale(.4); scenePlace(.5,-1.72); poseHandAngles(1.8,-.45); poseProps.position.x=meetCenter+slow*.25; break;
+      case 12: sceneScale(.48); scenePlace(.42,-1.72,Math.abs(wave)*.08,Math.abs(wave)*.08); blue.rotation.z=-.08; navy.rotation.z=-.08; poseProps.rotation.z=slow*.04; break;
+      case 13: sceneScale(.42); scenePlace(.38,-1.55); poseHandAngles(2.05,-.68); blue.rotation.z=.04; navy.rotation.z=-.04; poseProps.position.y=.2+slow*.42; break;
+      case 14: sceneScale(.48); scenePlace(.48,-1.78); blue.rotation.z=slow*.04; navy.rotation.z=-slow*.04; poseProps.position.y=slow*.12; poseProps.rotation.z=slow*.05; break;
+      case 15: sceneScale(.38); scenePlace(.34,-1.25); poseHandAngles(2.12,-.78); poseProps.position.y=Math.min(1.1,elapsed*.35)-.4; blue.position.y+=poseProps.position.y; navy.position.y+=poseProps.position.y; break;
+      case 16: sceneScale(.4); scenePlace(.55,-1.72); poseHandAngles(1.9+wave*.2,-.55-wave*.2); poseProps.position.x=meetCenter+slow*.35; break;
+      case 17: sceneScale(.58); scenePlace(.52,-1.88,hop*.18,hop*.18); blue.rotation.z=-.12; navy.rotation.z=.12; poseProps.rotation.z=wave*.05; break;
+      case 18: sceneScale(.62); scenePlace(.6,-1.92,Math.abs(wave)*.08,Math.abs(wave)*.08); poseHandAngles(1.3,-.05); poseProps.rotation.z=slow*.08; break;
+      case 19: sceneScale(.42); scenePlace(.35,-1.45); poseHandAngles(1.9,-.55); poseProps.position.y=.35+slow*.35; blue.position.y+=slow*.35; navy.position.y+=slow*.35; break;
+
+      case 20: sceneScale(.72); scenePlace(1.05,-2.35); walkers.blue.parts.rightLeg.rotation.z=-.75*hop; walkers.navy.parts.leftArm.rotation.z=-1.35; walkers.navy.parts.rightArm.rotation.z=1.35; poseProps.position.x=meetCenter+slow*.65; break;
+      case 21: sceneScale(.7); scenePlace(1.05,-2.35); navy.position.y+=hop*.45; walkers.navy.parts.leftArm.rotation.z=-1.5; walkers.navy.parts.rightArm.rotation.z=1.5; poseProps.position.y=.2+hop*.5; break;
+      case 22: sceneScale(.68); scenePlace(1.1,-2.35); walkers.blue.parts.rightArm.rotation.z=1.2-wave*.35; navy.rotation.z=-.16*hop; poseProps.rotation.z=-elapsed*2; break;
+      case 23: sceneScale(.72); scenePlace(1.1,-2.35); blue.rotation.z=.18; walkers.blue.parts.rightArm.rotation.z=1.55; poseProps.position.x=meetCenter+Math.min(.7,elapsed*.3); break;
+      case 24: sceneScale(.68); scenePlace(.8,-2.28,hop*.42,hop*.42); poseHandAngles(1.9,-.55); poseProps.rotation.z=elapsed*3; break;
+      case 25: sceneScale(.62); scenePlace(.75,-2.15); blue.rotation.z=-.18+wave*.08; navy.rotation.z=.18-wave*.08; poseProps.position.x=meetCenter+slow*.45; break;
+      case 26: sceneScale(.62); scenePlace(.65,-2.16); blue.rotation.y=elapsed*1.8; navy.rotation.y=-elapsed*1.8; poseHandAngles(1.85,-.5); break;
+      case 27: sceneScale(.62); scenePlace(.62,-2.02); blue.rotation.z=-slow*.18; navy.rotation.z=-slow*.18; poseProps.rotation.z=-slow*.12; poseProps.position.y=hop*.12; break;
+      case 28: sceneScale(.68); scenePlace(1.0,-2.35); walkers.blue.parts.rightArm.rotation.z=1.5+wave*.35; walkers.navy.parts.leftArm.rotation.z=-1.1-wave*.35; poseProps.rotation.z=wave*.12; break;
+      case 29: sceneScale(.66); scenePlace(1.05,-2.35); walkers.blue.parts.rightArm.rotation.z=1.3+wave*.28; walkers.navy.parts.leftArm.rotation.z=-.7-wave*.28; poseProps.position.x=meetCenter+slow*.18; break;
+
+      case 30: sceneScale(.72); scenePlace(.85,-2.35); blue.rotation.z=slow*.08; walkers.blue.parts.rightArm.rotation.z=1.2+wave*.25; navy.position.y+=hop*.15; break;
+      case 31: sceneScale(.68); scenePlace(.9,-2.35); walkers.navy.parts.leftArm.rotation.z=-1.2+wave*.3; walkers.navy.parts.rightArm.rotation.z=1.2-wave*.3; blue.position.y+=hop*.25; break;
+      case 32: sceneScale(.64); scenePlace(.72,-2.28); walkers.blue.parts.rightArm.rotation.z=1.4+wave*.18; walkers.navy.parts.leftArm.rotation.z=-.9-wave*.18; break;
+      case 33: sceneScale(.7); scenePlace(.9,-2.35); poseHandAngles(1.65+wave*.18,-.2-wave*.18); poseProps.position.y=slow*.12; break;
+      case 34: sceneScale(.68); scenePlace(.72,-2.22,hop*.25,Math.abs(Math.sin(elapsed*4.5+1))* .25); blue.rotation.z=wave*.1; navy.rotation.z=-wave*.1; poseHandAngles(2.0,-.68); break;
+
+      case 35: sceneScale(.62); scenePlace(.9,-2.28); poseHandAngles(1.42,-.05); poseProps.children.forEach((item,i)=>{item.rotation.y=slow*(i%2?.15:-.15);}); break;
+      case 36: sceneScale(.64); scenePlace(.9,-2.3); blue.rotation.z=-.1; navy.rotation.z=.1; poseHandAngles(1.25,-.05); poseProps.rotation.z=-.15+slow*.08; break;
+      case 37: sceneScale(.64); scenePlace(.85,-2.3); walkers.blue.parts.rightArm.rotation.z=1.3+wave*.35; walkers.navy.parts.leftArm.rotation.z=-1.0-wave*.35; poseProps.position.y=hop*.18; break;
+      case 38: sceneScale(.62); scenePlace(.9,-2.25); poseHandAngles(1.4,-.05); blue.rotation.z=-.04; navy.rotation.z=.04; break;
+      case 39: sceneScale(.68); scenePlace(.82,-2.3); poseHandAngles(1.85+wave*.15,-.5-wave*.15); poseProps.rotation.y=slow*.12; break;
+      case 40: sceneScale(.58); scenePlace(.5,-2.1); blue.rotation.z=slow*.05; navy.rotation.z=-slow*.05; poseProps.rotation.z=slow*.08; break;
+      case 41: sceneScale(.58); scenePlace(.9,-2.28); poseHandAngles(2.12,-.78); poseProps.rotation.y=slow*.18; break;
+      case 42: sceneScale(.5); scenePlace(.42,-1.86); poseHandAngles(2.0,-.65); poseProps.position.x=meetCenter+slow*.55; poseProps.rotation.z=slow*.06; break;
+      case 43: sceneScale(.5); scenePlace(.38,-1.75); blue.rotation.z=slow*.1; navy.rotation.z=-slow*.1; poseProps.position.y=hop*.18; break;
+      case 44: sceneScale(.66); scenePlace(.75,-2.3); poseHandAngles(1.8,-.4); poseProps.rotation.y=elapsed*.35; break;
+
+      case 45: sceneScale(.65); scenePlace(.8,-2.25,hop*.18,hop*.18); poseHandAngles(2.12,-.78); poseProps.scale.setScalar(1+hop*.1); break;
+      case 46: sceneScale(.62); scenePlace(.72,-2.25); blue.rotation.z=-.08; navy.rotation.z=.08; poseHandAngles(1.55,-.1); poseProps.rotation.y=elapsed*.55; break;
+      case 47: sceneScale(.6); scenePlace(.65,-2.2); poseHandAngles(1.7,-.25); poseProps.scale.setScalar(1+hop*.18); poseProps.rotation.y=elapsed*.8; break;
+      case 48: sceneScale(.7); scenePlace(.68,-2.1,hop*.45,hop*.45); blue.rotation.z=-.12; navy.rotation.z=.12; poseHandAngles(2.15,-.8); poseProps.rotation.z=slow*.12; break;
+      case 49: sceneScale(.68); scenePlace(.72,-2.2,hop*.5,hop*.5); blue.rotation.y=.38; navy.rotation.y=-.38; poseHandAngles(2.1,-.62); poseProps.rotation.y=elapsed*.7; poseProps.scale.setScalar(1+hop*.22); break;
     }
   }
 
   function poseFrame(index, elapsed) {
     const progress = Math.min(1, elapsed / 0.28);
     const settle = ease(progress);
-    const held = Math.min(1, elapsed / 2.5);
+    const held = Math.min(1, elapsed / (POSE_DURATIONS[index] || 3.8));
     const breathe = Math.sin(elapsed * 5) * 0.035;
     const jump = [27, 30, 45, 46, 49].includes(index) ? Math.abs(Math.sin(elapsed * 7)) * 0.44 : 0;
     const blueX = meetCenter - meet;
@@ -356,6 +441,7 @@ export function mountDanwoongWalk() {
         walkers.navy.model.position.x += Math.sin(elapsed * 5) * 0.12;
         break;
     }
+    applySceneLayout(index, elapsed);
     if (settle < 1 || held < 1) {
       walkers.blue.model.rotation.z *= settle;
       walkers.navy.model.rotation.z *= settle;
@@ -490,7 +576,7 @@ export function mountDanwoongWalk() {
         }
       } else {
         poseFrame(interaction.index, interactionElapsed);
-        if (interactionElapsed >= 2.5) {
+        if (interactionElapsed >= (POSE_DURATIONS[interaction.index] || 3.8)) {
           interaction = null;
           clearPoseProps();
           poseButton.setAttribute("aria-label", "단웅이와 단비의 랜덤 포즈 보기");
