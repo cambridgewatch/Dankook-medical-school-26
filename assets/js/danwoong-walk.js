@@ -66,8 +66,9 @@ export function mountDanwoongWalk() {
   function chooseHands(now) {
     const forceUp = testPattern === "match-up" || testPattern === "highfive-up";
     const forceDown = testPattern === "highfive-down";
-    walkers.blue.handUp = forceUp ? true : (forceDown ? false : (testPattern === "mismatch" ? true : Math.random() < 0.5));
-    walkers.navy.handUp = forceUp ? true : (forceDown ? false : (testPattern === "mismatch" ? false : Math.random() < 0.5));
+    const forceMismatch = testPattern === "mismatch" || testPattern === "highfive-mismatch";
+    walkers.blue.handUp = forceUp ? true : (forceDown ? false : (forceMismatch ? true : Math.random() < 0.5));
+    walkers.navy.handUp = forceUp ? true : (forceDown ? false : (forceMismatch ? false : Math.random() < 0.5));
     sameHands = walkers.blue.handUp === walkers.navy.handUp;
     cycleStarted = now;
   }
@@ -97,13 +98,17 @@ export function mountDanwoongWalk() {
     navy.scale.setScalar(modelScale);
   }
 
-  function poseHands() {
+  function poseHandAngles(blueAngle, navyAngle) {
     const blueParts = walkers.blue.parts;
     blueParts.leftArm.rotation.set(0, 0, -0.12);
-    blueParts.rightArm.rotation.set(0, 0, walkers.blue.handUp ? 2.15 : 1.15);
+    blueParts.rightArm.rotation.set(0, 0, blueAngle);
     const navyParts = walkers.navy.parts;
-    navyParts.leftArm.rotation.set(0, 0, walkers.navy.handUp ? -0.75 : 0.45);
+    navyParts.leftArm.rotation.set(0, 0, navyAngle);
     navyParts.rightArm.rotation.set(0, 0, -0.78);
+  }
+
+  function poseHands(blueUp = walkers.blue.handUp, navyUp = walkers.navy.handUp) {
+    poseHandAngles(blueUp ? 2.15 : 1.15, navyUp ? -0.75 : 0.45);
   }
 
   function walkMotion(walker, elapsed, strength = 1) {
@@ -124,6 +129,8 @@ export function mountDanwoongWalk() {
     const progress = ease(Math.min(1, elapsed / APPROACH_SECONDS));
     walkers.blue.model.position.x = mix(-edge, meetCenter - meet, progress);
     walkers.navy.model.position.x = mix(edge, meetCenter + meet, progress);
+    walkers.blue.model.position.z = 0;
+    walkers.navy.model.position.z = 0.2;
     walkers.blue.model.rotation.y = 0.18;
     walkers.navy.model.rotation.y = -0.18;
     walkMotion(walkers.blue, elapsed);
@@ -143,12 +150,32 @@ export function mountDanwoongWalk() {
     stopLegs(walkers.navy);
   }
 
+  function crossingHighFive(elapsed) {
+    const progress = Math.min(1, elapsed / HIGH_FIVE_SECONDS);
+    const blueFrom = walkers.blue.handUp ? 2.15 : 1.15;
+    const blueTo = walkers.blue.handUp ? 1.15 : 2.15;
+    const navyFrom = walkers.navy.handUp ? -0.75 : 0.45;
+    const navyTo = walkers.navy.handUp ? 0.45 : -0.75;
+    poseHandAngles(mix(blueFrom, blueTo, progress), mix(navyFrom, navyTo, progress));
+    const smallHop = Math.sin(progress * Math.PI) * 0.2;
+    walkers.blue.model.position.set(meetCenter - meet, -2.53 + smallHop, 0.25);
+    walkers.navy.model.position.set(meetCenter + meet, -2.53 + smallHop, -0.3);
+    walkers.blue.model.rotation.y = 0;
+    walkers.navy.model.rotation.y = 0;
+    walkers.blue.model.rotation.z = -Math.sin(progress * Math.PI) * 0.035;
+    walkers.navy.model.rotation.z = Math.sin(progress * Math.PI) * 0.035;
+    stopLegs(walkers.blue);
+    stopLegs(walkers.navy);
+  }
+
   function retreat(elapsed) {
     const progress = ease(Math.min(1, elapsed / EXIT_SECONDS));
     walkers.blue.model.position.x = mix(meetCenter - meet, -edge, progress);
     walkers.navy.model.position.x = mix(meetCenter + meet, edge, progress);
     walkers.blue.model.rotation.y = -0.58;
     walkers.navy.model.rotation.y = 0.58;
+    walkers.blue.model.position.z = 0;
+    walkers.navy.model.position.z = 0.2;
     walkMotion(walkers.blue, elapsed);
     walkMotion(walkers.navy, elapsed);
   }
@@ -159,6 +186,9 @@ export function mountDanwoongWalk() {
     walkers.navy.model.position.x = mix(meetCenter + meet, -edge, progress);
     walkers.blue.model.rotation.y = 0.18;
     walkers.navy.model.rotation.y = -0.18;
+    walkers.blue.model.position.z = 0.25;
+    walkers.navy.model.position.z = -0.3;
+    poseHands(!walkers.blue.handUp, !walkers.navy.handUp);
     walkMotion(walkers.blue, elapsed);
     walkMotion(walkers.navy, elapsed);
   }
@@ -175,12 +205,18 @@ export function mountDanwoongWalk() {
       renderer.render(scene, camera);
       return;
     }
+    if (testPattern === "highfive-mismatch") {
+      crossingHighFive(HIGH_FIVE_SECONDS / 2);
+      renderer.render(scene, camera);
+      return;
+    }
     if (elapsed < APPROACH_SECONDS) {
       approach(elapsed);
-    } else if (sameHands && elapsed < APPROACH_SECONDS + HIGH_FIVE_SECONDS) {
-      highFive(elapsed - APPROACH_SECONDS);
+    } else if (elapsed < APPROACH_SECONDS + HIGH_FIVE_SECONDS) {
+      if (sameHands) highFive(elapsed - APPROACH_SECONDS);
+      else crossingHighFive(elapsed - APPROACH_SECONDS);
     } else {
-      const exitElapsed = elapsed - APPROACH_SECONDS - (sameHands ? HIGH_FIVE_SECONDS : 0);
+      const exitElapsed = elapsed - APPROACH_SECONDS - HIGH_FIVE_SECONDS;
       if (sameHands) retreat(exitElapsed);
       else passBy(exitElapsed);
       if (exitElapsed >= EXIT_SECONDS) {
