@@ -8,7 +8,6 @@ const SESSION_KEY = "dkuSessionKnown";
 const hasSessionHint = sessionStorage.getItem(SESSION_KEY) === "1"
   || (localStorage.getItem("dkuAutoLogin") !== "false" && localStorage.getItem(SESSION_KEY) === "1");
 let overlay = null;
-let checkingTimer = null;
 
 function ensureOverlay() {
   if (overlay) return overlay;
@@ -18,7 +17,7 @@ function ensureOverlay() {
     <div class="gate-box">
       <div class="gate-logo">🔒</div>
       <h2>비공개 페이지</h2>
-      <p id="gateMsg">로그인 확인 중…</p>
+      <p id="gateMsg">로그인이 필요합니다.</p>
       <a id="gateLogin" class="btn btn-primary" href="login.html" style="display:none;">로그인하러 가기</a>
     </div>`;
   document.documentElement.appendChild(overlay);
@@ -26,14 +25,14 @@ function ensureOverlay() {
 }
 
 function unlock() {
-  clearTimeout(checkingTimer);
   overlay?.remove();
   overlay = null;
   document.body.classList.remove("locked");
+  document.documentElement.classList.add("dku-session-known");
 }
 
 function deny(message) {
-  clearTimeout(checkingTimer);
+  document.documentElement.classList.remove("dku-session-known");
   document.body.classList.add("locked");
   const box = ensureOverlay();
   box.querySelector("#gateMsg").textContent = message;
@@ -42,8 +41,6 @@ function deny(message) {
 
 if (hasSessionHint) {
   document.body.classList.remove("locked");
-} else {
-  checkingTimer = setTimeout(() => ensureOverlay(), 450);
 }
 
 if (!isConfigured) {

@@ -1,6 +1,6 @@
 /* 회원가입 / 로그인 로직 (login.html 전용) */
 
-import { auth, isConfigured, nameToEmail, emailToName } from "./firebase-init.js?v=12";
+import { auth, isConfigured, nameToEmail } from "./firebase-init.js?v=12";
 import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
@@ -27,12 +27,15 @@ if (!isConfigured) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  let loginInProgress = false;
+
   /* 이미 로그인돼 있으면 안내 */
   onAuthStateChanged(auth, (user) => {
     const status = $("#loggedInBox");
     if (user) {
-      status.style.display = "block";
-      $("#loggedInName").textContent = user.displayName || emailToName(user.email) || "동기";
+      sessionStorage.setItem("dkuSessionKnown", "1");
+      if (localStorage.getItem("dkuAutoLogin") !== "false") localStorage.setItem("dkuSessionKnown", "1");
+      if (!loginInProgress) location.replace("index.html");
     } else {
       status.style.display = "none";
     }
@@ -49,6 +52,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!name || !pw) return toast("이름과 비밀번호를 입력해 주세요.");
 
     const button = $("#loginForm button[type='submit']");
+    loginInProgress = true;
     button.disabled = true;
     button.textContent = "로그인 중…";
 
@@ -69,7 +73,7 @@ window.addEventListener("DOMContentLoaded", () => {
         await updateProfile(credential.user, { displayName: name.normalize("NFC") });
       }
       toast(`${name} 님, 환영합니다! 이동합니다…`, true);
-      setTimeout(() => location.replace("/"), 500);
+      setTimeout(() => location.replace("index.html"), 500);
     } catch (err) {
       if (
         err.code === "auth/invalid-credential" ||
@@ -79,6 +83,7 @@ window.addEventListener("DOMContentLoaded", () => {
         toast("이름 또는 비밀번호가 올바르지 않습니다.");
       else toast("로그인 오류: " + (err.message || err.code));
     } finally {
+      loginInProgress = false;
       button.disabled = false;
       button.textContent = "로그인";
     }
