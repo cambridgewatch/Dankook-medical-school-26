@@ -1,9 +1,13 @@
+Exit code: 0
+Wall time: 0.4 seconds
+Output:
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
 import { createBlueDanwoong, createNavyDanwoong, getDanwoongParts } from "./danwoong-models.js?v=4";
 
 const APPROACH_SECONDS = 6.6;
 const HIGH_FIVE_SECONDS = 1.25;
 const EXIT_SECONDS = 5.2;
+const RECALL_SECONDS = 1.15;
 const BLUE_LOW = 1.15;
 const BLUE_HIGH = 2.15;
 const BLUE_CONTACT = 1.65;
@@ -21,10 +25,15 @@ export function mountDanwoongWalk() {
   const canvas = document.createElement("canvas");
   canvas.className = "danwoong-walk-canvas";
   canvas.setAttribute("aria-hidden", "true");
+  const poseButton = document.createElement("button");
+  poseButton.type = "button";
+  poseButton.className = "danwoong-pose-trigger";
+  poseButton.setAttribute("aria-label", "단웅이와 단비의 랜덤 포즈 보기");
   const initiallyVisible = document.documentElement.dataset.mascots !== "hide";
   canvas.hidden = !initiallyVisible;
   canvas.style.display = initiallyVisible ? "" : "none";
   header.prepend(canvas);
+  header.append(poseButton);
 
   let renderer;
   try {
@@ -77,7 +86,8 @@ export function mountDanwoongWalk() {
   let gaitSpeed = 9;
   let modelScale = 0.82;
   let interaction = null;
-  let poseReady = false;
+  let triggerLeft = 0;
+  let triggerWidth = 40;
   const testPattern = new URLSearchParams(location.search).get("danwoongTest");
 
   function chooseHands(now) {
@@ -103,6 +113,7 @@ export function mountDanwoongWalk() {
     const controlRect = rightControl?.getBoundingClientRect();
     const gapLeft = brandRect ? brandRect.right - rect.left : width * 0.3;
     const gapRight = controlRect && controlRect.width ? controlRect.left - rect.left : width * 0.7;
+    const hasHeaderGap = gapRight - gapLeft >= 28;
     const meetingPixel = gapRight - gapLeft >= 90
       ? (gapLeft + gapRight) / 2 - (width > 820 ? 8 : 0)
       : width / 2;
@@ -119,6 +130,10 @@ export function mountDanwoongWalk() {
     highFiveDuration = width <= 820 ? HIGH_FIVE_SECONDS : 1.8;
     exitDuration = width <= 820 ? EXIT_SECONDS : 10.5;
     gaitSpeed = width <= 820 ? 9 : 6;
+    triggerLeft = hasHeaderGap ? gapLeft + 4 : meetingPixel - 26;
+    triggerWidth = hasHeaderGap ? Math.max(20, gapRight - gapLeft - 8) : 52;
+    poseButton.style.left = `${Math.round(triggerLeft)}px`;
+    poseButton.style.width = `${Math.round(triggerWidth)}px`;
   }
 
   function poseHandAngles(blueAngle, navyAngle) {
@@ -153,10 +168,6 @@ export function mountDanwoongWalk() {
     navy.scale.setScalar(modelScale);
     blue.rotation.set(0, 0, 0);
     navy.rotation.set(0, 0, 0);
-  }
-
-  function setPoseTrigger(enabled) {
-    poseReady = enabled;
   }
 
   function poseFrame(index, elapsed) {
@@ -230,8 +241,27 @@ export function mountDanwoongWalk() {
 
   function beginRandomPose() {
     if (interaction) return;
-    interaction = { index: Math.floor(Math.random() * 9), started: performance.now() / 1000 };
-    setPoseTrigger(false);
+    const now = performance.now() / 1000;
+    interaction = {
+      mode: "recall",
+      index: Math.floor(Math.random() * 9),
+      started: now,
+      blue: { position: blue.position.clone(), rotationY: blue.rotation.y },
+      navy: { position: navy.position.clone(), rotationY: navy.rotation.y },
+    };
+    poseButton.disabled = true;
+  }
+
+  function recallForPose(elapsed) {
+    const progress = ease(Math.min(1, elapsed / RECALL_SECONDS));
+    resetPoseTransforms();
+    blue.position.set(mix(interaction.blue.position.x, meetCenter - meet, progress), mix(interaction.blue.position.y, -2.53, progress), mix(interaction.blue.position.z, 0.1, progress));
+    navy.position.set(mix(interaction.navy.position.x, meetCenter + meet, progress), mix(interaction.navy.position.y, -2.53, progress), mix(interaction.navy.position.z, 0.15, progress));
+    blue.rotation.y = mix(interaction.blue.rotationY, 0, progress);
+    navy.rotation.y = mix(interaction.navy.rotationY, 0, progress);
+    poseHands();
+    walkMotion(walkers.blue, elapsed, 0.45);
+    walkMotion(walkers.navy, elapsed, 0.45);
   }
 
   function approach(elapsed) {
@@ -250,7 +280,7 @@ export function mountDanwoongWalk() {
     const now = performance.now() / 1000;
     chooseHands(now);
     interaction = null;
-    setPoseTrigger(false);
+    poseButton.disabled = false;
     lastFrame = 0;
     resetPoseTransforms();
     poseHands();
@@ -322,11 +352,17 @@ export function mountDanwoongWalk() {
     const now = time / 1000;
     const elapsed = now - cycleStarted;
     if (interaction) {
-      const poseElapsed = now - interaction.started;
-      poseFrame(interaction.index, poseElapsed);
-      if (poseElapsed >= 2.5) {
-        interaction = null;
-        cycleStarted = now - approachDuration - highFiveDuration;
+      const interactionElapsed = now - interaction.started;
+      if (interaction.mode === "recall") {
+        recallForPose(interactionElapsed);
+        if (interactionElapsed >= RECALL_SECONDS) interaction = { mode: "pose", index: interaction.index, started: now };
+      } else {
+        poseFrame(interaction.index, interactionElapsed);
+        if (interactionElapsed >= 2.5) {
+          interaction = null;
+          poseButton.disabled = false;
+          cycleStarted = now - approachDuration - highFiveDuration;
+        }
       }
       renderer.render(scene, camera);
       return;
@@ -357,11 +393,6 @@ export function mountDanwoongWalk() {
         approach(0);
       }
     }
-    const distance = Math.abs(walkers.blue.model.position.x - walkers.navy.model.position.x);
-    const canPose = elapsed >= approachDuration * 0.68
-      && elapsed < approachDuration + highFiveDuration
-      && distance <= 6.4;
-    setPoseTrigger(canPose);
     renderer.render(scene, camera);
   }
 
@@ -369,7 +400,7 @@ export function mountDanwoongWalk() {
     const shouldRestart = visible && (restart || !visibleState);
     visibleState = visible;
     canvas.hidden = !visible;
-    if (!visible) setPoseTrigger(false);
+    poseButton.hidden = !visible;
     if (visible) canvas.style.removeProperty("display");
     else canvas.style.setProperty("display", "none", "important");
     if (shouldRestart) {
@@ -391,16 +422,7 @@ export function mountDanwoongWalk() {
     running = document.documentElement.dataset.mascots !== "hide" && !document.hidden;
   });
   window.addEventListener("resize", resize, { passive: true });
-  header.addEventListener("click", (event) => {
-    if (!poseReady || interaction) return;
-    const rect = header.getBoundingClientRect();
-    const meetingPixel = ((meetCenter / halfWidth + 1) / 2) * rect.width;
-    const hitRadius = Math.min(82, Math.max(54, rect.width * 0.18));
-    if (Math.abs(event.clientX - rect.left - meetingPixel) > hitRadius) return;
-    event.preventDefault();
-    event.stopPropagation();
-    beginRandomPose();
-  }, true);
+  poseButton.addEventListener("click", beginRandomPose);
   resize();
   restartFromEdges();
   requestAnimationFrame(frame);

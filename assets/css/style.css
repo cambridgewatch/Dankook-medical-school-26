@@ -88,9 +88,24 @@ html.dku-session-known body.locked { visibility: visible; }
   height: 68px;
   pointer-events: none;
 }
+.danwoong-pose-trigger {
+  position: absolute;
+  top: 0;
+  z-index: 4;
+  height: 68px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.danwoong-pose-trigger:disabled { pointer-events: none; }
+.danwoong-pose-trigger:focus { outline: none; }
 html[data-mascots="hide"] .danwoong-walk-canvas {
   display: none !important;
 }
+html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .nav {
   position: relative;
   z-index: 2;
