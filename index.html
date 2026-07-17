@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>단국대학교 의과대학 26학번</title>
   <meta name="description" content="단국대학교 의과대학 26학번 공식 홈페이지" />
-  <link rel="stylesheet" href="assets/css/style.css?v=41" />
+  <link rel="stylesheet" href="assets/css/style.css?v=54" />
 </head>
 <body class="locked">
 
@@ -43,6 +43,25 @@
         <a class="btn btn-primary" href="about.html">수업 정보 보기</a>
         <a class="btn btn-ghost" href="notices.html">공지사항 →</a>
       </div>
+    </div>
+  </section>
+
+  <section class="home-schedule-summary" aria-label="다가오는 일정 요약">
+    <div class="container home-schedule-grid">
+      <article class="home-schedule-card">
+        <div class="home-schedule-head">
+          <div><small>UPCOMING</small><h2>주요 일정</h2></div>
+          <a href="calendar.html">전체 보기 →</a>
+        </div>
+        <div class="home-schedule-list" id="homeMajorDdays"><p>일정을 불러오는 중…</p></div>
+      </article>
+      <article class="home-schedule-card assignment">
+        <div class="home-schedule-head">
+          <div><small>ASSIGNMENT</small><h2>과제 D-Day</h2></div>
+          <a href="calendar.html">전체 보기 →</a>
+        </div>
+        <div class="home-schedule-list" id="homeAssignmentDdays"><p>과제를 불러오는 중…</p></div>
+      </article>
     </div>
   </section>
 
@@ -121,6 +140,7 @@
 
   <script src="assets/js/main.js?v=21"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
+  <script type="module" src="assets/js/home-dday.js?v=1"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=18"></script>
 </body>

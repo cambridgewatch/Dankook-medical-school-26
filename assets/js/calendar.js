@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const [y, m] = date.split("-").map(Number);
     view = new Date(y, m - 1, 1);
     render();
-    openDay(date);
+    openDay(date, true);
   }
 
   function eventDateLabel(event, short = false) {
@@ -403,6 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cmSubmit = cmForm.querySelector("button[type='submit']");
   let activeKey = null;
   let editingEvent = null;
+  let modalReadOnly = false;
 
   cmType.innerHTML = ADD_TYPES.map((t) => `<option value="${t}">${LABEL[t]}</option>`).join("");
 
@@ -419,9 +420,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setPersonalMode(cmPersonalToggle.getAttribute("aria-pressed") !== "true");
   });
 
-  function openDay(k) {
+  function openDay(k, readOnly = false) {
     activeKey = k;
     editingEvent = null;
+    modalReadOnly = readOnly;
     cmSubmit.textContent = "추가";
     cmForm.reset();
     setPersonalMode(false);
@@ -431,8 +433,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const [y, m, d] = k.split("-").map(Number);
     cmDate.textContent = `${m}월 ${d}일`;
     drawList();
-    cmForm.style.display = currentUser ? "flex" : "none";
-    cmHint.textContent = isAdmin ? "개인 일정을 켜지 않으면 모든 학생에게 반영됩니다." : "추가한 일정은 내 캘린더에만 표시됩니다.";
+    cmForm.style.display = currentUser && !modalReadOnly ? "flex" : "none";
+    cmHint.textContent = modalReadOnly
+      ? ""
+      : (isAdmin ? "개인 일정을 켜지 않으면 모든 학생에게 반영됩니다." : "추가한 일정은 내 캘린더에만 표시됩니다.");
     modal.classList.add("open");
   }
   function drawList() {
@@ -445,7 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const hasDetail = !!(e.detail && e.detail.trim());
       const body = hasDetail ? esc(e.detail).replace(/\n/g, "<br>") : "";
       const period = e.endDate && e.endDate > e.date ? `${e.date.replaceAll("-", ".")} – ${e.endDate.replaceAll("-", ".")}` : "";
-      const canManage = isAdmin || e.personal;
+      const canManage = !modalReadOnly && (isAdmin || e.personal);
       return `
       <li class="cm-ev ${hasDetail ? "has-detail" : ""}">
         <div class="cm-ev-head">
@@ -454,7 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ${e.personal ? `<span class="ev-private">개인</span>` : ""}
           ${period ? `<span class="ev-period">${period}</span>` : ""}
           ${hasDetail ? `<span class="ev-chev">▾</span>` : ""}
-          ${isAdmin && !e.personal ? `<button class="ev-alert" data-key="${esc(e.eventKey)}" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
+          ${!modalReadOnly && isAdmin && !e.personal ? `<button class="ev-alert" data-key="${esc(e.eventKey)}" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
           ${canManage ? `<button class="ev-edit" data-key="${e.eventKey}" title="수정">✏️</button>` : ""}
           ${canManage ? `<button class="ev-del" data-key="${e.eventKey}" data-text="${esc(e.text)}" title="삭제">🗑</button>` : ""}
         </div>
@@ -588,6 +592,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function closeModal() {
     modal.classList.remove("open");
     editingEvent = null;
+    modalReadOnly = false;
     cmSubmit.textContent = "추가";
     cmForm.reset();
     setPersonalMode(false);
@@ -628,7 +633,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const [y, m] = linkDate.split("-").map(Number);
     view = new Date(y, m - 1, 1);
     render();
-    openDay(linkDate);
+    openDay(linkDate, _p.get("view") === "1");
     if (linkEv) {
       cmList.querySelectorAll(".cm-ev").forEach((li) => {
         const t = li.querySelector(".ev-text");

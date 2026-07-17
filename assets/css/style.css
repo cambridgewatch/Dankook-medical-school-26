@@ -641,6 +641,30 @@ body.locked { visibility: hidden; }
 .dday-item span { display: block; position: relative; z-index: 1; font-size: 14px; font-weight: 750; }
 .dday-item small { display: block; position: relative; z-index: 1; margin-top: 7px; color: var(--gray); font-size: 12px; }
 .dday-empty { color: var(--gray); font-size: 14px; }
+.home-schedule-summary { padding: 24px 0 0; background: var(--bg); }
+.home-schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.home-schedule-card { padding: 18px 20px; border: 1px solid #dfe8f3; border-radius: 18px; background: #fff; box-shadow: var(--shadow-sm); }
+.home-schedule-card.assignment { border-color: #eadfcf; }
+.home-schedule-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.home-schedule-head small { display: block; color: #4d83ad; font-size: 9px; font-weight: 900; letter-spacing: 1.2px; }
+.home-schedule-card.assignment .home-schedule-head small { color: #b5742b; }
+.home-schedule-head h2 { margin-top: 1px; color: var(--navy); font-size: 17px; }
+.home-schedule-head > a { color: var(--gray); font-size: 11px; font-weight: 750; }
+.home-schedule-list { display: grid; gap: 7px; }
+.home-schedule-list > p { color: var(--gray); font-size: 12px; }
+.home-dday-link { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-height: 38px; padding: 7px 9px; border-radius: 11px; background: #f6f9fd; transition: background .15s, transform .15s; }
+.home-dday-link:hover { background: #eaf2fb; transform: translateX(2px); }
+.home-schedule-card.assignment .home-dday-link { background: #fff9f1; }
+.home-schedule-card.assignment .home-dday-link:hover { background: #fff1df; }
+.home-dday-link strong { color: #fff; background: #426f96; border-radius: 999px; padding: 3px 6px; font-size: 10px; text-align: center; }
+.home-schedule-card.assignment .home-dday-link strong { background: #ad6b24; }
+.home-dday-link span { overflow: hidden; color: var(--ink); font-size: 12px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.home-dday-link time { color: var(--gray); font-size: 10px; }
+@media (max-width: 620px) {
+  .home-schedule-summary { padding-top: 14px; }
+  .home-schedule-grid { grid-template-columns: 1fr; gap: 10px; padding-inline: 16px; }
+  .home-schedule-card { padding: 15px; border-radius: 15px; }
+}
 .assignment-dday-panel { background: linear-gradient(145deg, #fff 35%, #fff8ed); border-color: #f0dfc1; }
 .assignment-dday-panel .dday-head span { color: #bd7620; }
 .assignment-dday-item::after { background: #fff0d8; }
