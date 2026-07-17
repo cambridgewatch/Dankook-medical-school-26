@@ -13,7 +13,7 @@ import {
 const $ = (s) => document.querySelector(s);
 const PREF_KEY = "dkuAutoLogin";
 const BANNER_COLOR_KEY = "dkuBannerColor";
-const DEFAULT_BANNER_COLOR = "#334150";
+const DEFAULT_BANNER_COLOR = "#6fa8d6";
 
 window.addEventListener("DOMContentLoaded", () => {
   const toggle = $("#autoLoginToggle");

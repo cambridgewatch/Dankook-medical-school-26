@@ -84,13 +84,14 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
     note.textContent = "";
+    const ordered = [...filtered].sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned));
     if (openId && !openHandled) {
-      const idx = filtered.findIndex((n) => n.id === openId);
+      const idx = ordered.findIndex((n) => n.id === openId);
       if (idx >= 0) page = Math.floor(idx / PER_PAGE) + 1;
     }
-    const totalPages = Math.ceil(filtered.length / PER_PAGE);
+    const totalPages = Math.ceil(ordered.length / PER_PAGE);
     if (page > totalPages) page = totalPages;
-    const pageItems = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+    const pageItems = ordered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
     list.innerHTML = pageItems.map((n) => {
       const tag = TAG_CLASS[n.tag] || "";
       const date = fmt(n.createdAt);
@@ -101,8 +102,10 @@ window.addEventListener("DOMContentLoaded", () => {
           <div class="notice-head">
             <span class="tag ${tag}">${TAG_LABEL[n.tag] || "공지"}</span>
             <span class="nt-title">${esc(n.title)}</span>
+            ${n.pinned && !isAdmin ? `<span class="nt-pinned" title="고정된 공지">📌</span>` : ""}
             <span class="nt-date">${date}</span>
             ${hasDetail ? `<span class="nt-chev">▾</span>` : ""}
+            ${isAdmin ? `<button class="notice-pin ${n.pinned ? "active" : ""}" data-id="${n.id}" title="${n.pinned ? "고정 해제" : "공지 고정"}" aria-label="${n.pinned ? "고정 해제" : "공지 고정"}">📌</button>` : ""}
             ${isAdmin ? `<button class="notice-alert" data-id="${n.id}" data-title="${esc(n.title)}" data-detail="${esc(n.detail || "")}" title="알림 보내기">🔔</button>` : ""}
             ${isAdmin ? `<button class="notice-edit" data-id="${n.id}" title="수정">✏️</button>` : ""}
             ${isAdmin ? `<button class="notice-del" data-id="${n.id}" title="삭제">🗑</button>` : ""}
@@ -114,8 +117,21 @@ window.addEventListener("DOMContentLoaded", () => {
     /* 제목 클릭 → 상세 펼치기/접기 */
     list.querySelectorAll(".notice-card.has-detail .notice-head").forEach((h) => {
       h.addEventListener("click", (e) => {
-        if (e.target.closest(".notice-del") || e.target.closest(".notice-alert") || e.target.closest(".notice-edit")) return;
+        if (e.target.closest(".notice-del") || e.target.closest(".notice-alert") || e.target.closest(".notice-edit") || e.target.closest(".notice-pin")) return;
         h.parentElement.classList.toggle("open");
+      });
+    });
+    list.querySelectorAll(".notice-pin").forEach((button) => {
+      button.addEventListener("click", async (event) => {
+        event.stopPropagation();
+        const notice = notices.find((item) => item.id === button.dataset.id);
+        if (!notice || !isAdmin) return;
+        try {
+          await updateDoc(doc(db, "notices", notice.id), {
+            pinned: !notice.pinned,
+            pinnedAt: !notice.pinned ? serverTimestamp() : null,
+          });
+        } catch (err) { alert("고정 상태를 변경하지 못했습니다: " + err.message); }
       });
     });
     list.querySelectorAll(".notice-edit").forEach((b) => {

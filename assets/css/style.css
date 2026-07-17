@@ -18,11 +18,11 @@
   --shadow: 0 10px 30px rgba(0, 32, 91, 0.08);
   --shadow-sm: 0 4px 14px rgba(0, 32, 91, 0.06);
   --max: 1120px;
-  --banner-start: #1c2530;
-  --banner-end: #485666;
-  --hero-a: 24, 32, 41;
-  --hero-b: 42, 53, 65;
-  --hero-c: 83, 99, 114;
+  --banner-start: #40617c;
+  --banner-end: #6497c1;
+  --hero-a: 58, 87, 111;
+  --hero-b: 89, 134, 171;
+  --hero-c: 104, 158, 201;
 }
 
 html[data-banner-theme="purple"] { --banner-start:#32155f; --banner-end:#7040a8; --hero-a:50,21,95; --hero-b:80,39,132; --hero-c:133,79,180; }
@@ -517,6 +517,7 @@ body.locked { visibility: hidden; }
 .notice-head .tag.info { background: #7a8699; }
 .nt-title { flex: 1; font-weight: 600; color: var(--ink); font-size: 16px; }
 .nt-date { color: var(--gray); font-size: 13px; white-space: nowrap; }
+.nt-pinned { flex: 0 0 auto; font-size: 13px; filter: saturate(.8); }
 .nt-chev { color: var(--gray); font-size: 12px; transition: transform 0.25s; }
 .notice-card.open .nt-chev { transform: rotate(180deg); color: var(--navy); }
 .notice-body {
@@ -581,10 +582,12 @@ body.locked { visibility: hidden; }
 .na-tags select:focus { border-color: var(--blue); }
 .na-foot .btn { padding: 12px 28px; }
 .tag.info { background: #7a8699; }
-.notice-del, .notice-edit {
+.notice-del, .notice-edit, .notice-pin {
   border: 0; background: none; cursor: pointer; font-size: 14px; opacity: 0.55; margin-left: 6px;
 }
-.notice-del:hover, .notice-edit:hover { opacity: 1; }
+.notice-del:hover, .notice-edit:hover, .notice-pin:hover { opacity: 1; }
+.notice-pin { width: 28px; height: 28px; border-radius: 50%; margin-left: 0; filter: grayscale(1); transition: opacity .15s, background .15s, filter .15s; }
+.notice-pin.active { opacity: 1; background: #e7f2fb; filter: none; }
 
 /* ---------- 캘린더 / 학사일정 ---------- */
 .timeline { position: relative; margin-top: 10px; }
@@ -834,6 +837,8 @@ body.locked { visibility: hidden; }
   .notice-head .tag { grid-row: 2; padding: 4px 9px; font-size: 11px; }
   .notice-head .nt-date { grid-row: 2; font-size: 11px; }
   .notice-head .nt-chev,
+  .notice-head .nt-pinned,
+  .notice-head .notice-pin,
   .notice-head .notice-alert,
   .notice-head .notice-edit,
   .notice-head .notice-del { grid-row: 2; margin-left: 0; }

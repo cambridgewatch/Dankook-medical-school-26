@@ -1,7 +1,7 @@
 /* 단국대 의대 26학번 — 공통 스크립트 */
 
 const BANNER_COLOR_KEY = "dkuBannerColor";
-const DEFAULT_BANNER_COLOR = "#334150";
+const DEFAULT_BANNER_COLOR = "#6fa8d6";
 const LEGACY_BANNER_COLORS = {
   navy: "#003b78", purple: "#62378f", green: "#146a55",
   burgundy: "#7b263e", orange: "#a95620", charcoal: DEFAULT_BANNER_COLOR,
@@ -26,16 +26,19 @@ function applyBannerColor(hex) {
   const base = bannerRgb(hex) || bannerRgb(DEFAULT_BANNER_COLOR);
   const root = document.documentElement.style;
   root.setProperty("--banner-start", bannerHex(bannerMix(base, [0, 0, 0], .42)));
-  root.setProperty("--banner-end", bannerHex(bannerMix(base, [255, 255, 255], .18)));
+  root.setProperty("--banner-end", bannerHex(bannerMix(base, [0, 0, 0], .10)));
   root.setProperty("--hero-a", bannerMix(base, [0, 0, 0], .48).join(", "));
   root.setProperty("--hero-b", bannerMix(base, [0, 0, 0], .20).join(", "));
-  root.setProperty("--hero-c", bannerMix(base, [255, 255, 255], .22).join(", "));
+  root.setProperty("--hero-c", bannerMix(base, [0, 0, 0], .06).join(", "));
 }
 window.applyBannerColor = applyBannerColor;
 
 const legacyBannerColor = LEGACY_BANNER_COLORS[localStorage.getItem("dkuBannerTheme")];
-const savedBannerColor = localStorage.getItem(BANNER_COLOR_KEY) || legacyBannerColor || DEFAULT_BANNER_COLOR;
-if (!localStorage.getItem(BANNER_COLOR_KEY)) localStorage.setItem(BANNER_COLOR_KEY, savedBannerColor);
+const storedBannerColor = localStorage.getItem(BANNER_COLOR_KEY);
+const savedBannerColor = !storedBannerColor || storedBannerColor === "#334150"
+  ? DEFAULT_BANNER_COLOR
+  : (storedBannerColor || legacyBannerColor || DEFAULT_BANNER_COLOR);
+if (storedBannerColor !== savedBannerColor) localStorage.setItem(BANNER_COLOR_KEY, savedBannerColor);
 applyBannerColor(savedBannerColor);
 
 document.addEventListener("DOMContentLoaded", () => {
