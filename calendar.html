@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>학사일정 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=52" />
+  <link rel="stylesheet" href="assets/css/style.css?v=53" />
 </head>
 <body class="locked">
 
@@ -40,6 +40,35 @@
   <section class="section">
     <div class="container">
 
+      <div class="cal-card">
+        <div class="cal-top">
+          <div class="cal-move">
+            <button class="cal-nav" id="calPrev" aria-label="이전 달">‹</button>
+            <h2 id="calTitle">2026년 6월</h2>
+            <button class="cal-nav" id="calNext" aria-label="다음 달">›</button>
+          </div>
+          <button class="cal-today" id="calToday">오늘</button>
+        </div>
+
+        <div class="cal-dow">
+          <span class="sun">일</span><span>월</span><span>화</span><span>수</span>
+          <span>목</span><span>금</span><span class="sat">토</span>
+        </div>
+
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <div class="cal-legend">
+        <span><i class="d acad"></i>학사</span>
+        <span><i class="d exam"></i>시험</span>
+        <span><i class="d event"></i>행사</span>
+        <span><i class="d todo"></i>할 일</span>
+        <span><i class="d assignment"></i>과제</span>
+        <span><i class="d meet"></i>모임</span>
+        <span><i class="d vac"></i>방학</span>
+        <span><i class="d holi"></i>공휴일</span>
+      </div>
+
       <div class="cal-banner" id="calBanner">날짜를 클릭하면 그날의 일정을 볼 수 있어요.</div>
 
       <section class="dday-panel" aria-labelledby="ddayTitle">
@@ -59,39 +88,6 @@
           <button type="button" id="calendarSearchClear" aria-label="검색어 지우기">×</button>
         </div>
         <div class="calendar-search-results" id="calendarSearchResults"></div>
-      </div>
-
-      <div class="cal-card">
-        <!-- 달력 헤더 (월 이동) -->
-        <div class="cal-top">
-          <div class="cal-move">
-            <button class="cal-nav" id="calPrev" aria-label="이전 달">‹</button>
-            <h2 id="calTitle">2026년 6월</h2>
-            <button class="cal-nav" id="calNext" aria-label="다음 달">›</button>
-          </div>
-          <button class="cal-today" id="calToday">오늘</button>
-        </div>
-
-        <!-- 요일 -->
-        <div class="cal-dow">
-          <span class="sun">일</span><span>월</span><span>화</span><span>수</span>
-          <span>목</span><span>금</span><span class="sat">토</span>
-        </div>
-
-        <!-- 날짜 그리드 (JS가 채움) -->
-        <div class="cal-grid" id="calGrid"></div>
-      </div>
-
-      <!-- 범례 -->
-      <div class="cal-legend">
-        <span><i class="d acad"></i>학사</span>
-        <span><i class="d exam"></i>시험</span>
-        <span><i class="d event"></i>행사</span>
-        <span><i class="d todo"></i>할 일</span>
-        <span><i class="d assignment"></i>과제</span>
-        <span><i class="d meet"></i>모임</span>
-        <span><i class="d vac"></i>방학</span>
-        <span><i class="d holi"></i>공휴일</span>
       </div>
 
       <p style="margin-top:20px;color:var(--gray);font-size:13px;text-align:center;">
@@ -146,7 +142,7 @@
 
   <script src="assets/js/main.js?v=21"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
-  <script type="module" src="assets/js/calendar.js?v=45"></script>
+  <script type="module" src="assets/js/calendar.js?v=47"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=18"></script>
 </body>

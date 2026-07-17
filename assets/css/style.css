@@ -747,6 +747,7 @@ body.locked { visibility: hidden; }
   font-size: 13px; color: var(--gray);
 }
 .cal-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.cal-legend + .cal-banner { margin-top: 20px; }
 
 /* 날짜 모달 */
 .cal-modal {

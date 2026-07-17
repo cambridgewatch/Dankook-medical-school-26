@@ -12,12 +12,35 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* 특정 날짜+내용의 캘린더 알림 모두 삭제 */
-async function deleteCalAlerts(date, text) {
+async function deleteCalAlerts(date, text, eventKey = "", relatedDates = [date]) {
   try {
-    const snap = await getDocs(query(collection(db, "alerts"), where("date", "==", date)));
-    const toDel = snap.docs.filter((d) => (d.data().text || "") === text);
-    await Promise.all(toDel.map((d) => deleteDoc(doc(db, "alerts", d.id))));
+    const snap = await getDocs(query(collection(db, "alerts"), where("type", "==", "calendar")));
+    const dateSet = new Set(relatedDates);
+    const toDelete = snap.docs.filter((item) => {
+      const value = item.data();
+      return (eventKey && value.calendarEventKey === eventKey)
+        || ((value.text || "") === text && dateSet.has(value.date));
+    });
+    await Promise.all(toDelete.map((item) => deleteDoc(item.ref)));
   } catch (e) {}
+}
+
+/* 전체 일정 수정 시 기존 알림의 날짜·제목·세부 내용도 함께 갱신 */
+async function syncCalAlerts(oldDates, oldText, eventKey, next) {
+  const snap = await getDocs(query(collection(db, "alerts"), where("type", "==", "calendar")));
+  const dateSet = new Set(oldDates);
+  const targets = snap.docs.filter((item) => {
+    const value = item.data();
+    return value.calendarEventKey === eventKey
+      || ((value.text || "") === oldText && dateSet.has(value.date));
+  });
+  await Promise.all(targets.map((item) => updateDoc(item.ref, {
+    date: next.date,
+    title: next.text,
+    text: next.text,
+    detail: next.detail || "",
+    updatedAt: serverTimestamp(),
+  })));
 }
 
 /* 분류별 라벨 */
@@ -431,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ${e.personal ? `<span class="ev-private">개인</span>` : ""}
           ${period ? `<span class="ev-period">${period}</span>` : ""}
           ${hasDetail ? `<span class="ev-chev">▾</span>` : ""}
-          ${isAdmin && !e.personal ? `<button class="ev-alert" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
+          ${isAdmin && !e.personal ? `<button class="ev-alert" data-key="${esc(e.eventKey)}" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
           ${canManage ? `<button class="ev-edit" data-key="${e.eventKey}" title="수정">✏️</button>` : ""}
           ${canManage ? `<button class="ev-del" data-key="${e.eventKey}" data-text="${esc(e.text)}" title="삭제">🗑</button>` : ""}
         </div>
@@ -481,7 +504,14 @@ document.addEventListener("DOMContentLoaded", () => {
           } else {
             await deleteDoc(doc(db, "calendarEvents", event.id));
           }
-          if (!event.personal) await deleteCalAlerts(activeKey, b.dataset.text); // 전체 일정 삭제 시 관련 알림도 삭제
+          if (!event.personal) {
+            await deleteCalAlerts(
+              activeKey,
+              b.dataset.text,
+              event.eventKey,
+              datesInRange(event.date || activeKey, event.endDate)
+            );
+          }
           alert("일정을 삭제했습니다.");
         } catch (err) { alert("삭제 실패: " + err.message); }
       });
@@ -491,9 +521,11 @@ document.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
         if (!confirm("이 일정을 알림으로 보낼까요?")) return;
         try {
-          await deleteCalAlerts(activeKey, b.dataset.text); // 같은 일정의 기존 알림 정리
+          await deleteCalAlerts(activeKey, b.dataset.text, b.dataset.key); // 같은 일정의 기존 알림 정리
           await addDoc(collection(db, "alerts"), {
-            type: "calendar", title: b.dataset.text, detail: b.dataset.detail || "", date: activeKey, text: b.dataset.text, createdAt: serverTimestamp(),
+            type: "calendar", title: b.dataset.text, detail: b.dataset.detail || "",
+            date: activeKey, text: b.dataset.text, calendarEventKey: b.dataset.key,
+            createdAt: serverTimestamp(),
           });
           alert("🔔 알림을 보냈어요!");
         } catch (err) { alert("알림 실패: " + err.message); }
@@ -530,7 +562,14 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           await updateDoc(doc(db, "calendarEvents", editingEvent.id), { ...values, updatedAt: serverTimestamp() });
         }
-        if (!editingEvent.personal) await deleteCalAlerts(activeKey, editingEvent.text);
+        if (!editingEvent.personal) {
+          await syncCalAlerts(
+            datesInRange(editingEvent.date || activeKey, editingEvent.endDate),
+            editingEvent.text,
+            editingEvent.eventKey,
+            values
+          );
+        }
       } else {
         const target = savePersonal
           ? collection(db, "calendarPersonal", currentUser.uid, "events")

@@ -17,6 +17,14 @@ async function deleteAlertsByNotice(id) {
   } catch (e) {}
 }
 
+/* 공지 수정 시 이미 발송된 알림도 최신 내용으로 동기화 */
+async function syncAlertsByNotice(id, title, detail) {
+  const snap = await getDocs(query(collection(db, "alerts"), where("noticeId", "==", id)));
+  await Promise.all(snap.docs.map((item) => updateDoc(item.ref, {
+    title, detail: detail || "", updatedAt: serverTimestamp(),
+  })));
+}
+
 const $ = (s) => document.querySelector(s);
 const TAG_LABEL = { notice: "필독", event: "행사", acad: "학사", info: "안내" };
 const TAG_CLASS = { notice: "", event: "event", acad: "acad", info: "info" };
@@ -203,6 +211,7 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       if (editingId) {
         await updateDoc(doc(db, "notices", editingId), { title, detail, tag, updatedAt: serverTimestamp() });
+        await syncAlertsByNotice(editingId, title, detail);
       } else {
         await addDoc(collection(db, "notices"), { title, detail, tag, createdAt: serverTimestamp() });
       }
