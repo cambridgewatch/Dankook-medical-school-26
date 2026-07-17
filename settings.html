@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>설정 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=50" />
+  <link rel="stylesheet" href="assets/css/style.css?v=55" />
 </head>
 <body class="locked">
   <header class="site-header">
@@ -57,76 +57,173 @@
           <span class="settings-guide-arrow">⌄</span>
         </summary>
         <div class="settings-guide-body">
-          <h3>로그인과 메뉴 이동</h3>
-          <ul>
-            <li>이름과 비밀번호로 로그인하면 홈페이지의 모든 메뉴를 이용할 수 있습니다.</li>
-            <li>PC에서는 상단 메뉴를, 모바일에서는 오른쪽 위의 메뉴 버튼을 눌러 페이지를 이동합니다.</li>
-            <li>상단의 종 모양 버튼에 표시된 숫자는 아직 확인하지 않은 알림 개수입니다.</li>
-          </ul>
+          <p class="settings-guide-intro">궁금한 화면을 선택하면 자세한 사용 방법이 펼쳐집니다.</p>
+          <div class="settings-guide-sections">
+            <details class="settings-guide-section">
+              <summary><span class="guide-section-icon">🏠</span><span><strong>홈</strong><small>주요 일정, 과제와 빠른 메뉴 확인</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <div class="settings-guide-section-body">
+                <h4>일정 요약 확인</h4>
+                <ul>
+                  <li>홈 상단의 <strong>주요 일정</strong>에는 가까운 시험·학사·행사가, <strong>과제 D-Day</strong>에는 가까운 과제가 표시됩니다.</li>
+                  <li>항목을 누르면 학사일정의 해당 월로 이동하고, 그 날짜에 등록된 일정 창이 열립니다.</li>
+                  <li>선택한 일정에 세부 내용이 있으면 자동으로 펼쳐집니다.</li>
+                  <li><strong>전체 보기</strong>를 누르면 학사일정 화면으로 이동합니다.</li>
+                </ul>
+                <h4>빠른 메뉴</h4>
+                <ul>
+                  <li>홈의 바로가기 카드를 이용하면 공지사항, 학사일정, 갤러리 등 자주 쓰는 화면으로 바로 이동할 수 있습니다.</li>
+                  <li>PC에서는 상단 메뉴를, 모바일에서는 오른쪽 위의 메뉴 버튼을 사용합니다.</li>
+                </ul>
+              </div>
+            </details>
 
-          <h3>공지사항과 알림</h3>
-          <ul>
-            <li>공지 제목을 누르면 접혀 있던 세부 내용이 열립니다. 다시 누르면 접힙니다.</li>
-            <li>검색창에서 공지 제목, 세부 내용 또는 분류를 검색할 수 있습니다.</li>
-            <li>공지는 한 페이지에 10개씩 표시되며, 아래쪽 페이지 번호로 이전 공지를 확인합니다.</li>
-            <li>알림을 누르면 해당 공지나 일정의 최신 세부 내용을 바로 확인할 수 있습니다.</li>
-            <li>확인한 알림은 옅게 표시되며, 개별 삭제 또는 모두 삭제를 사용할 수 있습니다.</li>
-          </ul>
+            <details class="settings-guide-section">
+              <summary><span class="guide-section-icon">📚</span><span><strong>수업 정보</strong><small>개인·공통 시간표 만들기</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <div class="settings-guide-section-body">
+                <h4>수업 추가</h4>
+                <ul>
+                  <li>과목명을 입력하고 원하는 색상을 고른 뒤 과목명 옆의 <strong>확인</strong> 버튼을 누릅니다.</li>
+                  <li>확인 버튼이 옅어지면 시간표에서 수업을 넣을 첫 시간부터 마지막 시간까지 세로로 드래그합니다.</li>
+                  <li>시간표는 평일 오전 8시부터 오후 8시까지 30분 단위로 선택할 수 있습니다.</li>
+                  <li>과목명을 수정하면 확인 상태가 해제되므로 다시 <strong>확인</strong>을 눌러야 합니다.</li>
+                </ul>
+                <h4>수정과 삭제</h4>
+                <ul>
+                  <li>등록된 수업 블록의 × 버튼을 누르면 해당 수업을 삭제할 수 있습니다.</li>
+                  <li>모바일에서는 시간표를 좌우로 밀어 월요일부터 금요일까지 확인합니다.</li>
+                  <li><strong>관리자 전용:</strong> 전체 학생에게 반영을 켜고 추가한 수업은 모든 학생의 시간표에 공통으로 표시됩니다. 끄고 추가하면 관리자 본인에게만 저장됩니다.</li>
+                </ul>
+              </div>
+            </details>
 
-          <h3>학사일정과 D-Day</h3>
-          <ul>
-            <li>날짜를 누르면 그날의 일정과 세부 내용이 열립니다.</li>
-            <li>상단 화살표로 이전·다음 달로 이동하고, <strong>오늘</strong> 버튼으로 현재 달로 돌아옵니다.</li>
-            <li>검색창에서 일정명, 세부 내용 또는 일정 분류를 검색할 수 있습니다.</li>
-            <li>여러 날 동안 이어지는 일정은 시작일부터 종료일까지 각 날짜에 표시됩니다.</li>
-            <li>일반 사용자가 추가한 일정은 본인에게만 보이며, 전체 일정과 함께 달력에 표시됩니다.</li>
-            <li>관리자는 기본적으로 전체 일정을 추가하고, <strong>개인 일정</strong> 버튼을 켜면 본인에게만 보이는 일정으로 저장할 수 있습니다.</li>
-            <li>가까운 시험·학사·행사는 주요 일정 D-Day에, 과제로 분류된 일정은 과제 D-Day에 표시됩니다.</li>
-            <li>D-Day 카드를 누르면 해당 월과 날짜가 자동으로 열립니다.</li>
-          </ul>
+            <details class="settings-guide-section">
+              <summary><span class="guide-section-icon">📌</span><span><strong>공지사항</strong><small>공지 열람, 검색과 페이지 이동</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <div class="settings-guide-section-body">
+                <h4>공지 확인</h4>
+                <ul>
+                  <li>공지 제목을 누르면 세부 내용이 펼쳐지고, 다시 누르면 접힙니다.</li>
+                  <li>검색창에 제목, 세부 내용 또는 분류를 입력해 필요한 공지를 찾을 수 있습니다.</li>
+                  <li>공지는 한 페이지에 10개씩 표시되며 아래쪽의 페이지 번호로 이전 공지를 확인합니다.</li>
+                  <li>고정된 공지는 일반 공지보다 위에 표시됩니다.</li>
+                </ul>
+                <h4>관리자 기능</h4>
+                <ul>
+                  <li>관리자는 공지 작성 영역에서 제목, 분류와 세부 내용을 입력해 공지를 등록할 수 있습니다.</li>
+                  <li>연필 버튼은 수정, 휴지통 버튼은 삭제, 핀 버튼은 공지 고정 또는 고정 해제에 사용합니다.</li>
+                  <li>알림 버튼을 누르면 모든 사용자에게 해당 공지 알림을 보낼 수 있습니다.</li>
+                </ul>
+              </div>
+            </details>
 
-          <h3>시간표</h3>
-          <ul>
-            <li>수업 정보 페이지에서 과목명과 색상을 정하고 과목명 옆의 <strong>확인</strong>을 누른 뒤 원하는 요일의 시간대를 세로로 드래그합니다.</li>
-            <li>시간표는 오전 8시부터 오후 8시까지 30분 단위로 설정할 수 있습니다.</li>
-            <li>관리자에게만 <strong>전체 학생에게 반영</strong> 버튼이 표시되며, 활성화한 뒤 입력을 확인하면 모든 학생의 시간표에 공통 수업이 추가됩니다.</li>
-            <li>전체 반영을 선택하지 않은 관리자와 일반 사용자가 추가한 수업은 본인의 시간표에만 저장됩니다.</li>
-            <li>각 시간표에는 전체 공통 수업과 본인이 추가한 수업이 함께 표시됩니다.</li>
-            <li>수업 블록 오른쪽 위의 × 버튼을 누르면 해당 수업을 삭제할 수 있습니다.</li>
-          </ul>
+            <details class="settings-guide-section">
+              <summary><span class="guide-section-icon">📅</span><span><strong>학사일정</strong><small>달력, 검색, 개인 일정과 D-Day</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <div class="settings-guide-section-body">
+                <h4>달력과 검색</h4>
+                <ul>
+                  <li>날짜를 누르면 그날의 모든 일정이 열립니다. 세부 내용이 있는 항목은 제목을 눌러 펼치거나 접을 수 있습니다.</li>
+                  <li>달력 위의 화살표로 이전·다음 달로 이동하고 <strong>오늘</strong>을 누르면 현재 달로 돌아옵니다.</li>
+                  <li>검색창에서는 일정명, 세부 내용과 분류를 검색할 수 있습니다. 결과를 누르면 해당 날짜가 열리고 선택한 세부 내용이 자동으로 펼쳐집니다.</li>
+                  <li>주요 일정과 과제 D-Day를 눌러도 같은 방식으로 해당 날짜를 확인할 수 있습니다.</li>
+                </ul>
+                <h4>일정 추가</h4>
+                <ul>
+                  <li>날짜를 직접 누른 뒤 시작일·종료일, 제목, 분류와 세부 내용을 입력해 일정을 저장합니다.</li>
+                  <li>기간 일정은 시작일부터 종료일까지 달력의 각 날짜에 표시됩니다.</li>
+                  <li>일반 사용자가 추가한 일정은 본인에게만 보이고, 연필·휴지통 버튼으로 수정하거나 삭제할 수 있습니다.</li>
+                  <li><strong>관리자 전용:</strong> 기본 입력은 전체 일정이며, <strong>개인 일정</strong>을 켜면 관리자 본인에게만 저장됩니다. 전체 일정은 수정·삭제하거나 알림으로 보낼 수 있습니다.</li>
+                </ul>
+              </div>
+            </details>
 
-          <h3>갤러리</h3>
-          <ul>
-            <li>사진 파일을 선택하고 해시태그를 입력한 뒤 <strong>사진 올리기</strong>를 누릅니다.</li>
-            <li>해시태그는 공백이나 쉼표로 구분하며, # 기호는 자동으로 붙습니다.</li>
-            <li>사진 아래에는 올린 사람의 이름이 표시됩니다.</li>
-            <li>사진을 누르면 크게 볼 수 있고, 자신이 올린 사진은 삭제할 수 있습니다.</li>
-          </ul>
+            <details class="settings-guide-section">
+              <summary><span class="guide-section-icon">🔔</span><span><strong>알림</strong><small>새 알림 확인과 삭제</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <div class="settings-guide-section-body">
+                <h4>알림 확인</h4>
+                <ul>
+                  <li>상단 종 모양에 표시된 숫자는 아직 확인하지 않은 알림 개수입니다.</li>
+                  <li>알림 제목을 누르면 최신 세부 내용이 펼쳐지고 확인한 알림은 옅게 표시됩니다.</li>
+                  <li>같은 알림을 확인하기 전에 관리자가 다시 보내더라도 목록에는 중복으로 쌓이지 않습니다.</li>
+                  <li>이미 확인한 알림이 다시 발송되면 최신 내용으로 목록 맨 위에 다시 표시됩니다.</li>
+                </ul>
+                <h4>알림 정리</h4>
+                <ul>
+                  <li>일반 사용자의 개별 삭제와 <strong>모두 삭제</strong>는 본인의 알림 목록만 정리합니다. 관리자가 개별 알림을 삭제하면 모든 사용자에게서 삭제됩니다.</li>
+                  <li>관리자가 원본 공지나 일정을 삭제하면 관련 알림도 모든 사용자에게서 함께 사라집니다.</li>
+                </ul>
+              </div>
+            </details>
 
-          <h3>미니게임과 투표</h3>
-          <ul>
-            <li>각 게임의 <strong>게임 열기</strong> 버튼을 누르면 해당 게임만 펼쳐집니다.</li>
-            <li>룰렛은 동기 전체 또는 직접 입력한 이름 중에서 무작위로 한 명을 뽑습니다.</li>
-            <li>사다리타기는 참가자와 도착 결과를 입력한 후 결과를 개별 또는 표로 확인합니다.</li>
-            <li>투표는 누구나 만들 수 있으며, 작성자의 이름이 함께 표시됩니다.</li>
-            <li>투표를 만들 때 선택 수정, 실시간 결과 공개, 참여자의 항목 추가 허용 여부를 정할 수 있습니다.</li>
-            <li>투표가 종료되면 모든 참여자에게 최종 결과가 표시됩니다.</li>
-          </ul>
+            <details class="settings-guide-section">
+              <summary><span class="guide-section-icon">🖼️</span><span><strong>갤러리</strong><small>사진과 해시태그 등록</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <div class="settings-guide-section-body">
+                <h4>사진 올리기</h4>
+                <ul>
+                  <li>사진 파일을 선택하고 해시태그를 입력한 뒤 <strong>사진 올리기</strong>를 누릅니다.</li>
+                  <li>해시태그는 공백이나 쉼표로 구분하며 # 기호를 쓰지 않아도 자동으로 붙습니다.</li>
+                  <li>업로드가 끝날 때까지 페이지를 닫거나 새로고침하지 마세요.</li>
+                </ul>
+                <h4>사진 확인과 삭제</h4>
+                <ul>
+                  <li>사진 카드에는 해시태그와 사진을 올린 사람의 실명이 표시됩니다.</li>
+                  <li>사진을 누르면 큰 화면으로 볼 수 있습니다.</li>
+                  <li>자신이 올린 사진에 표시되는 삭제 버튼으로 해당 사진을 삭제할 수 있습니다.</li>
+                </ul>
+              </div>
+            </details>
 
-          <h3>설정과 계정 관리</h3>
-          <ul>
-            <li>배너 색상을 선택하면 홈 화면과 각 페이지의 상단 배너 색상이 바로 변경됩니다.</li>
-            <li>자동 로그인을 켜면 브라우저를 다시 열어도 로그인 상태가 유지됩니다.</li>
-            <li>비밀번호 변경에는 현재 비밀번호와 6자 이상의 새 비밀번호가 필요합니다.</li>
-            <li>공용 기기에서는 자동 로그인을 끄고 사용이 끝난 뒤 로그아웃하세요.</li>
-          </ul>
+            <details class="settings-guide-section">
+              <summary><span class="guide-section-icon">👥</span><span><strong>동기 명단</strong><small>가입된 동기 계정 확인</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <div class="settings-guide-section-body">
+                <h4>명단 확인</h4>
+                <ul>
+                  <li>동기 명단 화면에서는 등록된 26학번 구성원을 확인할 수 있습니다.</li>
+                  <li>표시되는 이름은 로그인과 게시물 작성자 표시에 사용되는 계정 이름과 연결됩니다.</li>
+                  <li>계정이나 이름에 문제가 있으면 관리자에게 수정을 요청하세요.</li>
+                </ul>
+              </div>
+            </details>
 
-          <h3>화면이 제대로 갱신되지 않을 때</h3>
-          <ul>
-            <li>PC에서는 <strong>Ctrl + F5</strong>로 완전히 새로고침합니다.</li>
-            <li>모바일에서는 페이지를 닫았다가 다시 열거나 브라우저를 새로고침합니다.</li>
-            <li>로그인이 풀렸다면 로그인 페이지에서 다시 로그인하세요.</li>
-          </ul>
+            <details class="settings-guide-section">
+              <summary><span class="guide-section-icon">🎮</span><span><strong>미니게임</strong><small>룰렛, 사다리타기와 투표</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <div class="settings-guide-section-body">
+                <h4>룰렛과 사다리타기</h4>
+                <ul>
+                  <li>사용할 게임의 <strong>게임 열기</strong>를 누르면 해당 게임이 펼쳐지고 다른 게임은 접힙니다.</li>
+                  <li>전체 룰렛은 등록된 동기 중 한 명을 무작위로 뽑고, 직접 입력 룰렛은 입력한 이름을 나누어 원판을 만듭니다.</li>
+                  <li>사다리타기는 참가 인원을 정한 뒤 참가자와 도착 결과를 입력하고 사다리를 만듭니다.</li>
+                  <li>개별 결과를 선택해 확인하거나 <strong>결과 표로 보기</strong>를 눌러 전체 연결 결과를 볼 수 있습니다.</li>
+                  <li>모바일에서 사다리가 넓으면 게임 영역을 좌우로 밀어 확인합니다.</li>
+                </ul>
+                <h4>투표</h4>
+                <ul>
+                  <li>누구나 제목과 항목을 입력해 투표를 만들 수 있으며 작성자의 이름이 함께 표시됩니다.</li>
+                  <li>투표 생성 전에 투표 후 수정 허용, 종료 전 실시간 결과 공개, 참여자의 항목 추가 허용 여부를 선택합니다.</li>
+                  <li>투표 작성자와 관리자는 투표 내용 수정·삭제, 참여자·미참여자 확인과 투표 종료를 할 수 있습니다.</li>
+                  <li>투표를 종료하면 설정과 관계없이 모든 사용자에게 최종 결과가 공개됩니다.</li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="settings-guide-section">
+              <summary><span class="guide-section-icon">⚙️</span><span><strong>설정과 계정</strong><small>색상, 로그인 유지와 비밀번호</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <div class="settings-guide-section-body">
+                <h4>화면과 로그인 설정</h4>
+                <ul>
+                  <li>배너 색상에서 원하는 색을 선택하면 홈과 각 화면 상단에 적용되며 현재 기기에 저장됩니다.</li>
+                  <li><strong>기본 색상</strong>을 누르면 사이트 기본 배너 색상으로 돌아갑니다.</li>
+                  <li>로그인 유지를 켜면 브라우저를 닫았다가 다시 열어도 이 기기에서 로그인 상태가 유지됩니다.</li>
+                  <li>공용 기기에서는 로그인 유지를 끄고 사용 후 반드시 로그아웃하세요.</li>
+                </ul>
+                <h4>비밀번호 변경과 문제 해결</h4>
+                <ul>
+                  <li>현재 비밀번호를 입력하고 6자 이상의 새 비밀번호를 두 번 입력한 뒤 <strong>비밀번호 변경</strong>을 누릅니다.</li>
+                  <li>변경 성공 메시지가 표시된 뒤부터 새 비밀번호로 로그인합니다.</li>
+                  <li>화면이 갱신되지 않으면 PC에서 <strong>Ctrl + F5</strong>를 누르거나 모바일 브라우저를 새로고침하세요.</li>
+                  <li>계속 문제가 있으면 로그아웃한 뒤 다시 로그인해 보세요.</li>
+                </ul>
+              </div>
+            </details>
+          </div>
         </div>
       </details>
 
