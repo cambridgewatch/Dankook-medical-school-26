@@ -13,7 +13,7 @@ import {
 import {
   normalizeAttachments, validateAttachmentFiles, uploadAttachmentFiles, deleteAttachmentFiles,
   attachmentMarkup, attachmentEditorMarkup, bindAttachmentOpen, formatAttachmentSize,
-} from "./attachments.js?v=1";
+} from "./attachments.js?v=2";
 
 /* 특정 날짜+내용의 캘린더 알림 모두 삭제 */
 async function deleteCalAlerts(date, text, eventKey = "", relatedDates = [date]) {
@@ -625,7 +625,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const previousButtonText = cmSubmit.textContent;
     try {
       cmSubmit.disabled = true;
-      cmSubmit.textContent = cmFiles.files.length ? "파일 업로드 중…" : "저장 중…";
+      cmSubmit.textContent = cmFiles.files.length ? "사진 업로드 중…" : "저장 중…";
       const savePersonal = editingEvent
         ? !!editingEvent.personal
         : (!isAdmin || cmPersonalToggle.getAttribute("aria-pressed") === "true");

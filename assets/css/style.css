@@ -915,6 +915,19 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .post-detail-text { white-space: normal; overflow-wrap: anywhere; }
 .post-attachments { display: grid; gap: 7px; margin-top: 12px; }
 .post-detail-text + .post-attachments { padding-top: 12px; border-top: 1px dashed #dbe3ed; }
+.post-image-attachments { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.attachment-image {
+  display: block; min-width: 0; overflow: hidden; border: 1px solid #dce5ef; border-radius: 12px;
+  color: var(--ink); background: #f5f8fb; text-decoration: none;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.attachment-image:hover { border-color: var(--blue); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+.attachment-image img {
+  display: block; width: 100%; height: 210px; object-fit: contain; background: #edf2f7;
+}
+.attachment-image > span { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; }
+.attachment-image strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.attachment-image small { flex: 0 0 auto; color: var(--gray); font-size: 10px; }
 .attachment-open {
   display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 9px;
   width: 100%; padding: 10px 12px; border: 1px solid #dce5ef; border-radius: 10px;
@@ -979,6 +992,8 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .notice-search-box { min-height: 52px; padding: 0 14px; border-radius: 15px; margin-bottom: 16px; }
   .notice-search-box input { height: 50px; font-size: 14px; }
   .attachment-picker { align-items: flex-start; flex-direction: column; gap: 2px; }
+  .post-image-attachments { grid-template-columns: 1fr; }
+  .attachment-image img { height: auto; max-height: 320px; }
   .attachment-open { grid-template-columns: auto minmax(0, 1fr); }
   .attachment-open small { grid-column: 2; }
   .notice-head {

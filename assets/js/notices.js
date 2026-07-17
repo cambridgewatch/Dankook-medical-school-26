@@ -11,7 +11,7 @@ import {
 import {
   normalizeAttachments, validateAttachmentFiles, uploadAttachmentFiles, deleteAttachmentFiles,
   attachmentMarkup, attachmentEditorMarkup, bindAttachmentOpen, formatAttachmentSize,
-} from "./attachments.js?v=1";
+} from "./attachments.js?v=2";
 
 /* 특정 공지에 연결된 알림 모두 삭제 */
 async function deleteAlertsByNotice(id) {
@@ -275,7 +275,7 @@ window.addEventListener("DOMContentLoaded", () => {
     let uploadedAttachments = [];
     try {
       saveButton.disabled = true;
-      saveButton.textContent = filesInput.files.length ? "파일 업로드 중…" : "저장 중…";
+      saveButton.textContent = filesInput.files.length ? "사진 업로드 중…" : "저장 중…";
       uploadedAttachments = await uploadAttachmentFiles(
         filesInput.files,
         currentUser,
