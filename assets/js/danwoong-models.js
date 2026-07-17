@@ -122,7 +122,7 @@ export function createBlueDanwoong() {
   rightLeg.add(sphere(blueDark, "Leg_R", [0, -0.25, 0.15], [0.53, 0.50, 0.63], 40));
   root.add(rightLeg);
 
-  const tail = pivot("Tail_Pivot", [0, 1.35, -0.93]);
+  const tail = pivot("Tail_Pivot", [0, 1.35, -1.12]);
   tail.add(sphere(blueDark, "Tail", [0, 0, 0], [0.25, 0.25, 0.25], 28));
   root.add(tail);
 
@@ -174,7 +174,7 @@ export function createNavyDanwoong() {
     root.add(mesh(tuftGeometry, belly, `BellyTuft_${index + 1}`, [x, 0.93 + Math.abs(x) * 0.14, 0.79], [1, 1, 0.65], [0, 0, Math.PI]));
   });
 
-  const tail = pivot("Tail_Pivot", [0, 1.68, -0.86]);
+  const tail = pivot("Tail_Pivot", [0, 1.68, -1.02]);
   tail.add(sphere(black, "Tail", [0, 0, 0], [0.17, 0.17, 0.17], 24));
   root.add(tail);
 
