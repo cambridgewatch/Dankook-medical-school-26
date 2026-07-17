@@ -21,6 +21,9 @@ export function mountDanwoongWalk() {
   const canvas = document.createElement("canvas");
   canvas.className = "danwoong-walk-canvas";
   canvas.setAttribute("aria-hidden", "true");
+  const initiallyVisible = document.documentElement.dataset.mascots !== "hide";
+  canvas.hidden = !initiallyVisible;
+  canvas.style.display = initiallyVisible ? "" : "none";
   header.prepend(canvas);
 
   let renderer;
@@ -66,7 +69,7 @@ export function mountDanwoongWalk() {
   let cycleStarted = performance.now() / 1000;
   let sameHands = false;
   let lastFrame = 0;
-  let running = !document.hidden;
+  let running = initiallyVisible && !document.hidden;
   let approachDuration = APPROACH_SECONDS;
   let highFiveDuration = HIGH_FIVE_SECONDS;
   let exitDuration = EXIT_SECONDS;
@@ -244,7 +247,15 @@ export function mountDanwoongWalk() {
     renderer.render(scene, camera);
   }
 
-  document.addEventListener("visibilitychange", () => { running = !document.hidden; });
+  window.addEventListener("dkuMascotVisibility", (event) => {
+    const visible = event.detail?.visible !== false;
+    canvas.hidden = !visible;
+    canvas.style.display = visible ? "" : "none";
+    running = visible && !document.hidden;
+  });
+  document.addEventListener("visibilitychange", () => {
+    running = document.documentElement.dataset.mascots !== "hide" && !document.hidden;
+  });
   window.addEventListener("resize", resize, { passive: true });
   resize();
   chooseHands(cycleStarted);

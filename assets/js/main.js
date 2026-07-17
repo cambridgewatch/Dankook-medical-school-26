@@ -41,6 +41,31 @@ const savedBannerColor = !storedBannerColor || storedBannerColor === "#334150"
 if (storedBannerColor !== savedBannerColor) localStorage.setItem(BANNER_COLOR_KEY, savedBannerColor);
 applyBannerColor(savedBannerColor);
 
+const MASCOT_DISPLAY_KEY = "dkuMascotDisplay";
+let mascotModulePromise = null;
+
+function mountHeaderMascots() {
+  if (!document.querySelector(".site-header")) return;
+  if (!mascotModulePromise) {
+    mascotModulePromise = import(new URL("assets/js/danwoong-walk.js?v=7", document.baseURI).href);
+  }
+  mascotModulePromise
+    .then(({ mountDanwoongWalk }) => mountDanwoongWalk())
+    .catch((error) => console.warn("단웅이 애니메이션을 불러오지 못했습니다.", error));
+}
+
+function applyMascotDisplay(enabled, save = false) {
+  const visible = enabled !== false;
+  if (save) localStorage.setItem(MASCOT_DISPLAY_KEY, String(visible));
+  document.documentElement.dataset.mascots = visible ? "show" : "hide";
+  window.dispatchEvent(new CustomEvent("dkuMascotVisibility", { detail: { visible } }));
+  if (visible) mountHeaderMascots();
+}
+
+window.setMascotDisplay = (enabled) => applyMascotDisplay(Boolean(enabled), true);
+const savedMascotDisplay = localStorage.getItem(MASCOT_DISPLAY_KEY) !== "false";
+document.documentElement.dataset.mascots = savedMascotDisplay ? "show" : "hide";
+
 document.addEventListener("DOMContentLoaded", () => {
   /* 모바일 메뉴 토글 */
   const toggle = document.querySelector(".nav-toggle");
@@ -95,9 +120,5 @@ document.addEventListener("DOMContentLoaded", () => {
   /* 동기 명단 검색은 members.js(Firestore 연동)에서 처리합니다. */
 
   /* 상단 헤더의 단웅이 3D 걷기 애니메이션 */
-  if (document.querySelector(".site-header")) {
-    import(new URL("assets/js/danwoong-walk.js?v=6", document.baseURI).href)
-      .then(({ mountDanwoongWalk }) => mountDanwoongWalk())
-      .catch((error) => console.warn("단웅이 애니메이션을 불러오지 못했습니다.", error));
-  }
+  if (savedMascotDisplay) mountHeaderMascots();
 });

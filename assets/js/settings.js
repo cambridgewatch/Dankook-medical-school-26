@@ -13,6 +13,7 @@ import {
 const $ = (s) => document.querySelector(s);
 const PREF_KEY = "dkuAutoLogin";
 const BANNER_COLOR_KEY = "dkuBannerColor";
+const MASCOT_DISPLAY_KEY = "dkuMascotDisplay";
 const DEFAULT_BANNER_COLOR = "#6fa8d6";
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -37,6 +38,24 @@ window.addEventListener("DOMContentLoaded", () => {
   themeStatus.textContent = `${bannerColor.value.toUpperCase()} 색상을 사용 중입니다.`;
   bannerColor.addEventListener("input", () => selectBannerColor(bannerColor.value));
   bannerColorReset.addEventListener("click", () => selectBannerColor(DEFAULT_BANNER_COLOR));
+
+  const mascotToggle = $("#mascotDisplayToggle");
+  const mascotStatus = $("#mascotDisplayStatus");
+  const updateMascotStatus = (enabled) => {
+    mascotStatus.textContent = enabled
+      ? "단웅이와 단비가 위쪽에 표시됩니다."
+      : "단웅이와 단비가 숨겨져 있습니다.";
+    mascotStatus.className = `settings-status ${enabled ? "on" : ""}`;
+  };
+  const savedMascotDisplay = localStorage.getItem(MASCOT_DISPLAY_KEY) !== "false";
+  mascotToggle.checked = savedMascotDisplay;
+  updateMascotStatus(savedMascotDisplay);
+  mascotToggle.addEventListener("change", () => {
+    const enabled = mascotToggle.checked;
+    if (typeof window.setMascotDisplay === "function") window.setMascotDisplay(enabled);
+    else localStorage.setItem(MASCOT_DISPLAY_KEY, String(enabled));
+    updateMascotStatus(enabled);
+  });
 
   const showMessage = (text, ok = false) => {
     msg.textContent = text;

@@ -50,6 +50,18 @@
         <div class="settings-status on" id="bannerThemeStatus"></div>
       </div>
 
+      <div class="settings-card">
+        <div class="settings-card-head">
+          <div><span class="settings-icon">🐻</span><h2>단웅이 단비 표시</h2></div>
+          <label class="switch" aria-label="단웅이 단비 표시 설정">
+            <input type="checkbox" id="mascotDisplayToggle" />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <p>사이트 위쪽에서 걸어다니는 단웅이와 단비를 표시합니다. 이 설정은 현재 기기에 저장됩니다.</p>
+        <div class="settings-status on" id="mascotDisplayStatus"></div>
+      </div>
+
       <details class="settings-card settings-guide">
         <summary>
           <span class="settings-icon">?</span>
@@ -203,6 +215,7 @@
                 <ul>
                   <li>배너 색상에서 원하는 색을 선택하면 홈과 각 화면 상단에 적용되며 현재 기기에 저장됩니다.</li>
                   <li><strong>기본 색상</strong>을 누르면 사이트 기본 배너 색상으로 돌아갑니다.</li>
+                  <li><strong>단웅이 단비 표시</strong>를 끄면 위쪽의 3D 캐릭터 애니메이션이 숨겨지고, 다시 켜면 즉시 표시됩니다. 선택한 상태는 현재 기기에 저장됩니다.</li>
                   <li>로그인 유지를 켜면 브라우저를 닫았다가 다시 열어도 이 기기에서 로그인 상태가 유지됩니다.</li>
                   <li>공용 기기에서는 로그인 유지를 끄고 사용 후 반드시 로그아웃하세요.</li>
                 </ul>
@@ -271,8 +284,8 @@
     </div>
   </footer>
 
-  <script src="assets/js/main.js?v=28"></script>
-  <script type="module" src="assets/js/settings.js?v=5"></script>
+  <script src="assets/js/main.js?v=29"></script>
+  <script type="module" src="assets/js/settings.js?v=6"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=18"></script>
 </body>
