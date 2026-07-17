@@ -108,7 +108,7 @@ export function mountDanwoongWalk() {
   let interaction = null;
   let sequenceCursor = 0;
   try {
-    const savedSequence = Number.parseInt(sessionStorage.getItem("dkuMascotPoseSequenceV2") || "0", 10);
+    const savedSequence = Number.parseInt(sessionStorage.getItem("dkuMascotPoseSequenceV3") || "0", 10);
     if (Number.isInteger(savedSequence) && savedSequence >= 0 && savedSequence < 72) sequenceCursor = savedSequence;
   } catch {}
   let triggerLeft = 0;
@@ -226,10 +226,10 @@ export function mountDanwoongWalk() {
     .filter((index) => index !== DKU_MED_POSE_INDEX && index !== NUMBER_POSE_INDEX);
 
   function getSequencedPose(cursor) {
-    if (cursor % 4 === 3) {
+    if (cursor % 4 === 0) {
       return Math.floor(cursor / 4) % 2 === 0 ? DKU_MED_POSE_INDEX : NUMBER_POSE_INDEX;
     }
-    const previousSpecialCount = Math.floor((cursor + 1) / 4);
+    const previousSpecialCount = Math.floor(cursor / 4) + 1;
     const regularIndex = cursor - previousSpecialCount;
     return REGULAR_POSE_ORDER[regularIndex % REGULAR_POSE_ORDER.length];
   }
@@ -444,13 +444,13 @@ export function mountDanwoongWalk() {
       }
       case 9: addStar(gold,0,.28,.2,"joined"); break;
       case 10:
-        tagProp(addText("DKU", "#79bfff",0,.58,3.25,106,.36),"dku");
-        tagProp(addText("MED", "#ffffff",0,-.58,2.7,88,.36),"med");
-        addStar(gold,-1.55,.18,.18,"pop"); addStar(0x8fd1ff,1.55,.18,.18,"pop");
+        tagProp(addText("DKU", "#79bfff",0,.9,8.4,210,.42),"dku");
+        tagProp(addText("MED", "#ffffff",0,-.9,8.4,210,.42),"med");
+        addStar(gold,-4.1,.18,.24,"pop"); addStar(0x8fd1ff,4.1,.18,.24,"pop");
         break;
       case 11:
-        tagProp(addText("26", "#79bfff",0,0,3.25,132,.67),"number");
-        addStar(gold,-1.55,.2,.18,"numberSpark"); addStar(gold,1.55,.2,.18,"numberSpark");
+        tagProp(addText("26", "#79bfff",0,0,9,220,.5),"number");
+        addStar(gold,-4.1,.2,.24,"numberSpark"); addStar(gold,4.1,.2,.24,"numberSpark");
         break;
       case 12: {
         [[0,.9,.12,.28,.08,-.55],[-.11,.62,.12,.3,.08,.55],[.08,.35,.13,.32,.08,-.52]].forEach(([x,y,sx,sy,sz,rz])=>tagProp(addBox(gold,x,y,sx,sy,sz,rz),"lightning"));
@@ -869,7 +869,7 @@ export function mountDanwoongWalk() {
       : getSequencedPose(sequenceCursor);
     if (!forcedPose) {
       sequenceCursor = (sequenceCursor + 1) % 72;
-      try { sessionStorage.setItem("dkuMascotPoseSequenceV2", String(sequenceCursor)); } catch {}
+      try { sessionStorage.setItem("dkuMascotPoseSequenceV3", String(sequenceCursor)); } catch {}
     }
     interaction = {
       mode: "recall",
