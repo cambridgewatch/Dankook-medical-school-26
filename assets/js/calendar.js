@@ -10,6 +10,10 @@ import {
 import {
   collection, addDoc, setDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, getDocs, writeBatch, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  normalizeAttachments, validateAttachmentFiles, uploadAttachmentFiles, deleteAttachmentFiles,
+  attachmentMarkup, attachmentEditorMarkup, bindAttachmentOpen, formatAttachmentSize,
+} from "./attachments.js?v=1";
 
 /* 특정 날짜+내용의 캘린더 알림 모두 삭제 */
 async function deleteCalAlerts(date, text, eventKey = "", relatedDates = [date]) {
@@ -268,6 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const visible = allCalendarEvents().filter((event) => !event.personal).map((event) => ({
         date: event.date, endDate: event.endDate || "", text: event.text,
         detail: event.detail || "", type: event.type || "etc",
+        attachments: normalizeAttachments(event.attachments),
       }));
       const batch = writeBatch(db);
       latestCalendarSnap.docs.forEach((item) => batch.delete(item.ref));
@@ -305,6 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
               const event = {
                 id: item.id, date: value.date, endDate: value.endDate || "",
                 text: value.text, type: value.type, detail: value.detail || "",
+                attachments: normalizeAttachments(value.attachments),
               };
               datesInRange(value.date, value.endDate).forEach((date) => {
                 (personal[date] = personal[date] || []).push(event);
@@ -335,7 +341,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (v.kind === "defaultOverride" && v.sourceId) {
           overrides[v.sourceId] = { id: d.id, ...v };
         } else {
-          const event = { id: d.id, date: v.date, endDate: v.endDate || "", text: v.text, type: v.type, detail: v.detail || "" };
+          const event = {
+            id: d.id, date: v.date, endDate: v.endDate || "", text: v.text,
+            type: v.type, detail: v.detail || "", attachments: normalizeAttachments(v.attachments),
+          };
           datesInRange(v.date, v.endDate).forEach((date) => {
             (custom[date] = custom[date] || []).push(event);
           });
@@ -409,6 +418,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const cmText = document.querySelector("#cmText");
   const cmType = document.querySelector("#cmType");
   const cmDetail = document.querySelector("#cmDetail");
+  const cmFiles = document.querySelector("#cmFiles");
+  const cmAttachmentEditList = document.querySelector("#cmAttachmentEditList");
   const cmStartDate = document.querySelector("#cmStartDate");
   const cmEndDate = document.querySelector("#cmEndDate");
   const cmHint = document.querySelector("#cmHint");
@@ -416,6 +427,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const cmSubmit = cmForm.querySelector("button[type='submit']");
   let activeKey = null;
   let editingEvent = null;
+  let editingAttachments = [];
+  let removedAttachments = [];
   let modalReadOnly = false;
   let activeAutoOpenText = "";
 
@@ -441,6 +454,9 @@ document.addEventListener("DOMContentLoaded", () => {
     activeAutoOpenText = eventText;
     cmSubmit.textContent = "추가";
     cmForm.reset();
+    editingAttachments = [];
+    removedAttachments = [];
+    renderAttachmentEditor();
     setPersonalMode(false);
     cmStartDate.value = k;
     cmEndDate.value = k;
@@ -462,8 +478,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     cmList.innerHTML = evs.map((e) => {
-      const hasDetail = !!(e.detail && e.detail.trim());
-      const body = hasDetail ? esc(e.detail).replace(/\n/g, "<br>") : "";
+      const attachments = normalizeAttachments(e.attachments);
+      const hasDetail = !!(e.detail && e.detail.trim()) || attachments.length > 0;
+      const detailBody = e.detail && e.detail.trim()
+        ? `<div class="post-detail-text">${esc(e.detail).replace(/\n/g, "<br>")}</div>`
+        : "";
+      const body = `${detailBody}${attachmentMarkup(attachments)}`;
       const period = e.endDate && e.endDate > e.date ? `${e.date.replaceAll("-", ".")} – ${e.endDate.replaceAll("-", ".")}` : "";
       const canManage = !modalReadOnly && (isAdmin || e.personal);
       return `
@@ -492,14 +512,19 @@ document.addEventListener("DOMContentLoaded", () => {
         h.parentElement.classList.toggle("open");
       });
     });
+    bindAttachmentOpen(cmList);
     cmList.querySelectorAll(".ev-edit").forEach((b) => {
       b.addEventListener("click", (e) => {
         e.stopPropagation();
         const event = eventsOf(activeKey).find((item) => item.eventKey === b.dataset.key);
         if (!event) return;
         editingEvent = event;
+        editingAttachments = normalizeAttachments(event.attachments);
+        removedAttachments = [];
         cmText.value = event.text || "";
         cmDetail.value = event.detail || "";
+        cmFiles.value = "";
+        renderAttachmentEditor();
         cmType.value = event.type || "event";
         cmStartDate.value = event.date || activeKey;
         cmEndDate.value = event.endDate || event.date || activeKey;
@@ -521,7 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
           } else if (event.fixed) {
             const values = {
               kind: "defaultOverride", sourceId: event.sourceId, date: activeKey,
-              text: event.text, detail: event.detail || "", type: event.type, hidden: true,
+              text: event.text, detail: event.detail || "", type: event.type, attachments: [], hidden: true,
               by: ADMIN_NAME, updatedAt: serverTimestamp(),
             };
             if (event.overrideId) await updateDoc(doc(db, "calendarEvents", event.overrideId), values);
@@ -537,6 +562,7 @@ document.addEventListener("DOMContentLoaded", () => {
               datesInRange(event.date || activeKey, event.endDate)
             );
           }
+          await deleteAttachmentFiles(event.attachments || []);
           alert("일정을 삭제했습니다.");
         } catch (err) { alert("삭제 실패: " + err.message); }
       });
@@ -557,6 +583,36 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  function renderAttachmentEditor() {
+    if (!cmAttachmentEditList) return;
+    const selected = [...(cmFiles?.files || [])];
+    const selectedMarkup = selected.map((file) => `
+      <span class="attachment-edit-item new">
+        <span>＋ ${esc(file.name)}</span><small>${formatAttachmentSize(file.size)}</small>
+      </span>`).join("");
+    cmAttachmentEditList.innerHTML = attachmentEditorMarkup(editingAttachments) + selectedMarkup;
+    cmAttachmentEditList.querySelectorAll("button[data-attachment-index]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const index = Number(button.dataset.attachmentIndex);
+        const [removed] = editingAttachments.splice(index, 1);
+        if (removed) removedAttachments.push(removed);
+        renderAttachmentEditor();
+      });
+    });
+  }
+
+  cmFiles?.addEventListener("change", () => {
+    try {
+      validateAttachmentFiles(cmFiles.files, editingAttachments.length);
+      renderAttachmentEditor();
+    } catch (error) {
+      cmFiles.value = "";
+      renderAttachmentEditor();
+      alert(error.message);
+    }
+  });
+
   cmForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!currentUser) return;
@@ -565,13 +621,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const startDate = cmStartDate.value || activeKey;
     const endDate = cmEndDate.value || startDate;
     if (endDate < startDate) return alert("종료일은 시작일보다 빠를 수 없습니다.");
+    let uploadedAttachments = [];
+    const previousButtonText = cmSubmit.textContent;
     try {
+      cmSubmit.disabled = true;
+      cmSubmit.textContent = cmFiles.files.length ? "파일 업로드 중…" : "저장 중…";
       const savePersonal = editingEvent
         ? !!editingEvent.personal
         : (!isAdmin || cmPersonalToggle.getAttribute("aria-pressed") === "true");
+      uploadedAttachments = await uploadAttachmentFiles(
+        cmFiles.files,
+        currentUser,
+        "calendar",
+        editingAttachments.length,
+      );
       const values = {
         date: startDate, endDate: endDate > startDate ? endDate : "", text,
         detail: cmDetail.value.trim(), type: cmType.value,
+        attachments: [...editingAttachments, ...uploadedAttachments],
         by: currentUser.displayName || (isAdmin ? ADMIN_NAME : "개인"),
       };
       if (editingEvent) {
@@ -601,13 +668,24 @@ document.addEventListener("DOMContentLoaded", () => {
           : collection(db, "calendarEvents");
         await addDoc(target, { ...values, createdAt: serverTimestamp() });
       }
+      await deleteAttachmentFiles(removedAttachments);
       cmText.value = "";
       cmDetail.value = "";
+      cmFiles.value = "";
       editingEvent = null;
+      editingAttachments = [];
+      removedAttachments = [];
+      renderAttachmentEditor();
       cmSubmit.textContent = "추가";
       setPersonalMode(false);
       alert("일정을 저장했습니다.");
-    } catch (err) { alert("저장 실패: " + err.message); }
+    } catch (err) {
+      await deleteAttachmentFiles(uploadedAttachments);
+      alert("저장 실패: " + err.message);
+    } finally {
+      cmSubmit.disabled = false;
+      if (cmSubmit.textContent.endsWith("중…")) cmSubmit.textContent = previousButtonText;
+    }
   });
 
   function closeModal() {
@@ -617,6 +695,9 @@ document.addEventListener("DOMContentLoaded", () => {
     activeAutoOpenText = "";
     cmSubmit.textContent = "추가";
     cmForm.reset();
+    editingAttachments = [];
+    removedAttachments = [];
+    renderAttachmentEditor();
     setPersonalMode(false);
   }
   document.querySelector("#cmClose").addEventListener("click", closeModal);

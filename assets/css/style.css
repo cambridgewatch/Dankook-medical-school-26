@@ -603,7 +603,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   border-top: 1px solid transparent; transition: all 0.28s ease;
 }
 .notice-card.open .notice-body {
-  max-height: 600px; opacity: 1; padding: 14px 20px 18px; border-top-color: var(--line);
+  max-height: none; opacity: 1; overflow: visible; padding: 14px 20px 18px; border-top-color: var(--line);
 }
 .notice-item {
   display: grid;
@@ -909,7 +909,47 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   color: var(--gray); font-size: 13.5px; line-height: 1.6;
   border-top: 1px solid transparent; transition: all 0.25s ease;
 }
-.cm-ev.open .cm-ev-body { max-height: 400px; opacity: 1; padding: 10px 12px 12px; border-top-color: var(--line); }
+.cm-ev.open .cm-ev-body { max-height: none; opacity: 1; overflow: visible; padding: 10px 12px 12px; border-top-color: var(--line); }
+
+/* 공지·일정 첨부파일 */
+.post-detail-text { white-space: normal; overflow-wrap: anywhere; }
+.post-attachments { display: grid; gap: 7px; margin-top: 12px; }
+.post-detail-text + .post-attachments { padding-top: 12px; border-top: 1px dashed #dbe3ed; }
+.attachment-open {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 9px;
+  width: 100%; padding: 10px 12px; border: 1px solid #dce5ef; border-radius: 10px;
+  color: var(--ink); background: #f8fbfe; text-align: left; font: inherit; cursor: pointer;
+  transition: border-color .15s, background .15s, transform .15s;
+}
+.attachment-open:hover { border-color: var(--blue); background: var(--blue-light); transform: translateY(-1px); }
+.attachment-open:disabled { opacity: .6; cursor: wait; transform: none; }
+.attachment-icon { font-size: 15px; }
+.attachment-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.attachment-open small { color: var(--gray); font-size: 11px; white-space: nowrap; }
+.attachment-field { margin-top: 10px; }
+.attachment-field > input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.attachment-picker {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 11px 13px; border: 1px dashed #bac9d9; border-radius: 11px;
+  color: #40566e; background: #f8fbfe; font-size: 13px; font-weight: 750; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.attachment-picker:hover { border-color: var(--blue); background: var(--blue-light); }
+.attachment-picker small { color: var(--gray); font-size: 11px; font-weight: 500; }
+.attachment-edit-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+.attachment-edit-list:empty { display: none; }
+.attachment-edit-item {
+  display: inline-flex; align-items: center; gap: 7px; max-width: 100%; padding: 6px 8px 6px 10px;
+  border: 1px solid #dce5ef; border-radius: 999px; color: #40566e; background: #fff; font-size: 12px;
+}
+.attachment-edit-item.new { border-style: dashed; background: #f4f8fc; }
+.attachment-edit-item > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.attachment-edit-item small { color: var(--gray); white-space: nowrap; }
+.attachment-edit-item button {
+  display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%;
+  color: #65758a; background: #edf2f7; font-size: 15px; line-height: 1; cursor: pointer;
+}
+.attachment-edit-item button:hover { color: #fff; background: #d15b5b; }
 
 .cm-form { display: flex; flex-direction: column; gap: 8px; }
 .cm-period-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 8px; margin-bottom: 2px; }
@@ -938,6 +978,9 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .cm-row .btn { grid-column: 1 / -1; justify-content: center; }
   .notice-search-box { min-height: 52px; padding: 0 14px; border-radius: 15px; margin-bottom: 16px; }
   .notice-search-box input { height: 50px; font-size: 14px; }
+  .attachment-picker { align-items: flex-start; flex-direction: column; gap: 2px; }
+  .attachment-open { grid-template-columns: auto minmax(0, 1fr); }
+  .attachment-open small { grid-column: 2; }
   .notice-head {
     display: grid; grid-template-columns: auto minmax(0, 1fr) repeat(4, auto);
     gap: 10px 8px; padding: 15px 14px; align-items: center;

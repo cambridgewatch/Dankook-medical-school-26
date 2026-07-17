@@ -13,7 +13,7 @@ firebase.initializeApp({
 });
 
 const messaging = firebase.messaging();
-const CACHE_NAME = "dku-med26-app-v2";
+const CACHE_NAME = "dku-med26-app-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -31,7 +31,8 @@ const APP_SHELL = [
   "./assets/img/logo.png",
   "./assets/js/main.js",
   "./assets/js/session-hint.js",
-  "./assets/js/firebase-init.js"
+  "./assets/js/firebase-init.js",
+  "./assets/js/attachments.js"
 ];
 
 self.addEventListener("install", (event) => {

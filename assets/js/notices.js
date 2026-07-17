@@ -6,8 +6,12 @@
 import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs, serverTimestamp,
+  collection, addDoc, setDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  normalizeAttachments, validateAttachmentFiles, uploadAttachmentFiles, deleteAttachmentFiles,
+  attachmentMarkup, attachmentEditorMarkup, bindAttachmentOpen, formatAttachmentSize,
+} from "./attachments.js?v=1";
 
 /* 특정 공지에 연결된 알림 모두 삭제 */
 async function deleteAlertsByNotice(id) {
@@ -38,9 +42,14 @@ window.addEventListener("DOMContentLoaded", () => {
   const PER_PAGE = 10;
   let page = 1;
   let isAdmin = false;
+  let currentUser = null;
   let notices = [];
   let subscribed = false;
   let editingId = null;
+  let editingAttachments = [];
+  let removedAttachments = [];
+  const filesInput = $("#naFiles");
+  const attachmentEditList = $("#naAttachmentEditList");
   const openId = new URLSearchParams(location.search).get("open");
   let openHandled = false;
 
@@ -62,6 +71,7 @@ window.addEventListener("DOMContentLoaded", () => {
   if (!isConfigured) { note.textContent = "Firebase 설정 후 공지를 볼 수 있습니다."; return; }
 
   onAuthStateChanged(auth, (user) => {
+    currentUser = user;
     isAdmin = !!user && user.email === ADMIN_EMAIL;
     adminBar.style.display = isAdmin ? "block" : "none";
     if (user && !subscribed) {
@@ -103,8 +113,12 @@ window.addEventListener("DOMContentLoaded", () => {
     list.innerHTML = pageItems.map((n) => {
       const tag = TAG_CLASS[n.tag] || "";
       const date = fmt(n.createdAt);
-      const hasDetail = !!(n.detail && n.detail.trim());
-      const body = hasDetail ? esc(n.detail).replace(/\n/g, "<br>") : "";
+      const attachments = normalizeAttachments(n.attachments);
+      const hasDetail = !!(n.detail && n.detail.trim()) || attachments.length > 0;
+      const detailBody = n.detail && n.detail.trim()
+        ? `<div class="post-detail-text">${esc(n.detail).replace(/\n/g, "<br>")}</div>`
+        : "";
+      const body = `${detailBody}${attachmentMarkup(attachments)}`;
       return `
         <div class="notice-card ${hasDetail ? "has-detail" : ""}" data-id="${n.id}">
           <div class="notice-head">
@@ -129,6 +143,7 @@ window.addEventListener("DOMContentLoaded", () => {
         h.parentElement.classList.toggle("open");
       });
     });
+    bindAttachmentOpen(list);
     list.querySelectorAll(".notice-pin").forEach((button) => {
       button.addEventListener("click", async (event) => {
         event.stopPropagation();
@@ -148,9 +163,13 @@ window.addEventListener("DOMContentLoaded", () => {
         const notice = notices.find((n) => n.id === b.dataset.id);
         if (!notice) return;
         editingId = notice.id;
+        editingAttachments = normalizeAttachments(notice.attachments);
+        removedAttachments = [];
         $("#naTitle").value = notice.title || "";
         $("#naDetail").value = notice.detail || "";
         $("#naTag").value = notice.tag || "notice";
+        filesInput.value = "";
+        renderAttachmentEditor();
         $("#noticeAdmin h3").textContent = "✏️ 공지 수정";
         $("#naAdd").textContent = "수정 저장";
         adminBar.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -175,7 +194,9 @@ window.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
         if (!confirm("이 공지를 삭제할까요?")) return;
         try {
+          const notice = notices.find((item) => item.id === b.dataset.id);
           await deleteDoc(doc(db, "notices", b.dataset.id));
+          await deleteAttachmentFiles(notice?.attachments || []);
           await deleteAlertsByNotice(b.dataset.id); // 공지 삭제 시 관련 알림도 삭제
         } catch (err) { alert("삭제 실패: " + err.message); }
       });
@@ -202,25 +223,82 @@ window.addEventListener("DOMContentLoaded", () => {
     searchEl.focus();
   });
 
+  function renderAttachmentEditor() {
+    if (!attachmentEditList) return;
+    const selected = [...(filesInput?.files || [])];
+    const selectedMarkup = selected.map((file) => `
+      <span class="attachment-edit-item new">
+        <span>＋ ${esc(file.name)}</span><small>${formatAttachmentSize(file.size)}</small>
+      </span>`).join("");
+    attachmentEditList.innerHTML = attachmentEditorMarkup(editingAttachments) + selectedMarkup;
+    attachmentEditList.querySelectorAll("button[data-attachment-index]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const index = Number(button.dataset.attachmentIndex);
+        const [removed] = editingAttachments.splice(index, 1);
+        if (removed) removedAttachments.push(removed);
+        renderAttachmentEditor();
+      });
+    });
+  }
+
+  filesInput?.addEventListener("change", () => {
+    try {
+      validateAttachmentFiles(filesInput.files, editingAttachments.length);
+      renderAttachmentEditor();
+    } catch (error) {
+      filesInput.value = "";
+      renderAttachmentEditor();
+      alert(error.message);
+    }
+  });
+
+  function resetNoticeEditor() {
+    $("#naTitle").value = "";
+    $("#naDetail").value = "";
+    filesInput.value = "";
+    editingId = null;
+    editingAttachments = [];
+    removedAttachments = [];
+    renderAttachmentEditor();
+    $("#noticeAdmin h3").textContent = "✏️ 새 공지 작성";
+    $("#naAdd").textContent = "공지 등록";
+  }
+
   $("#naAdd").addEventListener("click", async () => {
     if (!isAdmin) return alert("관리자만 등록할 수 있습니다.");
     const title = $("#naTitle").value.trim();
     const detail = $("#naDetail").value.trim();
     const tag = $("#naTag").value;
     if (!title) return alert("공지 제목을 입력해 주세요.");
+    const saveButton = $("#naAdd");
+    const previousButtonText = saveButton.textContent;
+    let uploadedAttachments = [];
     try {
+      saveButton.disabled = true;
+      saveButton.textContent = filesInput.files.length ? "파일 업로드 중…" : "저장 중…";
+      uploadedAttachments = await uploadAttachmentFiles(
+        filesInput.files,
+        currentUser,
+        "notices",
+        editingAttachments.length,
+      );
+      const attachments = [...editingAttachments, ...uploadedAttachments];
       if (editingId) {
-        await updateDoc(doc(db, "notices", editingId), { title, detail, tag, updatedAt: serverTimestamp() });
+        await updateDoc(doc(db, "notices", editingId), { title, detail, tag, attachments, updatedAt: serverTimestamp() });
         await syncAlertsByNotice(editingId, title, detail);
       } else {
-        await addDoc(collection(db, "notices"), { title, detail, tag, createdAt: serverTimestamp() });
+        const noticeRef = doc(collection(db, "notices"));
+        await setDoc(noticeRef, { title, detail, tag, attachments, createdAt: serverTimestamp() });
       }
-      $("#naTitle").value = "";
-      $("#naDetail").value = "";
-      editingId = null;
-      $("#noticeAdmin h3").textContent = "✏️ 새 공지 작성";
-      $("#naAdd").textContent = "공지 등록";
-    } catch (err) { alert("등록 실패: " + err.message); }
+      await deleteAttachmentFiles(removedAttachments);
+      resetNoticeEditor();
+    } catch (err) {
+      await deleteAttachmentFiles(uploadedAttachments);
+      alert("등록 실패: " + err.message);
+    } finally {
+      saveButton.disabled = false;
+      if (saveButton.textContent.endsWith("중…")) saveButton.textContent = previousButtonText;
+    }
   });
 
   function fmt(ts) {
