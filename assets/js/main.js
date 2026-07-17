@@ -47,7 +47,7 @@ let mascotModulePromise = null;
 function mountHeaderMascots() {
   if (!document.querySelector(".site-header")) return;
   if (!mascotModulePromise) {
-    mascotModulePromise = import(new URL("assets/js/danwoong-walk.js?v=8", document.baseURI).href);
+    mascotModulePromise = import(new URL("assets/js/danwoong-walk.js?v=9", document.baseURI).href);
   }
   mascotModulePromise
     .then(({ mountDanwoongWalk }) => mountDanwoongWalk())
@@ -58,7 +58,7 @@ function applyMascotDisplay(enabled, save = false) {
   const visible = enabled !== false;
   if (save) localStorage.setItem(MASCOT_DISPLAY_KEY, String(visible));
   document.documentElement.dataset.mascots = visible ? "show" : "hide";
-  window.dispatchEvent(new CustomEvent("dkuMascotVisibility", { detail: { visible } }));
+  window.dispatchEvent(new CustomEvent("dkuMascotVisibility", { detail: { visible, restart: visible } }));
   if (visible) mountHeaderMascots();
 }
 

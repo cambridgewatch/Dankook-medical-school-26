@@ -69,6 +69,7 @@ export function mountDanwoongWalk() {
   let cycleStarted = performance.now() / 1000;
   let sameHands = false;
   let lastFrame = 0;
+  let visibleState = initiallyVisible;
   let running = initiallyVisible && !document.hidden;
   let approachDuration = APPROACH_SECONDS;
   let highFiveDuration = HIGH_FIVE_SECONDS;
@@ -154,6 +155,15 @@ export function mountDanwoongWalk() {
     walkers.navy.model.rotation.y = -0.18;
     walkMotion(walkers.blue, elapsed);
     walkMotion(walkers.navy, elapsed);
+  }
+
+  function restartFromEdges() {
+    const now = performance.now() / 1000;
+    chooseHands(now);
+    lastFrame = 0;
+    poseHands();
+    approach(0);
+    renderer.render(scene, camera);
   }
 
   function highFive(elapsed) {
@@ -247,26 +257,32 @@ export function mountDanwoongWalk() {
     renderer.render(scene, camera);
   }
 
-  window.addEventListener("dkuMascotVisibility", (event) => {
-    const visible = event.detail?.visible !== false;
+  function setMascotVisibility(visible, restart = false) {
+    const shouldRestart = visible && (restart || !visibleState);
+    visibleState = visible;
     canvas.hidden = !visible;
     if (visible) canvas.style.removeProperty("display");
     else canvas.style.setProperty("display", "none", "important");
-    if (visible) {
-      const now = performance.now() / 1000;
+    if (shouldRestart) {
       resize();
-      chooseHands(now);
-      poseHands();
-      approach(0);
-      renderer.render(scene, camera);
+      restartFromEdges();
     }
     running = visible && !document.hidden;
+  }
+
+  window.addEventListener("dkuMascotVisibility", (event) => {
+    const visible = event.detail?.visible !== false;
+    setMascotVisibility(visible, event.detail?.restart !== false && visible);
   });
+  new MutationObserver(() => {
+    const visible = document.documentElement.dataset.mascots !== "hide";
+    setMascotVisibility(visible, visible && !visibleState);
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-mascots"] });
   document.addEventListener("visibilitychange", () => {
     running = document.documentElement.dataset.mascots !== "hide" && !document.hidden;
   });
   window.addEventListener("resize", resize, { passive: true });
   resize();
-  chooseHands(cycleStarted);
+  restartFromEdges();
   requestAnimationFrame(frame);
 }
