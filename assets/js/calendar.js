@@ -88,6 +88,19 @@ document.addEventListener("DOMContentLoaded", () => {
   function key(y, m, d) {
     return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
   }
+  function datesInRange(start, end = start) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(start || "")) return [];
+    const last = /^\d{4}-\d{2}-\d{2}$/.test(end || "") && end >= start ? end : start;
+    const dates = [];
+    const cursor = new Date(`${start}T00:00:00`);
+    for (let i = 0; i < 367; i++) {
+      const value = key(cursor.getFullYear(), cursor.getMonth(), cursor.getDate());
+      dates.push(value);
+      if (value >= last) break;
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return dates;
+  }
   function eventsOf(k) {
     const def = (useDefaults ? (DEFAULTS[k] || []) : []).map((e, index) => {
       const sourceId = `${k}:${index}`;
@@ -107,9 +120,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function allCalendarEvents() {
-    return [...new Set([...Object.keys(DEFAULTS), ...Object.keys(custom)])]
+    const events = [...new Set([...Object.keys(DEFAULTS), ...Object.keys(custom)])]
       .sort()
       .flatMap((date) => eventsOf(date).map((event) => ({ date, ...event })));
+    const seen = new Set();
+    return events.filter((event) => {
+      const id = event.fixed ? event.eventKey : `custom:${event.id}`;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
   }
 
   function goToEvent(date) {
@@ -117,6 +137,13 @@ document.addEventListener("DOMContentLoaded", () => {
     view = new Date(y, m - 1, 1);
     render();
     openDay(date);
+  }
+
+  function eventDateLabel(event, short = false) {
+    const start = short ? event.date.slice(5).replace("-", ".") : event.date.replaceAll("-", ".");
+    if (!event.endDate || event.endDate <= event.date) return start;
+    const end = short ? event.endDate.slice(5).replace("-", ".") : event.endDate.replaceAll("-", ".");
+    return `${start}–${end}`;
   }
 
   function renderDdays() {
@@ -140,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <button type="button" class="dday-item" data-date="${event.date}">
         <strong>${event.days === 0 ? "D-Day" : `D-${event.days}`}</strong>
         <span>${esc(event.text)}</span>
-        <small>${event.date.replaceAll("-", ".")} · ${LABEL[event.type] || "일정"}</small>
+        <small>${eventDateLabel(event)} · ${LABEL[event.type] || "일정"}</small>
       </button>`).join("");
     ddayList.querySelectorAll(".dday-item").forEach((button) => {
       button.addEventListener("click", () => goToEvent(button.dataset.date));
@@ -167,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <button type="button" class="dday-item assignment-dday-item" data-date="${event.date}">
         <strong>${event.days === 0 ? "D-Day" : `D-${event.days}`}</strong>
         <span>${esc(event.text)}</span>
-        <small>${event.date.replaceAll("-", ".")} · 과제</small>
+        <small>${eventDateLabel(event)} · 과제</small>
       </button>`).join("");
     assignmentDdayList.querySelectorAll(".dday-item").forEach((button) => {
       button.addEventListener("click", () => goToEvent(button.dataset.date));
@@ -188,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
     calendarSearchResults.classList.add("open");
     calendarSearchResults.innerHTML = results.length ? results.map((event) => `
       <button type="button" class="cal-search-item" data-date="${event.date}">
-        <time>${event.date.slice(5).replace("-", ".")}</time>
+        <time>${eventDateLabel(event, true)}</time>
         <span>${esc(event.text)}</span>
       </button>`).join("") : `<p class="empty-note">검색 결과가 없습니다.</p>`;
     calendarSearchResults.querySelectorAll(".cal-search-item").forEach((button) => {
@@ -204,10 +231,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (latestCalendarSnap.docs.some((d) => d.id === MIGRATION_ID)) return;
     migrationStarted = true;
     try {
-      const dates = [...new Set([...Object.keys(DEFAULTS), ...Object.keys(custom)])].sort();
-      const visible = dates.flatMap((date) => eventsOf(date).map((event) => ({
-        date, text: event.text, detail: event.detail || "", type: event.type || "etc",
-      })));
+      const visible = allCalendarEvents().map((event) => ({
+        date: event.date, endDate: event.endDate || "", text: event.text,
+        detail: event.detail || "", type: event.type || "etc",
+      }));
       const batch = writeBatch(db);
       latestCalendarSnap.docs.forEach((item) => batch.delete(item.ref));
       visible.forEach((event) => {
@@ -247,7 +274,10 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (v.kind === "defaultOverride" && v.sourceId) {
           overrides[v.sourceId] = { id: d.id, ...v };
         } else {
-          (custom[v.date] = custom[v.date] || []).push({ id: d.id, text: v.text, type: v.type, detail: v.detail || "" });
+          const event = { id: d.id, date: v.date, endDate: v.endDate || "", text: v.text, type: v.type, detail: v.detail || "" };
+          datesInRange(v.date, v.endDate).forEach((date) => {
+            (custom[date] = custom[date] || []).push(event);
+          });
         }
       });
       render();
@@ -312,6 +342,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const cmText = document.querySelector("#cmText");
   const cmType = document.querySelector("#cmType");
   const cmDetail = document.querySelector("#cmDetail");
+  const cmStartDate = document.querySelector("#cmStartDate");
+  const cmEndDate = document.querySelector("#cmEndDate");
   const cmHint = document.querySelector("#cmHint");
   const cmSubmit = cmForm.querySelector("button[type='submit']");
   let activeKey = null;
@@ -324,6 +356,9 @@ document.addEventListener("DOMContentLoaded", () => {
     editingEvent = null;
     cmSubmit.textContent = "추가";
     cmForm.reset();
+    cmStartDate.value = k;
+    cmEndDate.value = k;
+    cmEndDate.min = k;
     const [y, m, d] = k.split("-").map(Number);
     cmDate.textContent = `${m}월 ${d}일`;
     drawList();
@@ -340,11 +375,13 @@ document.addEventListener("DOMContentLoaded", () => {
     cmList.innerHTML = evs.map((e) => {
       const hasDetail = !!(e.detail && e.detail.trim());
       const body = hasDetail ? esc(e.detail).replace(/\n/g, "<br>") : "";
+      const period = e.endDate && e.endDate > e.date ? `${e.date.replaceAll("-", ".")} – ${e.endDate.replaceAll("-", ".")}` : "";
       return `
       <li class="cm-ev ${hasDetail ? "has-detail" : ""}">
         <div class="cm-ev-head">
           <span class="ev-tag ${e.type}">${LABEL[e.type]}</span>
           <span class="ev-text">${esc(e.text)}</span>
+          ${period ? `<span class="ev-period">${period}</span>` : ""}
           ${hasDetail ? `<span class="ev-chev">▾</span>` : ""}
           ${isAdmin ? `<button class="ev-alert" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
           ${isAdmin ? `<button class="ev-edit" data-key="${e.eventKey}" title="수정">✏️</button>` : ""}
@@ -368,6 +405,9 @@ document.addEventListener("DOMContentLoaded", () => {
         cmText.value = event.text || "";
         cmDetail.value = event.detail || "";
         cmType.value = event.type || "event";
+        cmStartDate.value = event.date || activeKey;
+        cmEndDate.value = event.endDate || event.date || activeKey;
+        cmEndDate.min = cmStartDate.value;
         cmSubmit.textContent = "수정 저장";
         cmText.focus();
       });
@@ -414,8 +454,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!isAdmin) return;
     const text = cmText.value.trim();
     if (!text) return;
+    const startDate = cmStartDate.value || activeKey;
+    const endDate = cmEndDate.value || startDate;
+    if (endDate < startDate) return alert("종료일은 시작일보다 빠를 수 없습니다.");
     try {
-      const values = { date: activeKey, text, detail: cmDetail.value.trim(), type: cmType.value, by: ADMIN_NAME };
+      const values = { date: startDate, endDate: endDate > startDate ? endDate : "", text, detail: cmDetail.value.trim(), type: cmType.value, by: ADMIN_NAME };
       if (editingEvent) {
         if (editingEvent.fixed) {
           const overrideValues = {
@@ -457,6 +500,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelector("#calPrev").addEventListener("click", () => { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); render(); });
   document.querySelector("#calNext").addEventListener("click", () => { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); render(); });
   document.querySelector("#calToday").addEventListener("click", () => { view = new Date(today.getFullYear(), today.getMonth(), 1); render(); });
+  cmStartDate.addEventListener("change", () => {
+    cmEndDate.min = cmStartDate.value;
+    if (!cmEndDate.value || cmEndDate.value < cmStartDate.value) cmEndDate.value = cmStartDate.value;
+  });
   calendarSearch?.addEventListener("input", renderCalendarSearch);
   document.querySelector("#calendarSearchClear")?.addEventListener("click", () => {
     calendarSearch.value = "";

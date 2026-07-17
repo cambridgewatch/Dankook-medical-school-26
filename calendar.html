@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>학사일정 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=37" />
+  <link rel="stylesheet" href="assets/css/style.css?v=40" />
 </head>
 <body class="locked">
 
@@ -107,6 +107,11 @@
       <h3 id="cmDate">날짜</h3>
       <ul class="cm-list" id="cmList"></ul>
       <form class="cm-form" id="cmForm">
+        <div class="cm-period-row">
+          <label>시작일<input type="date" id="cmStartDate" /></label>
+          <span>–</span>
+          <label>종료일<input type="date" id="cmEndDate" /></label>
+        </div>
         <div class="cm-row">
           <input type="text" id="cmText" placeholder="일정 / 할 일" maxlength="40" />
           <select id="cmType"></select>
@@ -140,7 +145,7 @@
 
   <script src="assets/js/main.js?v=18"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
-  <script type="module" src="assets/js/calendar.js?v=42"></script>
+  <script type="module" src="assets/js/calendar.js?v=43"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=14"></script>
 </body>
