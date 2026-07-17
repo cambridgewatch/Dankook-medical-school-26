@@ -110,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let latestCalendarSnap = null;
   let migrationStarted = false;
   let nextDateClickReadOnly = false;
+  let nextDateClickEventText = "";
   const MIGRATION_ID = "editable-reset-v1";
 
   function key(y, m, d) {
@@ -160,13 +161,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function goToEvent(date, readOnly = true) {
+  function goToEvent(date, readOnly = true, eventText = "") {
     const [y, m] = date.split("-").map(Number);
     view = new Date(y, m - 1, 1);
     render();
     const dateCell = grid.querySelector(`.cal-cell[data-key="${date}"]`);
     if (!dateCell) return;
     nextDateClickReadOnly = readOnly;
+    nextDateClickEventText = eventText;
     document.querySelector(".cal-card")?.scrollIntoView({ block: "start", behavior: "auto" });
     dateCell.click();
   }
@@ -196,13 +198,13 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     ddayList.innerHTML = upcoming.map((event) => `
-      <button type="button" class="dday-item" data-date="${event.date}">
+      <button type="button" class="dday-item" data-date="${event.date}" data-event="${esc(event.text)}">
         <strong>${event.days === 0 ? "D-Day" : `D-${event.days}`}</strong>
         <span>${esc(event.text)}</span>
         <small>${eventDateLabel(event)} · ${LABEL[event.type] || "일정"}</small>
       </button>`).join("");
     ddayList.querySelectorAll(".dday-item").forEach((button) => {
-      button.addEventListener("click", () => goToEvent(button.dataset.date));
+      button.addEventListener("click", () => goToEvent(button.dataset.date, true, button.dataset.event));
     });
   }
 
@@ -223,13 +225,13 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     assignmentDdayList.innerHTML = assignments.map((event) => `
-      <button type="button" class="dday-item assignment-dday-item" data-date="${event.date}">
+      <button type="button" class="dday-item assignment-dday-item" data-date="${event.date}" data-event="${esc(event.text)}">
         <strong>${event.days === 0 ? "D-Day" : `D-${event.days}`}</strong>
         <span>${esc(event.text)}</span>
         <small>${eventDateLabel(event)} · 과제</small>
       </button>`).join("");
     assignmentDdayList.querySelectorAll(".dday-item").forEach((button) => {
-      button.addEventListener("click", () => goToEvent(button.dataset.date));
+      button.addEventListener("click", () => goToEvent(button.dataset.date, true, button.dataset.event));
     });
   }
 
@@ -246,13 +248,13 @@ document.addEventListener("DOMContentLoaded", () => {
     ).slice(0, 20);
     calendarSearchResults.classList.add("open");
     calendarSearchResults.innerHTML = results.length ? results.map((event) => `
-      <button type="button" class="cal-search-item" data-date="${event.date}">
+      <button type="button" class="cal-search-item" data-date="${event.date}" data-event="${esc(event.text)}">
         <time>${eventDateLabel(event, true)}</time>
         <span>${esc(event.text)}</span>
       </button>`).join("") : `<p class="empty-note">검색 결과가 없습니다.</p>`;
     calendarSearchResults.querySelectorAll(".cal-search-item").forEach((button) => {
       button.addEventListener("click", () => {
-        goToEvent(button.dataset.date);
+        goToEvent(button.dataset.date, true, button.dataset.event);
         calendarSearchResults.classList.remove("open");
       });
     });
@@ -391,8 +393,10 @@ document.addEventListener("DOMContentLoaded", () => {
     grid.querySelectorAll(".cal-cell:not(.empty)").forEach((cell) => {
       cell.addEventListener("click", () => {
         const readOnly = nextDateClickReadOnly;
+        const eventText = nextDateClickEventText;
         nextDateClickReadOnly = false;
-        openDay(cell.dataset.key, readOnly);
+        nextDateClickEventText = "";
+        openDay(cell.dataset.key, readOnly, eventText);
       });
     });
   }
@@ -413,6 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeKey = null;
   let editingEvent = null;
   let modalReadOnly = false;
+  let activeAutoOpenText = "";
 
   cmType.innerHTML = ADD_TYPES.map((t) => `<option value="${t}">${LABEL[t]}</option>`).join("");
 
@@ -429,10 +434,11 @@ document.addEventListener("DOMContentLoaded", () => {
     setPersonalMode(cmPersonalToggle.getAttribute("aria-pressed") !== "true");
   });
 
-  function openDay(k, readOnly = false) {
+  function openDay(k, readOnly = false, eventText = "") {
     activeKey = k;
     editingEvent = null;
     modalReadOnly = readOnly;
+    activeAutoOpenText = eventText;
     cmSubmit.textContent = "추가";
     cmForm.reset();
     setPersonalMode(false);
@@ -475,6 +481,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ${hasDetail ? `<div class="cm-ev-body">${body}</div>` : ""}
       </li>`;
     }).join("");
+    if (activeAutoOpenText) {
+      cmList.querySelectorAll(".cm-ev.has-detail").forEach((item) => {
+        if (item.querySelector(".ev-text")?.textContent === activeAutoOpenText) item.classList.add("open");
+      });
+    }
     cmList.querySelectorAll(".cm-ev.has-detail .cm-ev-head").forEach((h) => {
       h.addEventListener("click", (e) => {
         if (e.target.closest(".ev-del") || e.target.closest(".ev-alert") || e.target.closest(".ev-edit")) return;
@@ -603,6 +614,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.classList.remove("open");
     editingEvent = null;
     modalReadOnly = false;
+    activeAutoOpenText = "";
     cmSubmit.textContent = "추가";
     cmForm.reset();
     setPersonalMode(false);
@@ -640,13 +652,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function tryDeepLink() {
     if (linkHandled || !linkDate || !/^\d{4}-\d{2}-\d{2}$/.test(linkDate)) return;
     linkHandled = true;
-    goToEvent(linkDate, _p.get("view") === "1");
-    if (linkEv && _p.get("view") !== "1") {
-      cmList.querySelectorAll(".cm-ev").forEach((li) => {
-        const t = li.querySelector(".ev-text");
-        if (t && t.textContent === linkEv) li.classList.add("open");
-      });
-    }
+    goToEvent(linkDate, _p.get("view") === "1", linkEv || "");
   }
 
   updateBanner();
