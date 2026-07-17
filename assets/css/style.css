@@ -100,10 +100,43 @@ html.dku-session-known body.locked { visibility: visible; }
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   color: transparent;
+  opacity: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.danwoong-pose-trigger::before {
+  content: "";
+  width: 22px;
+  height: 22px;
+  background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='%2300205b'%3E%3Cellipse cx='9.5' cy='11.5' rx='4.2' ry='5.1' transform='rotate(-24 9.5 11.5)'/%3E%3Cellipse cx='17' cy='7.8' rx='4.1' ry='5.2' transform='rotate(-7 17 7.8)'/%3E%3Cellipse cx='24.7' cy='8.3' rx='4.1' ry='5.2' transform='rotate(9 24.7 8.3)'/%3E%3Cellipse cx='31' cy='12.8' rx='4.1' ry='5' transform='rotate(25 31 12.8)'/%3E%3Cpath d='M20 15.2c-7.1 0-12.1 5.8-12.1 12.6 0 5.2 4.2 8.3 9 6.3 2.1-.9 4.1-.9 6.2 0 4.8 2 9-1.1 9-6.3 0-6.8-5-12.6-12.1-12.6Z'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: .3;
+  filter: drop-shadow(0 2px 4px rgba(0, 32, 91, .12));
+  transition: opacity .2s ease, transform .2s ease, filter .2s ease;
+  animation: mascot-paw-hint 5.5s ease-in-out infinite;
+}
+.danwoong-pose-trigger:hover::before,
+.danwoong-pose-trigger:focus-visible::before {
+  opacity: .72;
+  transform: scale(1.08);
+  filter: drop-shadow(0 3px 6px rgba(0, 32, 91, .2));
+  animation-play-state: paused;
+}
+.danwoong-pose-trigger:disabled::before {
   opacity: 0;
+  transform: scale(.75);
+  animation: none;
+}
+@keyframes mascot-paw-hint {
+  0%, 70%, 100% { opacity: .3; transform: scale(1); }
+  78% { opacity: .48; transform: scale(1.08); }
+  86% { opacity: .34; transform: scale(1); }
 }
 .danwoong-pose-trigger:disabled { pointer-events: none; }
 .danwoong-pose-trigger:focus { outline: none; }
+@media (prefers-reduced-motion: reduce) {
+  .danwoong-pose-trigger::before { animation: none; }
+}
 html[data-mascots="hide"] .danwoong-walk-canvas {
   display: none !important;
 }
