@@ -396,11 +396,6 @@ body.locked { visibility: hidden; }
 .tt-quick-help { grid-column: 1 / -1; margin: -2px 2px 0; color: #7a8593; font-size: 11px; line-height: 1.55; }
 .tt-quick-help strong { color: #425165; }
 .timetable-grid.ready { cursor: crosshair; box-shadow: inset 0 0 0 2px rgba(66,103,169,.18); }
-.timetable-guide { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; max-width: 940px; margin: 0 auto 12px; color: var(--gray); font-size: 13px; }
-.timetable-guide span { display: inline-flex; align-items: center; gap: 6px; }
-.timetable-guide small { margin-left: auto; }
-.tt-legend { width: 13px; height: 13px; border-radius: 4px; background: #4267a9; }
-.tt-legend.personal { background: #fff; border: 2px dashed #4267a9; }
 .timetable-scroll { max-width: 940px; margin: 0 auto; overflow-x: auto; border: 1px solid #dbe2ec; border-radius: 18px; background: #fff; box-shadow: var(--shadow); }
 .timetable-head, .timetable-grid { min-width: 680px; display: grid; grid-template-columns: 68px repeat(5, minmax(115px, 1fr)); }
 .timetable-head { position: sticky; top: 0; z-index: 5; background: #f8faff; border-bottom: 1px solid var(--line); }
@@ -429,9 +424,6 @@ body.locked { visibility: hidden; }
   .tt-tool-actions { grid-column: 1 / -1; }
   .tt-tool-actions button { flex: 1; padding-inline: 10px; }
   .tt-quick-help { font-size: 10px; }
-  .timetable-guide { gap: 8px 12px; margin-bottom: 9px; font-size: 11px; }
-  .timetable-guide small { width: 100%; margin-left: 0; font-size: 10px; }
-  .tt-legend { width: 10px; height: 10px; border-radius: 3px; }
   .timetable-scroll { width: 100%; overflow-x: hidden; border-radius: 12px; }
   .timetable-head, .timetable-grid {
     width: 100%; min-width: 0;

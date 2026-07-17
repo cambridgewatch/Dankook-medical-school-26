@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .sort((a, b) => a.days - b.days || a.date.localeCompare(b.date))
       .slice(0, 6);
     if (!assignments.length) {
-      assignmentDdayList.innerHTML = `<p class="dday-empty">등록된 과제가 없습니다. 일정을 추가할 때 분류를 ‘과제’로 선택하세요.</p>`;
+      assignmentDdayList.innerHTML = `<p class="dday-empty">등록된 과제가 없습니다.</p>`;
       return;
     }
     assignmentDdayList.innerHTML = assignments.map((event) => `
