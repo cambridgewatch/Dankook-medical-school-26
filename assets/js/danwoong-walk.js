@@ -67,6 +67,9 @@ export function mountDanwoongWalk() {
   let sameHands = false;
   let lastFrame = 0;
   let running = !document.hidden;
+  let approachDuration = APPROACH_SECONDS;
+  let highFiveDuration = HIGH_FIVE_SECONDS;
+  let exitDuration = EXIT_SECONDS;
   const testPattern = new URLSearchParams(location.search).get("danwoongTest");
 
   function chooseHands(now) {
@@ -104,6 +107,9 @@ export function mountDanwoongWalk() {
     const modelScale = width <= 820 ? 0.86 : 0.82;
     blue.scale.setScalar(modelScale);
     navy.scale.setScalar(modelScale);
+    approachDuration = width <= 820 ? APPROACH_SECONDS : 9.6;
+    highFiveDuration = width <= 820 ? HIGH_FIVE_SECONDS : 1.5;
+    exitDuration = width <= 820 ? EXIT_SECONDS : 7.4;
   }
 
   function poseHandAngles(blueAngle, navyAngle) {
@@ -134,7 +140,7 @@ export function mountDanwoongWalk() {
   }
 
   function approach(elapsed) {
-    const progress = ease(Math.min(1, elapsed / APPROACH_SECONDS));
+    const progress = ease(Math.min(1, elapsed / approachDuration));
     walkers.blue.model.position.x = mix(-edge, meetCenter - meet, progress);
     walkers.navy.model.position.x = mix(edge, meetCenter + meet, progress);
     walkers.blue.model.position.z = 0;
@@ -146,7 +152,7 @@ export function mountDanwoongWalk() {
   }
 
   function highFive(elapsed) {
-    const progress = Math.min(1, elapsed / HIGH_FIVE_SECONDS);
+    const progress = Math.min(1, elapsed / highFiveDuration);
     const jump = Math.sin(progress * Math.PI) * 0.72;
     walkers.blue.model.position.set(meetCenter - meet, -2.53 + jump, 0);
     walkers.navy.model.position.set(meetCenter + meet, -2.53 + jump, 0.2);
@@ -159,7 +165,7 @@ export function mountDanwoongWalk() {
   }
 
   function crossingHighFive(elapsed) {
-    const progress = Math.min(1, elapsed / HIGH_FIVE_SECONDS);
+    const progress = Math.min(1, elapsed / highFiveDuration);
     const blueFrom = walkers.blue.handUp ? BLUE_HIGH : BLUE_LOW;
     const navyFrom = walkers.navy.handUp ? NAVY_HIGH : NAVY_LOW;
     poseHandAngles(mix(blueFrom, BLUE_CONTACT, ease(progress)), mix(navyFrom, NAVY_CONTACT, ease(progress)));
@@ -175,7 +181,7 @@ export function mountDanwoongWalk() {
   }
 
   function retreat(elapsed) {
-    const progress = ease(Math.min(1, elapsed / EXIT_SECONDS));
+    const progress = ease(Math.min(1, elapsed / exitDuration));
     walkers.blue.model.position.x = mix(meetCenter - meet, -edge, progress);
     walkers.navy.model.position.x = mix(meetCenter + meet, edge, progress);
     walkers.blue.model.rotation.y = -0.58;
@@ -187,7 +193,7 @@ export function mountDanwoongWalk() {
   }
 
   function passBy(elapsed) {
-    const progress = ease(Math.min(1, elapsed / EXIT_SECONDS));
+    const progress = ease(Math.min(1, elapsed / exitDuration));
     const handProgress = ease(Math.min(1, elapsed / 0.7));
     const blueEnd = walkers.blue.handUp ? BLUE_LOW : BLUE_HIGH;
     const navyEnd = walkers.navy.handUp ? NAVY_LOW : NAVY_HIGH;
@@ -210,25 +216,25 @@ export function mountDanwoongWalk() {
     const elapsed = now - cycleStarted;
     poseHands();
     if (testPattern === "highfive-up" || testPattern === "highfive-down") {
-      highFive(HIGH_FIVE_SECONDS / 2);
+      highFive(highFiveDuration / 2);
       renderer.render(scene, camera);
       return;
     }
     if (testPattern === "highfive-mismatch") {
-      crossingHighFive(HIGH_FIVE_SECONDS);
+      crossingHighFive(highFiveDuration);
       renderer.render(scene, camera);
       return;
     }
-    if (elapsed < APPROACH_SECONDS) {
+    if (elapsed < approachDuration) {
       approach(elapsed);
-    } else if (elapsed < APPROACH_SECONDS + HIGH_FIVE_SECONDS) {
-      if (sameHands) highFive(elapsed - APPROACH_SECONDS);
-      else crossingHighFive(elapsed - APPROACH_SECONDS);
+    } else if (elapsed < approachDuration + highFiveDuration) {
+      if (sameHands) highFive(elapsed - approachDuration);
+      else crossingHighFive(elapsed - approachDuration);
     } else {
-      const exitElapsed = elapsed - APPROACH_SECONDS - HIGH_FIVE_SECONDS;
+      const exitElapsed = elapsed - approachDuration - highFiveDuration;
       if (sameHands) retreat(exitElapsed);
       else passBy(exitElapsed);
-      if (exitElapsed >= EXIT_SECONDS) {
+      if (exitElapsed >= exitDuration) {
         chooseHands(now);
         approach(0);
       }
