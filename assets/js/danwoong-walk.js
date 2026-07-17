@@ -114,6 +114,7 @@ export function mountDanwoongWalk() {
   let triggerLeft = 0;
   let triggerWidth = 40;
   let triggerWorldWidth = 8;
+  let compactHeader = false;
   const searchParams = new URLSearchParams(location.search);
   const testPattern = searchParams.get("danwoongTest");
   const poseTest = Number.parseInt(searchParams.get("mascotPose") || "", 10);
@@ -132,6 +133,7 @@ export function mountDanwoongWalk() {
     const rect = header.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height || 68));
+    compactHeader = width <= 820;
     renderer.setSize(width, height, false);
     const aspect = width / height;
     halfWidth = 2.65 * aspect;
@@ -279,26 +281,29 @@ export function mountDanwoongWalk() {
   }
 
   function addText(text, color = "#ffffff", x = 0, y = 0, width = 1.2, fontSize = 74, heightRatio = .5, style = {}) {
+    const resolutionScale = style.resolutionScale || 1;
+    const canvasWidth = 512 * resolutionScale;
+    const canvasHeight = 256 * resolutionScale;
     const labelCanvas = document.createElement("canvas");
-    labelCanvas.width = 512;
-    labelCanvas.height = 256;
+    labelCanvas.width = canvasWidth;
+    labelCanvas.height = canvasHeight;
     const context = labelCanvas.getContext("2d");
-    context.clearRect(0, 0, 512, 256);
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
     const fontWeight = style.fontWeight || 900;
     const fontFamily = style.fontFamily || 'Pretendard, sans-serif';
-    context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-    if ("letterSpacing" in context) context.letterSpacing = `${style.letterSpacing || 0}px`;
+    context.font = `${fontWeight} ${fontSize * resolutionScale}px ${fontFamily}`;
+    if ("letterSpacing" in context) context.letterSpacing = `${(style.letterSpacing || 0) * resolutionScale}px`;
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.lineJoin = "round";
-    context.lineWidth = style.strokeWidth ?? 14;
+    context.lineWidth = (style.strokeWidth ?? 14) * resolutionScale;
     context.strokeStyle = style.strokeColor || "rgba(0,32,91,.72)";
-    if (context.lineWidth > 0) context.strokeText(text, 256, 128);
+    if (context.lineWidth > 0) context.strokeText(text, canvasWidth / 2, canvasHeight / 2);
     context.shadowColor = style.shadowColor || "transparent";
-    context.shadowBlur = style.shadowBlur || 0;
-    context.shadowOffsetY = style.shadowOffsetY || 0;
+    context.shadowBlur = (style.shadowBlur || 0) * resolutionScale;
+    context.shadowOffsetY = (style.shadowOffsetY || 0) * resolutionScale;
     context.fillStyle = color;
-    context.fillText(text, 256, 128);
+    context.fillText(text, canvasWidth / 2, canvasHeight / 2);
     const texture = new THREE.CanvasTexture(labelCanvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false }));
@@ -455,7 +460,8 @@ export function mountDanwoongWalk() {
       }
       case 9: addStar(gold,0,.28,.2,"joined"); break;
       case 10: {
-        const titleWidth = Math.min(25, triggerWorldWidth * .96) / 1.5;
+        const mobileWidthScale = compactHeader ? .6 : 1;
+        const titleWidth = Math.min(25, triggerWorldWidth * .96) / 1.5 * mobileWidthScale;
         const titleStyle = {
           fontWeight: 800,
           fontFamily: '"SF Pro Display", "Segoe UI Variable Display", "Avenir Next", "Helvetica Neue", Arial, sans-serif',
@@ -465,13 +471,15 @@ export function mountDanwoongWalk() {
           shadowColor: "rgba(24, 72, 112, .2)",
           shadowBlur: 10,
           shadowOffsetY: 3,
+          resolutionScale: 2,
         };
         tagProp(addText("DKU", "#62b6e8",0,.84,titleWidth,220,2.05/titleWidth,titleStyle),"dku");
         tagProp(addText("MED", "#173a63",0,-.84,titleWidth,220,2.05/titleWidth,titleStyle),"med");
         break;
       }
       case 11: {
-        const numberWidth = Math.min(16, triggerWorldWidth * 1.45) * .9 / 1.2;
+        const mobileWidthScale = compactHeader ? .6 : 1;
+        const numberWidth = Math.min(16, triggerWorldWidth * 1.45) * .9 / 1.2 * mobileWidthScale;
         const numberStyle = {
           fontWeight: 800,
           fontFamily: '"SF Pro Display", "Segoe UI Variable Display", "Avenir Next", "Helvetica Neue", Arial, sans-serif',
@@ -481,6 +489,7 @@ export function mountDanwoongWalk() {
           shadowColor: "rgba(24, 72, 112, .2)",
           shadowBlur: 12,
           shadowOffsetY: 3,
+          resolutionScale: 2,
         };
         tagProp(addText("26", "#327fb8",0,0,numberWidth,230,(4.35*.9/1.2)/numberWidth,numberStyle),"number");
         break;

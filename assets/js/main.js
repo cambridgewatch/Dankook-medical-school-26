@@ -47,7 +47,7 @@ let mascotModulePromise = null;
 function mountHeaderMascots() {
   if (!document.querySelector(".site-header")) return;
   if (!mascotModulePromise) {
-    mascotModulePromise = import(new URL("assets/js/danwoong-walk.js?v=28", document.baseURI).href);
+    mascotModulePromise = import(new URL("assets/js/danwoong-walk.js?v=29", document.baseURI).href);
   }
   mascotModulePromise
     .then(({ mountDanwoongWalk }) => mountDanwoongWalk())
