@@ -29,7 +29,7 @@ export const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
 
 /* Firebase Console → 프로젝트 설정 → Cloud Messaging에서 만든 웹 푸시 공개키(VAPID)를 넣으세요.
    이 값은 공개키이므로 웹 코드에 있어도 안전합니다. */
-export const WEB_PUSH_VAPID_KEY = "";
+export const WEB_PUSH_VAPID_KEY = "BD6NlsvDKlDOvROv9l9N_jCkSkk68V4q90ywC3nNOswec1ZyzjVo_XkL-0OqaprG5hFE8LMz9SBsODGnR0fpfDg";
 export const webPushReady = WEB_PUSH_VAPID_KEY.length > 20;
 
 /* ImgBB(무료 이미지 호스팅) API 키 — 사진 파일은 여기에 저장됩니다.
