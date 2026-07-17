@@ -496,7 +496,7 @@ export function mountDanwoongWalk() {
       case 9: addStar(gold,0,.28,.2,"joined"); break;
       case 10: {
         const responsiveWidthScale = compactHeader ? .6 : .65 * .8;
-        const titleOffsetX = compactHeader ? 0 : -.4;
+        const titleOffsetX = compactHeader ? 0 : -.2;
         const titleWidth = Math.min(25, triggerWorldWidth * .96) / 1.5 * responsiveWidthScale;
         const titleStyle = {
           fontWeight: 800,
@@ -515,7 +515,7 @@ export function mountDanwoongWalk() {
       }
       case 11: {
         const responsiveWidthScale = compactHeader ? .6 : .65 * .8;
-        const titleOffsetX = compactHeader ? 0 : -.4;
+        const titleOffsetX = compactHeader ? 0 : -.2;
         const numberWidth = Math.min(16, triggerWorldWidth * 1.45) * .9 / 1.2 * responsiveWidthScale;
         const numberStyle = {
           fontWeight: 800,
