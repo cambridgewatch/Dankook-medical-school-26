@@ -389,6 +389,9 @@ body.locked { visibility: hidden; }
 .tt-confirm-btn:hover b { transform: translateX(2px); }
 .tt-confirm-btn:active { transform: translateY(0); box-shadow: 0 3px 8px rgba(25,39,52,.18); }
 .tt-confirm-btn:focus-visible { outline: 3px solid rgba(66,103,169,.25); outline-offset: 2px; }
+.tt-confirm-btn.confirmed { border-color: #cbd2da; background: #e9edf1; color: #687584; box-shadow: none; filter: none; }
+.tt-confirm-btn.confirmed:hover { transform: none; box-shadow: none; filter: none; }
+.tt-confirm-btn.confirmed:hover b { transform: none; }
 .tt-quick-help { grid-column: 1 / -1; margin: -2px 2px 0; color: #7a8593; font-size: 11px; line-height: 1.55; }
 .tt-quick-help strong { color: #425165; }
 .timetable-grid.ready { cursor: crosshair; box-shadow: inset 0 0 0 2px rgba(66,103,169,.18); }

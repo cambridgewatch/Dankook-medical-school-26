@@ -62,6 +62,9 @@ window.addEventListener("DOMContentLoaded", () => {
         console.warn("로그인 유지 설정을 적용하지 못했습니다.", persistenceError);
       }
       const credential = await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
+      sessionStorage.setItem("dkuSessionKnown", "1");
+      if (remember) localStorage.setItem("dkuSessionKnown", "1");
+      else localStorage.removeItem("dkuSessionKnown");
       if (!credential.user.displayName) {
         await updateProfile(credential.user, { displayName: name.normalize("NFC") });
       }

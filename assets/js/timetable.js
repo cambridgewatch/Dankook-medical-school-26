@@ -42,10 +42,19 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   grid.innerHTML = cells;
 
+  function setConfirmState(confirmed) {
+    confirmButton.classList.toggle("confirmed", confirmed);
+    confirmButton.setAttribute("aria-pressed", String(confirmed));
+    confirmButton.innerHTML = confirmed
+      ? '<span>확인됨</span><b aria-hidden="true">✓</b>'
+      : '<span>확인</span><b aria-hidden="true">→</b>';
+  }
+
   function resetPreparedCourse() {
     if (!preparedCourse) return;
     preparedCourse = null;
     grid.classList.remove("ready");
+    setConfirmState(false);
     status.textContent = "입력 내용이 변경되었습니다. 확인을 다시 눌러 주세요.";
   }
 
@@ -75,6 +84,7 @@ window.addEventListener("DOMContentLoaded", () => {
       color: colorInput.value,
       scope: applyToAll ? "global" : "personal",
     };
+    setConfirmState(true);
     grid.classList.add("ready");
     status.textContent = applyToAll
       ? `${subject}: 모든 학생에게 반영할 시간대를 드래그하세요.`

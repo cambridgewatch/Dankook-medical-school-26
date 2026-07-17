@@ -101,6 +101,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   $("#settingsLogoutBtn").addEventListener("click", async () => {
     if (!confirm("이 기기에서 로그아웃할까요?")) return;
+    sessionStorage.removeItem("dkuSessionKnown");
+    localStorage.removeItem("dkuSessionKnown");
     await signOut(auth);
     location.replace("login.html");
   });
