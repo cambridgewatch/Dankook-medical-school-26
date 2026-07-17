@@ -23,7 +23,6 @@ window.addEventListener("DOMContentLoaded", () => {
   let globalEntries = [];
   let personalEntries = [];
   let dragging = false;
-  let activePointerId = null;
   let startCell = null;
   let currentCell = null;
   let preparedCourse = null;
@@ -47,10 +46,13 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!preparedCourse) return;
     preparedCourse = null;
     grid.classList.remove("ready");
-    status.textContent = "입력 내용이 변경되었습니다. 입력 확인을 다시 눌러 주세요.";
+    status.textContent = "입력 내용이 변경되었습니다. 확인을 다시 눌러 주세요.";
   }
 
   subjectInput.addEventListener("input", resetPreparedCourse);
+  subjectInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") confirmButton.click();
+  });
   colorInput.addEventListener("input", resetPreparedCourse);
 
   applyAllButton.addEventListener("click", () => {
@@ -100,21 +102,28 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!cell) return;
       if (!user) return;
       if (!preparedCourse) {
-        status.textContent = "과목명과 색상을 정하고 입력 확인을 먼저 눌러 주세요.";
+        status.textContent = "과목명과 색상을 정하고 확인을 먼저 눌러 주세요.";
         subjectInput.focus();
         return;
       }
       event.preventDefault();
       dragging = true;
-      activePointerId = event.pointerId;
       startCell = cell;
       currentCell = cell;
-      grid.setPointerCapture?.(event.pointerId);
       drawSelection();
   });
 
+  grid.addEventListener("pointerover", (event) => {
+    if (!dragging) return;
+    const cell = event.target.closest(".tt-cell");
+    if (cell && cell.dataset.day === startCell.dataset.day) {
+      currentCell = cell;
+      drawSelection();
+    }
+  });
+
   window.addEventListener("pointermove", (event) => {
-    if (!dragging || event.pointerId !== activePointerId) return;
+    if (!dragging) return;
     event.preventDefault();
     const cell = document.elementFromPoint(event.clientX, event.clientY)?.closest(".tt-cell");
     if (cell && cell.dataset.day === startCell.dataset.day) {
@@ -123,11 +132,9 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }, { passive: false });
 
-  window.addEventListener("pointerup", async (event) => {
-    if (event.pointerId !== activePointerId) return;
+  window.addEventListener("pointerup", async () => {
     if (!dragging || !startCell || !currentCell) return;
     dragging = false;
-    activePointerId = null;
     const day = Number(startCell.dataset.day);
     const startSlot = Math.min(Number(startCell.dataset.slot), Number(currentCell.dataset.slot));
     const endSlot = Math.max(Number(startCell.dataset.slot), Number(currentCell.dataset.slot)) + 1;
@@ -150,7 +157,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("pointercancel", () => {
     dragging = false;
-    activePointerId = null;
     startCell = null;
     currentCell = null;
     clearSelection();
@@ -190,16 +196,16 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!user) return;
     isAdmin = user.email === ADMIN_EMAIL;
     if (isAdmin) {
-      applyAllButton.hidden = false;
+      applyAllButton.parentElement.hidden = false;
     } else {
-      applyAllButton.hidden = true;
+      applyAllButton.parentElement.hidden = true;
       applyAllButton.setAttribute("aria-pressed", "false");
       applyAllButton.textContent = "전체 학생에게 반영";
     }
     onSnapshot(collection(db, "timetableGlobal"), (snap) => {
       globalEntries = snap.docs.map((item) => ({ id: item.id, ...item.data() }));
       renderEntries();
-      if (!preparedCourse) status.textContent = "과목명과 색상을 정하고 입력 확인을 눌러 주세요.";
+      if (!preparedCourse) status.textContent = "과목명과 색상을 정하고 확인을 눌러 주세요.";
     }, (err) => { status.textContent = "전체 시간표를 불러오지 못했습니다: " + err.message; });
     onSnapshot(collection(db, "timetablePersonal", user.uid, "entries"), (snap) => {
       personalEntries = snap.docs.map((item) => ({ id: item.id, ...item.data() }));

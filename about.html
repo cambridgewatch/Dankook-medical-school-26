@@ -47,18 +47,22 @@
       </div>
 
       <div class="timetable-tools">
-        <label>과목명<input type="text" id="ttSubject" maxlength="30" placeholder="예: 일반화학" /></label>
+        <label class="tt-subject-label">과목명
+          <span class="tt-subject-row">
+            <input type="text" id="ttSubject" maxlength="30" placeholder="예: 일반화학" />
+            <button type="button" class="tt-confirm-btn" id="ttConfirm">확인</button>
+          </span>
+        </label>
         <label>색상<input type="color" id="ttColor" value="#4267a9" /></label>
-        <div class="tt-tool-actions">
-          <button type="button" class="tt-all-btn" id="ttApplyAll" aria-pressed="false" hidden>전체 학생에게 반영</button>
-          <button type="button" class="tt-confirm-btn" id="ttConfirm">입력 확인</button>
+        <div class="tt-tool-actions" id="ttAdminActions" hidden>
+          <button type="button" class="tt-all-btn" id="ttApplyAll" aria-pressed="false">전체 학생에게 반영</button>
         </div>
       </div>
 
       <div class="timetable-guide">
         <span><i class="tt-legend global"></i>전체 학생 공통 수업</span>
         <span><i class="tt-legend personal"></i>내가 추가한 수업</span>
-        <small>입력 확인 후 드래그 · 30분 단위</small>
+        <small>확인 후 드래그 · 30분 단위</small>
       </div>
 
       <div class="timetable-scroll" aria-label="시간표. 모바일에서는 좌우로 스크롤할 수 있습니다.">
@@ -91,7 +95,7 @@
 
   <script src="assets/js/main.js?v=19"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
-  <script type="module" src="assets/js/timetable.js?v=3"></script>
+  <script type="module" src="assets/js/timetable.js?v=4"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=14"></script>
 </body>
