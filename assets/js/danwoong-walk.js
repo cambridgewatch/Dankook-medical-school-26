@@ -107,7 +107,7 @@ export function mountDanwoongWalk() {
     renderer.setSize(width, height, false);
     const aspect = width / height;
     halfWidth = 2.65 * aspect;
-    edge = halfWidth + 2.2;
+    edge = halfWidth + 0.7;
     const brandRect = header.querySelector(".brand")?.getBoundingClientRect();
     const rightControl = width <= 820 ? header.querySelector(".nav-toggle") : header.querySelector(".nav-menu");
     const controlRect = rightControl?.getBoundingClientRect();
@@ -279,12 +279,13 @@ export function mountDanwoongWalk() {
   function restartFromEdges() {
     const now = performance.now() / 1000;
     chooseHands(now);
+    cycleStarted = now - approachDuration * 0.28;
     interaction = null;
     poseButton.disabled = false;
     lastFrame = 0;
     resetPoseTransforms();
     poseHands();
-    approach(0);
+    approach(approachDuration * 0.28);
     renderer.render(scene, camera);
   }
 
@@ -390,7 +391,8 @@ export function mountDanwoongWalk() {
       else passBy(exitElapsed);
       if (exitElapsed >= exitDuration) {
         chooseHands(now);
-        approach(0);
+        cycleStarted = now - approachDuration * 0.12;
+        approach(approachDuration * 0.12);
       }
     }
     renderer.render(scene, camera);
