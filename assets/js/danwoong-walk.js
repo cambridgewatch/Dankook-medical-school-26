@@ -1,5 +1,7 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
 import { createBlueDanwoong, createNavyDanwoong, getDanwoongParts } from "./danwoong-models.js?v=4";
+import { auth } from "./firebase-init.js?v=11";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const APPROACH_SECONDS = 6.6;
 const HIGH_FIVE_SECONDS = 1.25;
@@ -27,6 +29,7 @@ export function mountDanwoongWalk() {
   const poseButton = document.createElement("button");
   poseButton.type = "button";
   poseButton.className = "danwoong-pose-trigger";
+  poseButton.disabled = true;
   poseButton.setAttribute("aria-label", "단웅이와 단비의 다음 동작 보기");
   const initiallyVisible = document.documentElement.dataset.mascots !== "hide";
   canvas.hidden = !initiallyVisible;
@@ -107,10 +110,9 @@ export function mountDanwoongWalk() {
   let modelScale = 0.82;
   let interaction = null;
   let sequenceCursor = 0;
-  try {
-    const savedSequence = Number.parseInt(sessionStorage.getItem("dkuMascotPoseSequenceV3") || "0", 10);
-    if (Number.isInteger(savedSequence) && savedSequence >= 0 && savedSequence < 72) sequenceCursor = savedSequence;
-  } catch {}
+  let poseRequestCount = 0;
+  let sequenceReady = false;
+  let sequenceStorageKey = "";
   let triggerLeft = 0;
   let triggerWidth = 40;
   let triggerWorldWidth = 8;
@@ -118,6 +120,37 @@ export function mountDanwoongWalk() {
   const searchParams = new URLSearchParams(location.search);
   const testPattern = searchParams.get("danwoongTest");
   const poseTest = Number.parseInt(searchParams.get("mascotPose") || "", 10);
+  const forcedPoseEnabled = Number.isInteger(poseTest) && poseTest >= 1 && poseTest <= 29;
+
+  function updateSequenceLabel() {
+    if (forcedPoseEnabled) return;
+    poseButton.setAttribute("aria-label", `다음 동작: ${POSE_NAMES[getSequencedPose(sequenceCursor)]}`);
+  }
+
+  function loadAccountSequence(user) {
+    const accountId = user?.uid || "guest";
+    sequenceStorageKey = `dkuMascotPoseProgressV1:${accountId}`;
+    sequenceCursor = 0;
+    poseRequestCount = 0;
+    try {
+      const saved = JSON.parse(localStorage.getItem(sequenceStorageKey) || "null");
+      if (Number.isInteger(saved?.cursor) && saved.cursor >= 0) sequenceCursor = saved.cursor % 72;
+      if (Number.isInteger(saved?.count) && saved.count >= 0) poseRequestCount = saved.count;
+    } catch {}
+    sequenceReady = true;
+    if (!interaction) poseButton.disabled = false;
+    updateSequenceLabel();
+  }
+
+  function saveAccountSequence() {
+    if (!sequenceStorageKey) return;
+    try {
+      localStorage.setItem(sequenceStorageKey, JSON.stringify({
+        cursor: sequenceCursor,
+        count: poseRequestCount,
+      }));
+    } catch {}
+  }
 
   function chooseHands(now) {
     const forceUp = testPattern === "match-up" || testPattern === "highfive-up";
@@ -239,6 +272,8 @@ export function mountDanwoongWalk() {
     const regularIndex = cursor - previousSpecialCount;
     return REGULAR_POSE_ORDER[regularIndex % REGULAR_POSE_ORDER.length];
   }
+
+  onAuthStateChanged(auth, loadAccountSequence);
 
   function clearPoseProps() {
     while (poseProps.children.length) {
@@ -460,8 +495,8 @@ export function mountDanwoongWalk() {
       }
       case 9: addStar(gold,0,.28,.2,"joined"); break;
       case 10: {
-        const mobileWidthScale = compactHeader ? .6 : 1;
-        const titleWidth = Math.min(25, triggerWorldWidth * .96) / 1.5 * mobileWidthScale;
+        const responsiveWidthScale = compactHeader ? .6 : .65;
+        const titleWidth = Math.min(25, triggerWorldWidth * .96) / 1.5 * responsiveWidthScale;
         const titleStyle = {
           fontWeight: 800,
           fontFamily: '"SF Pro Display", "Segoe UI Variable Display", "Avenir Next", "Helvetica Neue", Arial, sans-serif',
@@ -478,8 +513,8 @@ export function mountDanwoongWalk() {
         break;
       }
       case 11: {
-        const mobileWidthScale = compactHeader ? .6 : 1;
-        const numberWidth = Math.min(16, triggerWorldWidth * 1.45) * .9 / 1.2 * mobileWidthScale;
+        const responsiveWidthScale = compactHeader ? .6 : .65;
+        const numberWidth = Math.min(16, triggerWorldWidth * 1.45) * .9 / 1.2 * responsiveWidthScale;
         const numberStyle = {
           fontWeight: 800,
           fontFamily: '"SF Pro Display", "Segoe UI Variable Display", "Avenir Next", "Helvetica Neue", Arial, sans-serif',
@@ -903,15 +938,16 @@ export function mountDanwoongWalk() {
   }
 
   function beginNextPose() {
-    if (interaction) return;
+    if (interaction || (!sequenceReady && !forcedPoseEnabled)) return;
     const now = performance.now() / 1000;
-    const forcedPose = Number.isInteger(poseTest) && poseTest >= 1 && poseTest <= POSE_NAMES.length;
+    const forcedPose = forcedPoseEnabled;
     const nextPose = forcedPose
       ? poseTest - 1
       : getSequencedPose(sequenceCursor);
     if (!forcedPose) {
       sequenceCursor = (sequenceCursor + 1) % 72;
-      try { sessionStorage.setItem("dkuMascotPoseSequenceV3", String(sequenceCursor)); } catch {}
+      poseRequestCount += 1;
+      saveAccountSequence();
     }
     interaction = {
       mode: "recall",
@@ -963,7 +999,7 @@ export function mountDanwoongWalk() {
     cycleStarted = now - approachDuration * 0.28;
     interaction = null;
     clearPoseProps();
-    poseButton.disabled = false;
+    poseButton.disabled = !sequenceReady && !forcedPoseEnabled;
     lastFrame = 0;
     resetPoseTransforms();
     poseHands();
@@ -1055,7 +1091,7 @@ export function mountDanwoongWalk() {
         if (interactionElapsed >= POSE_COOLDOWN_SECONDS) {
           interaction = null;
           poseButton.setAttribute("aria-label", `다음 동작: ${POSE_NAMES[getSequencedPose(sequenceCursor)]}`);
-          poseButton.disabled = false;
+          poseButton.disabled = !sequenceReady && !forcedPoseEnabled;
           cycleStarted = now - approachDuration;
         }
       }
