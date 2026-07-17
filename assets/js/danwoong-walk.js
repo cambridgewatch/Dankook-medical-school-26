@@ -469,7 +469,7 @@ export function mountDanwoongWalk() {
         break;
       }
       case 11: {
-        const numberWidth = Math.min(16, triggerWorldWidth * 1.45) / 1.2;
+        const numberWidth = Math.min(16, triggerWorldWidth * 1.45) * .9 / 1.2;
         const numberStyle = {
           fontWeight: 800,
           fontFamily: '"SF Pro Display", "Segoe UI Variable Display", "Avenir Next", "Helvetica Neue", Arial, sans-serif',
@@ -480,7 +480,7 @@ export function mountDanwoongWalk() {
           shadowBlur: 12,
           shadowOffsetY: 3,
         };
-        tagProp(addText("26", "#327fb8",0,0,numberWidth,230,(4.35/1.2)/numberWidth,numberStyle),"number");
+        tagProp(addText("26", "#327fb8",0,0,numberWidth,230,(4.35*.9/1.2)/numberWidth,numberStyle),"number");
         break;
       }
       case 12: {
