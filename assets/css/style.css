@@ -421,11 +421,30 @@ body.locked { visibility: hidden; }
 .tt-block button { position: absolute; right: 5px; top: 4px; width: 18px; height: 18px; border: 0; border-radius: 50%; background: rgba(0,0,0,.2); color: #fff; cursor: pointer; line-height: 1; }
 .timetable-status { min-height: 22px; max-width: 940px; margin: 10px auto 0; color: var(--gray); font-size: 13px; text-align: center; }
 @media (max-width: 620px) {
-  .timetable-tools { grid-template-columns: 1fr 86px; padding: 14px; }
+  .timetable-section { padding: 38px 0; }
+  .timetable-section .container { padding-inline: 12px; }
+  .timetable-section .section-title { margin-bottom: 24px; }
+  .timetable-tools { grid-template-columns: 1fr 76px; gap: 9px; margin-bottom: 10px; padding: 12px; }
   .tt-tool-actions { grid-column: 1 / -1; }
   .tt-tool-actions button { flex: 1; padding-inline: 10px; }
-  .timetable-guide small { width: 100%; margin-left: 0; }
-  .timetable-scroll { border-radius: 14px; }
+  .tt-quick-help { font-size: 10px; }
+  .timetable-guide { gap: 8px 12px; margin-bottom: 9px; font-size: 11px; }
+  .timetable-guide small { width: 100%; margin-left: 0; font-size: 10px; }
+  .tt-legend { width: 10px; height: 10px; border-radius: 3px; }
+  .timetable-scroll { width: 100%; overflow-x: hidden; border-radius: 12px; }
+  .timetable-head, .timetable-grid {
+    width: 100%; min-width: 0;
+    grid-template-columns: 42px repeat(5, minmax(0, 1fr));
+  }
+  .timetable-head span { height: 36px; font-size: 11px; }
+  .timetable-grid { grid-template-rows: repeat(24, 24px); }
+  .tt-time { padding: 1px 4px 0 0; font-size: 8px; }
+  .tt-block { margin: 1px; padding: 3px 16px 2px 4px; border-radius: 5px; font-size: 9px; line-height: 1.1; box-shadow: 0 2px 5px rgba(20,40,70,.14); }
+  .tt-block.personal { border-width: 1px; }
+  .tt-block strong { font-size: 9px; line-height: 1.15; }
+  .tt-block small { display: none; }
+  .tt-block button { right: 2px; top: 2px; width: 14px; height: 14px; padding: 0; font-size: 10px; }
+  .timetable-status { margin-top: 7px; font-size: 11px; }
 }
 
 /* ---------- 다짐 배너 ---------- */
