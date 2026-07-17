@@ -276,18 +276,25 @@ export function mountDanwoongWalk() {
     }
   }
 
-  function addText(text, color = "#ffffff", x = 0, y = 0, width = 1.2, fontSize = 74, heightRatio = .5) {
+  function addText(text, color = "#ffffff", x = 0, y = 0, width = 1.2, fontSize = 74, heightRatio = .5, style = {}) {
     const labelCanvas = document.createElement("canvas");
     labelCanvas.width = 512;
     labelCanvas.height = 256;
     const context = labelCanvas.getContext("2d");
     context.clearRect(0, 0, 512, 256);
-    context.font = `900 ${fontSize}px Pretendard, sans-serif`;
+    const fontWeight = style.fontWeight || 900;
+    const fontFamily = style.fontFamily || 'Pretendard, sans-serif';
+    context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    if ("letterSpacing" in context) context.letterSpacing = `${style.letterSpacing || 0}px`;
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.lineWidth = 14;
-    context.strokeStyle = "rgba(0,32,91,.72)";
-    context.strokeText(text, 256, 128);
+    context.lineJoin = "round";
+    context.lineWidth = style.strokeWidth ?? 14;
+    context.strokeStyle = style.strokeColor || "rgba(0,32,91,.72)";
+    if (context.lineWidth > 0) context.strokeText(text, 256, 128);
+    context.shadowColor = style.shadowColor || "transparent";
+    context.shadowBlur = style.shadowBlur || 0;
+    context.shadowOffsetY = style.shadowOffsetY || 0;
     context.fillStyle = color;
     context.fillText(text, 256, 128);
     const texture = new THREE.CanvasTexture(labelCanvas);
@@ -446,18 +453,34 @@ export function mountDanwoongWalk() {
       }
       case 9: addStar(gold,0,.28,.2,"joined"); break;
       case 10: {
-        const titleWidth = Math.min(33.6, triggerWorldWidth * 1.28);
-        tagProp(addText("DKU", "#79bfff",0,.92,titleWidth,230,2.3/titleWidth),"dku");
-        tagProp(addText("MED", "#ffffff",0,-.92,titleWidth,230,2.3/titleWidth),"med");
-        const sparkleX = Math.min(triggerWorldWidth * .48, titleWidth * .47);
-        addStar(gold,-sparkleX,.18,.25,"pop"); addStar(0x8fd1ff,sparkleX,.18,.25,"pop");
+        const titleWidth = Math.min(25, triggerWorldWidth * .96);
+        const titleStyle = {
+          fontWeight: 800,
+          fontFamily: '"SF Pro Display", "Segoe UI Variable Display", "Avenir Next", "Helvetica Neue", Arial, sans-serif',
+          letterSpacing: 7,
+          strokeWidth: 2,
+          strokeColor: "rgba(20, 55, 92, .18)",
+          shadowColor: "rgba(24, 72, 112, .2)",
+          shadowBlur: 10,
+          shadowOffsetY: 3,
+        };
+        tagProp(addText("DKU", "#62b6e8",0,.84,titleWidth,220,2.05/titleWidth,titleStyle),"dku");
+        tagProp(addText("MED", "#173a63",0,-.84,titleWidth,220,2.05/titleWidth,titleStyle),"med");
         break;
       }
       case 11: {
-        const numberWidth = Math.min(18, triggerWorldWidth * 1.75);
-        tagProp(addText("26", "#79bfff",0,0,numberWidth,230,4.65/numberWidth),"number");
-        const sparkleX = Math.min(triggerWorldWidth * .48, numberWidth * .47);
-        addStar(gold,-sparkleX,.2,.25,"numberSpark"); addStar(gold,sparkleX,.2,.25,"numberSpark");
+        const numberWidth = Math.min(16, triggerWorldWidth * 1.45);
+        const numberStyle = {
+          fontWeight: 800,
+          fontFamily: '"SF Pro Display", "Segoe UI Variable Display", "Avenir Next", "Helvetica Neue", Arial, sans-serif',
+          letterSpacing: 10,
+          strokeWidth: 2,
+          strokeColor: "rgba(20, 55, 92, .16)",
+          shadowColor: "rgba(24, 72, 112, .2)",
+          shadowBlur: 12,
+          shadowOffsetY: 3,
+        };
+        tagProp(addText("26", "#327fb8",0,0,numberWidth,230,4.35/numberWidth,numberStyle),"number");
         break;
       }
       case 12: {
