@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>설정 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=41" />
+  <link rel="stylesheet" href="assets/css/style.css?v=42" />
 </head>
 <body class="locked">
   <header class="site-header">
@@ -53,6 +53,54 @@
         </div>
         <div class="settings-status on" id="bannerThemeStatus"></div>
       </div>
+
+      <details class="settings-card settings-guide">
+        <summary>
+          <span class="settings-icon">?</span>
+          <span><strong>사용 안내</strong><small>홈페이지의 주요 기능과 이용 방법</small></span>
+          <span class="settings-guide-arrow">⌄</span>
+        </summary>
+        <div class="settings-guide-body">
+          <h3>주요 기능</h3>
+          <ul>
+            <li><strong>공지사항</strong> — 제목을 눌러 세부 내용을 확인하고 검색할 수 있습니다.</li>
+            <li><strong>학사일정</strong> — 날짜별 일정과 기간 일정을 확인하며, 시험·과제 D-Day를 볼 수 있습니다.</li>
+            <li><strong>알림</strong> — 상단 종 모양 버튼에서 새 공지와 일정 알림을 확인합니다.</li>
+            <li><strong>갤러리</strong> — 로그인한 구성원 누구나 사진과 해시태그를 올릴 수 있습니다.</li>
+            <li><strong>미니게임</strong> — 룰렛, 사다리타기, 투표 기능을 이용할 수 있습니다.</li>
+          </ul>
+          <h3>계정과 기기 설정</h3>
+          <ul>
+            <li>배너 색상과 자동 로그인 여부는 현재 기기에 저장됩니다.</li>
+            <li>비밀번호 변경 후에는 새 비밀번호로 로그인해야 합니다.</li>
+            <li>공용 기기에서는 자동 로그인을 끄고 사용 후 로그아웃하세요.</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="settings-card settings-guide">
+        <summary>
+          <span class="settings-icon">🔒</span>
+          <span><strong>보안 및 개인정보 보호</strong><small>로그인과 데이터가 보호되는 방식</small></span>
+          <span class="settings-guide-arrow">⌄</span>
+        </summary>
+        <div class="settings-guide-body">
+          <h3>접근 보호</h3>
+          <ul>
+            <li>홈페이지 내용은 Firebase 로그인을 완료한 계정만 열람할 수 있습니다.</li>
+            <li>공지·일정·명단·투표 데이터는 Firestore 보안 규칙으로 접근 권한을 검사합니다.</li>
+            <li>공지와 학사일정 관리는 관리자 계정에만 허용됩니다.</li>
+            <li>투표 수정·삭제와 개인별 참여 결과는 관리자와 해당 투표 작성자만 이용할 수 있습니다.</li>
+          </ul>
+          <h3>비밀번호와 저장 정보</h3>
+          <ul>
+            <li>비밀번호는 홈페이지 코드나 Firestore에 저장하지 않고 Firebase Authentication에서 처리합니다.</li>
+            <li>자동 로그인, 읽은 알림, 배너 색상은 해당 브라우저의 로컬 저장소에 보관됩니다.</li>
+            <li>사진 파일은 ImgBB에 저장되고, 홈페이지에는 사진 주소와 작성자 정보만 저장됩니다.</li>
+          </ul>
+          <p class="settings-security-note">계정이나 기기를 다른 사람과 공유하지 말고, 개인정보가 포함된 사진과 글을 올릴 때는 반드시 당사자의 동의를 확인하세요.</p>
+        </div>
+      </details>
 
       <div class="settings-card">
         <div class="settings-card-head">
