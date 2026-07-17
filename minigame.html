@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>미니게임 · 단국대 의대 26학번</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=37" />
+  <link rel="stylesheet" href="assets/css/style.css?v=38" />
 </head>
 <body class="locked">
 
@@ -123,6 +123,39 @@
         </div>
       </div>
 
+      <!-- 게임 4: 투표 -->
+      <div class="game-card game-launch-card poll-game">
+        <div class="game-head">
+          <h2>🗳️ 투표</h2>
+          <p>누구나 투표를 만들고 참여할 수 있어요. 작성자는 이름과 함께 표시됩니다.</p>
+        </div>
+        <button class="btn btn-solid game-toggle" type="button" aria-expanded="false">게임 열기</button>
+        <div class="game-panel" hidden>
+          <button type="button" class="btn btn-solid poll-new-btn" id="pollNewBtn">새 투표 만들기</button>
+
+          <form class="poll-editor" id="pollEditor" hidden>
+            <div class="poll-editor-head">
+              <h3 id="pollEditorTitle">새 투표 만들기</h3>
+              <button type="button" id="pollEditorClose" aria-label="작성 취소">×</button>
+            </div>
+            <label for="pollTitle">투표 제목</label>
+            <input type="text" id="pollTitle" maxlength="80" placeholder="무엇을 정할까요?" required />
+            <label for="pollDescription">설명 <small>(선택)</small></label>
+            <textarea id="pollDescription" maxlength="300" rows="3" placeholder="투표에 대한 설명을 적어주세요."></textarea>
+            <div class="poll-option-head"><strong>투표 항목</strong><button type="button" id="pollOptionAdd">+ 항목 추가</button></div>
+            <div class="poll-option-editor" id="pollOptionEditor"></div>
+            <div class="poll-settings">
+              <label><input type="checkbox" id="pollAllowChange" /> 투표 후 선택 수정 허용</label>
+              <label><input type="checkbox" id="pollShowResults" /> 종료 전 다른 사람에게 결과 공개</label>
+              <label><input type="checkbox" id="pollAllowOptions" /> 참여자가 투표 항목 추가 가능</label>
+            </div>
+            <button type="submit" class="btn btn-solid" id="pollSaveBtn">투표 올리기</button>
+          </form>
+
+          <div class="poll-list" id="pollList"><p class="game-status">투표를 불러오는 중…</p></div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -184,6 +217,7 @@
   </script>
   <script type="module" src="assets/js/minigame.js?v=34"></script>
   <script src="assets/js/ladder.js?v=5"></script>
+  <script type="module" src="assets/js/polls.js?v=1"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=17"></script>
 </body>

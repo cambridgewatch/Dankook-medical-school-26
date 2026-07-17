@@ -73,6 +73,46 @@
          allow read: if isAdmin() || isApproved();
          allow write: if isAdmin();
        }
+       match /polls/{pollId} {
+         function poll() {
+           return get(/databases/$(database)/documents/polls/$(pollId)).data;
+         }
+         function isPollOwner() {
+           return request.auth != null && poll().creatorUid == request.auth.uid;
+         }
+
+         allow read: if request.auth != null;
+         allow create: if request.auth != null
+                       && request.resource.data.creatorUid == request.auth.uid;
+         allow update: if isAdmin() || isPollOwner()
+                       || ((request.auth != null)
+                           && resource.data.closed == false
+                           && resource.data.allowOptionAdd == true
+                           && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(['options', 'updatedAt']));
+         allow delete: if isAdmin() || isPollOwner();
+
+         match /votes/{uid} {
+           allow read: if isAdmin() || request.auth.uid == uid || isPollOwner()
+                       || poll().closed == true
+                       || poll().showResultsBeforeClose == true;
+           allow create: if request.auth != null
+                         && request.auth.uid == uid && poll().closed == false;
+           allow update: if request.auth != null
+                         && request.auth.uid == uid
+                         && poll().closed == false
+                         && poll().allowVoteChange == true;
+           allow delete: if isAdmin() || isPollOwner() || request.auth.uid == uid;
+         }
+
+         match /voters/{uid} {
+           allow read: if isAdmin() || isPollOwner() || request.auth.uid == uid;
+           allow create, update: if request.auth != null
+                                 && request.auth.uid == uid
+                                 && poll().closed == false;
+           allow delete: if isAdmin() || isPollOwner() || request.auth.uid == uid;
+         }
+       }
      }
    }
    ```

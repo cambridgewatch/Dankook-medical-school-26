@@ -1106,11 +1106,64 @@ body.locked { visibility: hidden; }
 .ladder-table td:first-child { width: 70px; color: var(--gray); text-align: center; }
 .ladder-table tbody tr:last-child td { border-bottom: 0; }
 .ladder-table tbody tr:nth-child(even) { background: #fafcff; }
+
+/* ---------- 미니게임: 투표 ---------- */
+.poll-game .game-panel { text-align: left; }
+.poll-new-btn { display: block; margin: 0 0 18px auto; }
+.poll-editor { padding: 22px; margin-bottom: 24px; border: 1px solid #dce5f2; border-radius: 18px; background: #f8fbff; }
+.poll-editor[hidden] { display: none; }
+.poll-editor-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.poll-editor-head h3 { color: var(--navy); font-size: 19px; }
+.poll-editor-head button { border: 0; background: none; color: var(--gray); font-size: 26px; cursor: pointer; }
+.poll-editor > label { display: block; margin: 11px 0 6px; color: var(--ink); font-size: 13px; font-weight: 800; }
+.poll-editor input[type="text"], .poll-editor textarea, .poll-add-option input {
+  width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 11px;
+  background: #fff; font: inherit; outline: none;
+}
+.poll-editor input:focus, .poll-editor textarea:focus, .poll-add-option input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.poll-option-head { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 8px; }
+.poll-option-head button { border: 0; background: none; color: var(--blue); font-weight: 800; cursor: pointer; }
+.poll-option-editor { display: grid; gap: 8px; }
+.poll-option-row { display: flex; gap: 8px; }
+.poll-option-row button { width: 38px; border: 0; border-radius: 9px; background: #eef1f5; color: var(--gray); cursor: pointer; }
+.poll-settings { display: grid; gap: 9px; margin: 18px 0; padding: 14px; border-radius: 12px; background: #fff; }
+.poll-settings label { display: flex; align-items: center; gap: 9px; color: var(--ink); font-size: 14px; }
+.poll-settings input { width: 17px; height: 17px; accent-color: var(--navy); }
+.poll-list { display: grid; gap: 16px; }
+.poll-card { padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: var(--shadow-sm); }
+.poll-card.closed { background: #fafbfc; }
+.poll-card-head { display: flex; gap: 12px; align-items: flex-start; }
+.poll-card-title { flex: 1; min-width: 0; }
+.poll-card-title h3 { color: var(--navy); font-size: 18px; line-height: 1.45; }
+.poll-card-title p { margin-top: 5px; color: var(--gray); font-size: 14px; white-space: pre-wrap; }
+.poll-author { display: block; margin-top: 7px; color: var(--blue); font-size: 12px; font-weight: 750; }
+.poll-state { flex: 0 0 auto; padding: 4px 9px; border-radius: 999px; color: #167653; background: #e7f7f0; font-size: 11px; font-weight: 850; }
+.poll-card.closed .poll-state { color: #697383; background: #e9edf2; }
+.poll-options { display: grid; gap: 9px; margin-top: 17px; }
+.poll-choice { position: relative; display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; cursor: pointer; }
+.poll-choice:hover { border-color: #b8cbea; }
+.poll-choice input { position: relative; z-index: 2; width: 17px; height: 17px; accent-color: var(--navy); }
+.poll-choice-text { position: relative; z-index: 2; flex: 1; font-size: 14px; font-weight: 650; }
+.poll-result-bar { position: absolute; inset: 0 auto 0 0; background: #e8f1ff; pointer-events: none; }
+.poll-count { position: relative; z-index: 2; color: var(--gray); font-size: 12px; white-space: nowrap; }
+.poll-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 15px; }
+.poll-actions button { padding: 8px 12px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--ink); font-weight: 750; cursor: pointer; }
+.poll-actions .poll-vote { background: var(--navy); border-color: var(--navy); color: #fff; }
+.poll-actions .danger { color: #b22d39; }
+.poll-result-note { margin-top: 13px; color: var(--gray); font-size: 13px; }
+.poll-add-option { display: flex; gap: 8px; margin-top: 12px; }
+.poll-add-option button { flex: 0 0 auto; border: 0; border-radius: 10px; padding: 0 13px; background: var(--blue-light); color: var(--navy); font-weight: 800; cursor: pointer; }
+.poll-people { margin-top: 14px; padding: 13px; border-radius: 12px; background: #f5f7fa; font-size: 13px; color: var(--gray); }
+.poll-people strong { color: var(--ink); }
+.poll-people p + p { margin-top: 6px; }
 @media (max-width: 620px) {
   .ladder-game { padding-left: 18px; padding-right: 18px; }
   .ladder-scroll-hint { display: block; }
   .ladder-play { align-items: stretch; flex-direction: column; }
   .ladder-play select, .ladder-play .btn { width: 100%; }
+  .poll-editor, .poll-card { padding: 16px; }
+  .poll-card-head { align-items: flex-start; }
+  .poll-actions button { flex: 1 1 calc(50% - 4px); }
 }
 
 /* ---------- 페이지네이션 ---------- */
