@@ -183,7 +183,7 @@ export function mountDanwoongWalk() {
     stopLegs(walkers.blue);
     stopLegs(walkers.navy);
 
-    // 손가락 없이 팔과 앞발의 방향만으로 표현하는 9가지 포즈입니다.
+    // 손가락 없이 팔과 앞발의 방향만으로 표현하는 포즈입니다.
     switch (index) {
       case 0: // 옆으로 돌아서 양 앞발 하이파이브
         walkers.blue.model.rotation.y = 0.55;
@@ -222,11 +222,6 @@ export function mountDanwoongWalk() {
         walkers.blue.parts.leftArm.rotation.z = -0.7;
         walkers.navy.parts.rightArm.rotation.z = 0.7;
         break;
-      case 8: // 단웅이는 앉고 단비는 손 흔들기
-        walkers.blue.model.position.y = -2.9 + breathe;
-        blue.scale.set(modelScale, modelScale * 0.84, modelScale);
-        poseHandAngles(1.0, -0.55 - Math.sin(elapsed * 7) * 0.3);
-        break;
       default:
         poseHands();
     }
@@ -241,7 +236,7 @@ export function mountDanwoongWalk() {
     const now = performance.now() / 1000;
     interaction = {
       mode: "recall",
-      index: Math.floor(Math.random() * 9),
+      index: Math.floor(Math.random() * 8),
       started: now,
       blue: { position: blue.position.clone(), rotationY: blue.rotation.y },
       navy: { position: navy.position.clone(), rotationY: navy.rotation.y },
