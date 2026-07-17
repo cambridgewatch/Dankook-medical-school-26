@@ -117,7 +117,7 @@ window.addEventListener("DOMContentLoaded", () => {
               <small>${src} · ${fmt(a.createdAt)}</small>
             </div>
             ${expandable ? `<span class="alert-chev">▾</span>` : `<span class="alert-dot"></span>`}
-            <button class="alert-del" data-id="${a.id}" title="삭제" style="border:0;background:none;cursor:pointer;font-size:15px;opacity:.55;">🗑</button>
+            <button class="alert-del ${isAdmin ? "alert-del-global" : ""}" data-id="${a.id}" title="${isAdmin ? "모두에게서 삭제" : "내 목록에서 삭제"}" style="border:0;background:none;cursor:pointer;font-size:12px;font-weight:700;opacity:.72;white-space:nowrap;">${isAdmin ? "모두에게서 삭제" : "삭제"}</button>
           </div>
           ${expandable ? `<div class="alert-body">불러오는 중…</div>` : ""}
         </div>`;
@@ -147,12 +147,13 @@ window.addEventListener("DOMContentLoaded", () => {
     listEl.querySelectorAll(".alert-del").forEach((b) => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
-        if (!confirm("이 알림을 삭제할까요?")) return;
         const id = b.dataset.id;
         if (isAdmin) {
+          if (!confirm("이 알림을 모든 사람의 알림 목록에서 삭제할까요?")) return;
           try { await deleteDoc(doc(db, "alerts", id)); }
-          catch (err) { alert("삭제 실패: " + err.message); }
+          catch (err) { alert("삭제에 실패했습니다: " + err.message); }
         } else {
+          if (!confirm("내 알림 목록에서만 삭제할까요?")) return;
           hiddenSet.add(id); saveHidden(hiddenSet); render();
         }
       });
