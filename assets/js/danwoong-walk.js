@@ -4,6 +4,12 @@ import { createBlueDanwoong, createNavyDanwoong, getDanwoongParts } from "./danw
 const APPROACH_SECONDS = 6.6;
 const HIGH_FIVE_SECONDS = 1.25;
 const EXIT_SECONDS = 5.2;
+const BLUE_LOW = 1.15;
+const BLUE_HIGH = 2.15;
+const BLUE_CONTACT = 1.65;
+const NAVY_LOW = 0.45;
+const NAVY_HIGH = -0.75;
+const NAVY_CONTACT = -0.15;
 
 function ease(value) { return value * value * (3 - 2 * value); }
 function mix(from, to, amount) { return from + (to - from) * amount; }
@@ -86,14 +92,16 @@ export function mountDanwoongWalk() {
     const controlRect = rightControl?.getBoundingClientRect();
     const gapLeft = brandRect ? brandRect.right - rect.left : width * 0.3;
     const gapRight = controlRect && controlRect.width ? controlRect.left - rect.left : width * 0.7;
-    const meetingPixel = gapRight - gapLeft >= 90 ? (gapLeft + gapRight) / 2 : width / 2;
+    const meetingPixel = gapRight - gapLeft >= 90
+      ? (gapLeft + gapRight) / 2 - (width > 820 ? 8 : 0)
+      : width / 2;
     meetCenter = (meetingPixel / width * 2 - 1) * halfWidth;
     camera.left = -halfWidth;
     camera.right = halfWidth;
     camera.top = 2.65;
     camera.bottom = -2.65;
     camera.updateProjectionMatrix();
-    const modelScale = width <= 820 ? 0.86 : 0.94;
+    const modelScale = width <= 820 ? 0.86 : 0.82;
     blue.scale.setScalar(modelScale);
     navy.scale.setScalar(modelScale);
   }
@@ -104,11 +112,11 @@ export function mountDanwoongWalk() {
     blueParts.rightArm.rotation.set(0, 0, blueAngle);
     const navyParts = walkers.navy.parts;
     navyParts.leftArm.rotation.set(0, 0, navyAngle);
-    navyParts.rightArm.rotation.set(0, 0, -0.78);
+    navyParts.rightArm.rotation.set(0, 0, -1.32);
   }
 
   function poseHands(blueUp = walkers.blue.handUp, navyUp = walkers.navy.handUp) {
-    poseHandAngles(blueUp ? 2.15 : 1.15, navyUp ? -0.75 : 0.45);
+    poseHandAngles(blueUp ? BLUE_HIGH : BLUE_LOW, navyUp ? NAVY_HIGH : NAVY_LOW);
   }
 
   function walkMotion(walker, elapsed, strength = 1) {
@@ -152,11 +160,9 @@ export function mountDanwoongWalk() {
 
   function crossingHighFive(elapsed) {
     const progress = Math.min(1, elapsed / HIGH_FIVE_SECONDS);
-    const blueFrom = walkers.blue.handUp ? 2.15 : 1.15;
-    const blueTo = walkers.blue.handUp ? 1.15 : 2.15;
-    const navyFrom = walkers.navy.handUp ? -0.75 : 0.45;
-    const navyTo = walkers.navy.handUp ? 0.45 : -0.75;
-    poseHandAngles(mix(blueFrom, blueTo, progress), mix(navyFrom, navyTo, progress));
+    const blueFrom = walkers.blue.handUp ? BLUE_HIGH : BLUE_LOW;
+    const navyFrom = walkers.navy.handUp ? NAVY_HIGH : NAVY_LOW;
+    poseHandAngles(mix(blueFrom, BLUE_CONTACT, ease(progress)), mix(navyFrom, NAVY_CONTACT, ease(progress)));
     const smallHop = Math.sin(progress * Math.PI) * 0.2;
     walkers.blue.model.position.set(meetCenter - meet, -2.53 + smallHop, 0.25);
     walkers.navy.model.position.set(meetCenter + meet, -2.53 + smallHop, -0.3);
@@ -182,13 +188,16 @@ export function mountDanwoongWalk() {
 
   function passBy(elapsed) {
     const progress = ease(Math.min(1, elapsed / EXIT_SECONDS));
+    const handProgress = ease(Math.min(1, elapsed / 0.7));
+    const blueEnd = walkers.blue.handUp ? BLUE_LOW : BLUE_HIGH;
+    const navyEnd = walkers.navy.handUp ? NAVY_LOW : NAVY_HIGH;
     walkers.blue.model.position.x = mix(meetCenter - meet, edge, progress);
     walkers.navy.model.position.x = mix(meetCenter + meet, -edge, progress);
     walkers.blue.model.rotation.y = 0.18;
     walkers.navy.model.rotation.y = -0.18;
     walkers.blue.model.position.z = 0.25;
     walkers.navy.model.position.z = -0.3;
-    poseHands(!walkers.blue.handUp, !walkers.navy.handUp);
+    poseHandAngles(mix(BLUE_CONTACT, blueEnd, handProgress), mix(NAVY_CONTACT, navyEnd, handProgress));
     walkMotion(walkers.blue, elapsed);
     walkMotion(walkers.navy, elapsed);
   }
@@ -206,7 +215,7 @@ export function mountDanwoongWalk() {
       return;
     }
     if (testPattern === "highfive-mismatch") {
-      crossingHighFive(HIGH_FIVE_SECONDS / 2);
+      crossingHighFive(HIGH_FIVE_SECONDS);
       renderer.render(scene, camera);
       return;
     }

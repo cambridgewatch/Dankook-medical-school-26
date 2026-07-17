@@ -95,8 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
   /* 동기 명단 검색은 members.js(Firestore 연동)에서 처리합니다. */
 
   /* 상단 헤더의 단웅이 3D 걷기 애니메이션 */
-  if (document.querySelector(".site-header") && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    import(new URL("assets/js/danwoong-walk.js?v=3", document.baseURI).href)
+  if (document.querySelector(".site-header")) {
+    import(new URL("assets/js/danwoong-walk.js?v=4", document.baseURI).href)
       .then(({ mountDanwoongWalk }) => mountDanwoongWalk())
       .catch((error) => console.warn("단웅이 애니메이션을 불러오지 못했습니다.", error));
   }
