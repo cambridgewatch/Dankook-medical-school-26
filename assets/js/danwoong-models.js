@@ -1,0 +1,198 @@
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
+
+const COLORS = {
+  blue: 0x80b8d7,
+  blueDark: 0x68a3c7,
+  navy: 0x3f4d69,
+  navyBelly: 0x37445f,
+  black: 0x17191d,
+  white: 0xf3f1e9,
+  cream: 0xf4dcae,
+  coral: 0xe76862,
+  orange: 0xf28a26,
+};
+
+function material(color, roughness = 0.72, metalness = 0) {
+  return new THREE.MeshStandardMaterial({ color, roughness, metalness });
+}
+
+function mesh(geometry, mat, name, position, scale, rotation = [0, 0, 0]) {
+  const item = new THREE.Mesh(geometry, mat);
+  item.name = name;
+  item.position.set(...position);
+  item.scale.set(...scale);
+  item.rotation.set(...rotation);
+  item.castShadow = true;
+  item.receiveShadow = true;
+  return item;
+}
+
+function sphere(mat, name, position, scale, segments = 40) {
+  return mesh(new THREE.SphereGeometry(1, segments, Math.max(20, segments / 2)), mat, name, position, scale);
+}
+
+function pivot(name, position) {
+  const group = new THREE.Group();
+  group.name = name;
+  group.position.set(...position);
+  return group;
+}
+
+function addEye(parent, side, x, y, z, whiteMaterial, pupilMaterial) {
+  const eye = pivot(`Eye_${side}`, [x, y, z]);
+  eye.add(sphere(whiteMaterial, `EyeWhite_${side}`, [0, 0, 0], [0.22, 0.26, 0.13], 28));
+  eye.add(sphere(pupilMaterial, `Pupil_${side}`, [side === "L" ? 0.035 : -0.035, -0.01, 0.12], [0.105, 0.13, 0.065], 24));
+  eye.add(sphere(whiteMaterial, `EyeHighlight_${side}`, [side === "L" ? 0.07 : 0.005, 0.065, 0.177], [0.037, 0.045, 0.022], 16));
+  parent.add(eye);
+  return eye;
+}
+
+function addFaceCurves(parent, darkMaterial, mouthY, mouthZ, browY, browZ) {
+  const mouthCurve = new THREE.QuadraticBezierCurve3(
+    new THREE.Vector3(-0.16, mouthY + 0.02, mouthZ),
+    new THREE.Vector3(0, mouthY - 0.10, mouthZ + 0.02),
+    new THREE.Vector3(0.16, mouthY + 0.02, mouthZ)
+  );
+  parent.add(mesh(new THREE.TubeGeometry(mouthCurve, 18, 0.022, 8, false), darkMaterial, "Mouth", [0, 0, 0], [1, 1, 1]));
+
+  [
+    ["L", -0.25, -0.05],
+    ["R", 0.25, 0.05],
+  ].forEach(([side, x, tilt]) => {
+    const curve = new THREE.QuadraticBezierCurve3(
+      new THREE.Vector3(x - 0.09, browY, browZ),
+      new THREE.Vector3(x, browY + 0.035, browZ + 0.01),
+      new THREE.Vector3(x + 0.09, browY - Number(tilt), browZ)
+    );
+    parent.add(mesh(new THREE.TubeGeometry(curve, 12, 0.018, 8, false), darkMaterial, `Brow_${side}`, [0, 0, 0], [1, 1, 1]));
+  });
+}
+
+function attachAnimationMetadata(root) {
+  root.userData.modelType = "animation-ready-procedural";
+  root.userData.frontAxis = "+Z";
+  root.userData.floorY = 0;
+  root.userData.animationParts = {
+    leftArm: "Arm_L_Pivot",
+    rightArm: "Arm_R_Pivot",
+    leftLeg: "Leg_L_Pivot",
+    rightLeg: "Leg_R_Pivot",
+    leftEye: "Eye_L",
+    rightEye: "Eye_R",
+    tail: "Tail_Pivot",
+  };
+  return root;
+}
+
+export function createBlueDanwoong() {
+  const root = new THREE.Group();
+  root.name = "Danwoong_Blue";
+
+  const blue = material(COLORS.blue, 0.78);
+  const blueDark = material(COLORS.blueDark, 0.8);
+  const black = material(COLORS.black, 0.58);
+  const white = material(COLORS.white, 0.72);
+  const coral = material(COLORS.coral, 0.68);
+
+  root.add(sphere(blue, "Body", [0, 2.25, 0], [1.38, 2.05, 1.02], 56));
+  root.add(sphere(black, "Ear_L", [-0.64, 4.02, 0.03], [0.31, 0.31, 0.22], 32));
+  root.add(sphere(black, "Ear_R", [0.64, 4.02, 0.03], [0.31, 0.31, 0.22], 32));
+
+  root.add(sphere(white, "Muzzle", [0, 3.35, 0.94], [0.48, 0.40, 0.25], 40));
+  root.add(sphere(black, "Nose", [0, 3.56, 1.18], [0.15, 0.12, 0.10], 28));
+  root.add(sphere(coral, "Cheek_L", [-0.53, 3.39, 0.86], [0.24, 0.29, 0.11], 30));
+  root.add(sphere(coral, "Cheek_R", [0.53, 3.39, 0.86], [0.24, 0.29, 0.11], 30));
+  addEye(root, "L", -0.25, 3.72, 0.91, white, black);
+  addEye(root, "R", 0.25, 3.72, 0.91, white, black);
+  addFaceCurves(root, black, 3.24, 1.20, 3.98, 0.91);
+
+  const leftArm = pivot("Arm_L_Pivot", [-1.05, 3.10, 0.02]);
+  leftArm.rotation.z = -0.12;
+  leftArm.add(sphere(blueDark, "Arm_L", [-0.03, -0.82, 0.04], [0.34, 1.04, 0.38], 36));
+  root.add(leftArm);
+  const rightArm = pivot("Arm_R_Pivot", [1.05, 3.10, 0.02]);
+  rightArm.rotation.z = 0.12;
+  rightArm.add(sphere(blueDark, "Arm_R", [0.03, -0.82, 0.04], [0.34, 1.04, 0.38], 36));
+  root.add(rightArm);
+
+  const leftLeg = pivot("Leg_L_Pivot", [-0.52, 0.66, 0]);
+  leftLeg.add(sphere(blueDark, "Leg_L", [0, -0.25, 0.15], [0.53, 0.50, 0.63], 40));
+  root.add(leftLeg);
+  const rightLeg = pivot("Leg_R_Pivot", [0.52, 0.66, 0]);
+  rightLeg.add(sphere(blueDark, "Leg_R", [0, -0.25, 0.15], [0.53, 0.50, 0.63], 40));
+  root.add(rightLeg);
+
+  const tail = pivot("Tail_Pivot", [1.15, 1.35, -0.58]);
+  tail.add(sphere(blueDark, "Tail", [0, 0, 0], [0.25, 0.25, 0.25], 28));
+  root.add(tail);
+
+  return attachAnimationMetadata(root);
+}
+
+export function createNavyDanwoong() {
+  const root = new THREE.Group();
+  root.name = "Danwoong_Navy";
+
+  const navy = material(COLORS.navy, 0.82);
+  const belly = material(COLORS.navyBelly, 0.86);
+  const black = material(COLORS.black, 0.62);
+  const white = material(COLORS.white, 0.72);
+  const cream = material(COLORS.cream, 0.76);
+  const orange = material(COLORS.orange, 0.66);
+
+  root.add(sphere(navy, "Body", [0, 2.22, 0], [1.25, 2.02, 0.92], 52));
+  root.add(sphere(belly, "Belly", [0, 1.67, 0.81], [0.84, 0.93, 0.12], 40));
+  root.add(sphere(black, "Ear_L", [-0.57, 4.02, 0.02], [0.25, 0.27, 0.19], 30));
+  root.add(sphere(black, "Ear_R", [0.57, 4.02, 0.02], [0.25, 0.27, 0.19], 30));
+
+  root.add(sphere(cream, "Muzzle", [0, 3.42, 0.86], [0.46, 0.36, 0.23], 38));
+  root.add(sphere(black, "Nose", [-0.05, 3.61, 1.08], [0.16, 0.12, 0.10], 26));
+  root.add(sphere(orange, "Cheek_L", [-0.48, 3.42, 0.80], [0.14, 0.15, 0.08], 24));
+  root.add(sphere(orange, "Cheek_R", [0.48, 3.42, 0.80], [0.14, 0.15, 0.08], 24));
+  addEye(root, "L", -0.23, 3.73, 0.82, white, black);
+  addEye(root, "R", 0.23, 3.73, 0.82, white, black);
+  addFaceCurves(root, black, 3.33, 1.09, 3.98, 0.82);
+
+  const leftArm = pivot("Arm_L_Pivot", [-1.0, 3.08, 0]);
+  leftArm.rotation.z = -1.08;
+  leftArm.add(sphere(navy, "Arm_L", [-0.72, -0.03, 0.02], [0.92, 0.32, 0.35], 36));
+  root.add(leftArm);
+  const rightArm = pivot("Arm_R_Pivot", [1.0, 3.08, 0]);
+  rightArm.rotation.z = 1.08;
+  rightArm.add(sphere(navy, "Arm_R", [0.72, -0.03, 0.02], [0.92, 0.32, 0.35], 36));
+  root.add(rightArm);
+
+  const leftLeg = pivot("Leg_L_Pivot", [-0.46, 0.66, 0]);
+  leftLeg.add(sphere(navy, "Leg_L", [0, -0.28, 0.07], [0.45, 0.60, 0.46], 36));
+  root.add(leftLeg);
+  const rightLeg = pivot("Leg_R_Pivot", [0.46, 0.66, 0]);
+  rightLeg.add(sphere(navy, "Leg_R", [0, -0.28, 0.07], [0.45, 0.60, 0.46], 36));
+  root.add(rightLeg);
+
+  const tuftGeometry = new THREE.ConeGeometry(0.14, 0.28, 4);
+  [-0.56, -0.28, 0, 0.28, 0.56].forEach((x, index) => {
+    root.add(mesh(tuftGeometry, belly, `BellyTuft_${index + 1}`, [x, 0.93 + Math.abs(x) * 0.14, 0.79], [1, 1, 0.65], [0, 0, Math.PI]));
+  });
+
+  const tail = pivot("Tail_Pivot", [1.16, 1.68, -0.55]);
+  tail.add(sphere(black, "Tail", [0, 0, 0], [0.17, 0.17, 0.17], 24));
+  root.add(tail);
+
+  return attachAnimationMetadata(root);
+}
+
+export function getDanwoongParts(model) {
+  const parts = {};
+  Object.entries(model.userData.animationParts || {}).forEach(([key, name]) => {
+    parts[key] = model.getObjectByName(name) || null;
+  });
+  return parts;
+}
+
+export function disposeDanwoong(model) {
+  model.traverse((item) => {
+    item.geometry?.dispose?.();
+    if (Array.isArray(item.material)) item.material.forEach((entry) => entry.dispose?.());
+    else item.material?.dispose?.();
+  });
+}

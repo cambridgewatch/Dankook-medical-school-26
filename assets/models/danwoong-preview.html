@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>단웅이 3D 모델 미리보기</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; padding: 28px; background: #eef3f8; color: #102a50; font-family: Pretendard, "Noto Sans KR", sans-serif; }
+    header { max-width: 1180px; margin: 0 auto 20px; }
+    h1 { margin: 0 0 6px; font-size: clamp(24px, 4vw, 38px); }
+    p { margin: 0; color: #64748b; }
+    main { max-width: 1180px; margin: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    article { overflow: hidden; border: 1px solid #dbe4ee; border-radius: 22px; background: #fff; box-shadow: 0 14px 40px #23405f14; }
+    .title { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; }
+    .title strong { font-size: 18px; }
+    .title span { color: #7b8796; font-size: 12px; }
+    canvas { display: block; width: 100%; height: min(68vh, 650px); touch-action: none; cursor: grab; background: radial-gradient(circle at 50% 34%, #fff 0, #f7fafc 48%, #eaf1f7 100%); }
+    canvas:active { cursor: grabbing; }
+    .note { padding: 12px 18px 16px; color: #64748b; font-size: 12px; }
+    @media (max-width: 760px) { body { padding: 16px; } main { grid-template-columns: 1fr; } canvas { height: 520px; } }
+  </style>
+</head>
+<body>
+  <header><h1>단웅이 3D 모델</h1><p>마우스나 손가락으로 좌우 회전할 수 있습니다.</p></header>
+  <main>
+    <article><div class="title"><strong>파란 단웅이</strong><span>BLUE 3D</span></div><canvas id="blue"></canvas><div class="note">팔·다리·눈·꼬리가 애니메이션용 회전축으로 분리되어 있습니다.</div></article>
+    <article><div class="title"><strong>남색 단웅이</strong><span>NAVY 3D</span></div><canvas id="navy"></canvas><div class="note">원화의 벌린 팔과 배 부분의 털 실루엣을 입체적으로 재구성했습니다.</div></article>
+  </main>
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
+    import { createBlueDanwoong, createNavyDanwoong } from "../js/danwoong-models.js";
+
+    function mount(canvas, createModel) {
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+      camera.position.set(0, 2.5, 9.8);
+      camera.lookAt(0, 2.2, 0);
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x8fa4b8, 2.2));
+      const key = new THREE.DirectionalLight(0xffffff, 3.2);
+      key.position.set(4, 7, 6);
+      key.castShadow = true;
+      scene.add(key);
+      const rim = new THREE.DirectionalLight(0x9bc9ef, 1.5);
+      rim.position.set(-5, 4, -3);
+      scene.add(rim);
+
+      const floor = new THREE.Mesh(new THREE.CircleGeometry(2.25, 64), new THREE.ShadowMaterial({ color: 0x20344c, opacity: 0.14 }));
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -0.14;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      const model = createModel();
+      scene.add(model);
+      let dragging = false;
+      let previousX = 0;
+      canvas.addEventListener("pointerdown", (event) => { dragging = true; previousX = event.clientX; canvas.setPointerCapture(event.pointerId); });
+      canvas.addEventListener("pointermove", (event) => { if (!dragging) return; model.rotation.y += (event.clientX - previousX) * 0.012; previousX = event.clientX; });
+      canvas.addEventListener("pointerup", () => { dragging = false; });
+      canvas.addEventListener("pointercancel", () => { dragging = false; });
+
+      function resize() {
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        if (canvas.width !== Math.floor(width * renderer.getPixelRatio()) || canvas.height !== Math.floor(height * renderer.getPixelRatio())) {
+          renderer.setSize(width, height, false);
+          camera.aspect = width / height;
+          camera.updateProjectionMatrix();
+        }
+      }
+      function frame(time) {
+        resize();
+        if (!dragging) model.rotation.y = Math.sin(time * 0.00035) * 0.16;
+        renderer.render(scene, camera);
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    mount(document.querySelector("#blue"), createBlueDanwoong);
+    mount(document.querySelector("#navy"), createNavyDanwoong);
+  </script>
+</body>
+</html>
