@@ -1,6 +1,13 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
 import { createBlueDanwoong, createNavyDanwoong, getDanwoongParts } from "./danwoong-models.js?v=4";
 
+const APPROACH_SECONDS = 6.6;
+const HIGH_FIVE_SECONDS = 1.25;
+const EXIT_SECONDS = 5.2;
+
+function ease(value) { return value * value * (3 - 2 * value); }
+function mix(from, to, amount) { return from + (to - from) * amount; }
+
 export function mountDanwoongWalk() {
   const header = document.querySelector(".site-header");
   if (!header || header.querySelector(".danwoong-walk-canvas")) return;
@@ -39,67 +46,154 @@ export function mountDanwoongWalk() {
   const navy = createNavyDanwoong();
   blue.name = "HeaderWalker_Blue";
   navy.name = "HeaderWalker_Navy";
-  blue.rotation.y = Math.PI / 2;
-  navy.rotation.y = -Math.PI / 2;
   navy.position.z = 0.2;
   scene.add(blue, navy);
 
-  const walkers = [
-    { model: blue, parts: getDanwoongParts(blue), direction: 1, phase: 0 },
-    { model: navy, parts: getDanwoongParts(navy), direction: -1, phase: Math.PI },
-  ];
+  const walkers = {
+    blue: { model: blue, parts: getDanwoongParts(blue), phase: 0, handUp: false },
+    navy: { model: navy, parts: getDanwoongParts(navy), phase: Math.PI, handUp: false },
+  };
   let halfWidth = 20;
-  let duration = 18;
-  let headerHeight = 68;
+  let edge = 22;
+  const meet = 1.7;
+  let meetCenter = 0;
+  let cycleStarted = performance.now() / 1000;
+  let sameHands = false;
   let lastFrame = 0;
   let running = !document.hidden;
+  const testPattern = new URLSearchParams(location.search).get("danwoongTest");
+
+  function chooseHands(now) {
+    const forceUp = testPattern === "match-up" || testPattern === "highfive-up";
+    const forceDown = testPattern === "highfive-down";
+    walkers.blue.handUp = forceUp ? true : (forceDown ? false : (testPattern === "mismatch" ? true : Math.random() < 0.5));
+    walkers.navy.handUp = forceUp ? true : (forceDown ? false : (testPattern === "mismatch" ? false : Math.random() < 0.5));
+    sameHands = walkers.blue.handUp === walkers.navy.handUp;
+    cycleStarted = now;
+  }
 
   function resize() {
     const rect = header.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
-    headerHeight = Math.max(1, Math.round(rect.height || 68));
-    renderer.setSize(width, headerHeight, false);
-    const aspect = width / headerHeight;
+    const height = Math.max(1, Math.round(rect.height || 68));
+    renderer.setSize(width, height, false);
+    const aspect = width / height;
     halfWidth = 2.65 * aspect;
+    edge = halfWidth + 2.2;
+    const brandRect = header.querySelector(".brand")?.getBoundingClientRect();
+    const rightControl = width <= 820 ? header.querySelector(".nav-toggle") : header.querySelector(".nav-menu");
+    const controlRect = rightControl?.getBoundingClientRect();
+    const gapLeft = brandRect ? brandRect.right - rect.left : width * 0.3;
+    const gapRight = controlRect && controlRect.width ? controlRect.left - rect.left : width * 0.7;
+    const meetingPixel = gapRight - gapLeft >= 90 ? (gapLeft + gapRight) / 2 : width / 2;
+    meetCenter = (meetingPixel / width * 2 - 1) * halfWidth;
     camera.left = -halfWidth;
     camera.right = halfWidth;
     camera.top = 2.65;
     camera.bottom = -2.65;
     camera.updateProjectionMatrix();
-    const mobile = width <= 820;
-    const modelScale = mobile ? 0.86 : 0.94;
+    const modelScale = width <= 820 ? 0.86 : 0.94;
     blue.scale.setScalar(modelScale);
     navy.scale.setScalar(modelScale);
-    duration = mobile ? 11 : 18;
   }
 
-  function animateWalker(walker, elapsed, progress) {
-    const stride = Math.sin(elapsed * 9 + walker.phase);
-    const bounce = Math.abs(Math.cos(elapsed * 9 + walker.phase));
-    const travelEdge = halfWidth + 2.2;
-    walker.model.position.x = walker.direction > 0
-      ? -travelEdge + progress * travelEdge * 2
-      : travelEdge - progress * travelEdge * 2;
+  function poseHands() {
+    const blueParts = walkers.blue.parts;
+    blueParts.leftArm.rotation.set(0, 0, -0.12);
+    blueParts.rightArm.rotation.set(0, 0, walkers.blue.handUp ? 2.15 : 1.15);
+    const navyParts = walkers.navy.parts;
+    navyParts.leftArm.rotation.set(0, 0, walkers.navy.handUp ? -0.75 : 0.45);
+    navyParts.rightArm.rotation.set(0, 0, -0.78);
+  }
+
+  function walkMotion(walker, elapsed, strength = 1) {
+    const stride = Math.sin(elapsed * 9 + walker.phase) * strength;
+    const bounce = Math.abs(Math.cos(elapsed * 9 + walker.phase)) * strength;
+    walker.parts.leftLeg.rotation.z = stride * 0.28;
+    walker.parts.rightLeg.rotation.z = -stride * 0.28;
     walker.model.position.y = -2.53 + bounce * 0.09;
     walker.model.rotation.z = stride * 0.025;
-    walker.parts.leftLeg.rotation.x = stride * 0.68;
-    walker.parts.rightLeg.rotation.x = -stride * 0.68;
-    walker.parts.leftArm.rotation.x = -stride * 0.46;
-    walker.parts.rightArm.rotation.x = stride * 0.46;
+  }
+
+  function stopLegs(walker) {
+    walker.parts.leftLeg.rotation.z = 0;
+    walker.parts.rightLeg.rotation.z = 0;
+  }
+
+  function approach(elapsed) {
+    const progress = ease(Math.min(1, elapsed / APPROACH_SECONDS));
+    walkers.blue.model.position.x = mix(-edge, meetCenter - meet, progress);
+    walkers.navy.model.position.x = mix(edge, meetCenter + meet, progress);
+    walkers.blue.model.rotation.y = 0.18;
+    walkers.navy.model.rotation.y = -0.18;
+    walkMotion(walkers.blue, elapsed);
+    walkMotion(walkers.navy, elapsed);
+  }
+
+  function highFive(elapsed) {
+    const progress = Math.min(1, elapsed / HIGH_FIVE_SECONDS);
+    const jump = Math.sin(progress * Math.PI) * 0.72;
+    walkers.blue.model.position.set(meetCenter - meet, -2.53 + jump, 0);
+    walkers.navy.model.position.set(meetCenter + meet, -2.53 + jump, 0.2);
+    walkers.blue.model.rotation.y = 0;
+    walkers.navy.model.rotation.y = 0;
+    walkers.blue.model.rotation.z = -Math.sin(progress * Math.PI) * 0.055;
+    walkers.navy.model.rotation.z = Math.sin(progress * Math.PI) * 0.055;
+    stopLegs(walkers.blue);
+    stopLegs(walkers.navy);
+  }
+
+  function retreat(elapsed) {
+    const progress = ease(Math.min(1, elapsed / EXIT_SECONDS));
+    walkers.blue.model.position.x = mix(meetCenter - meet, -edge, progress);
+    walkers.navy.model.position.x = mix(meetCenter + meet, edge, progress);
+    walkers.blue.model.rotation.y = -0.58;
+    walkers.navy.model.rotation.y = 0.58;
+    walkMotion(walkers.blue, elapsed);
+    walkMotion(walkers.navy, elapsed);
+  }
+
+  function passBy(elapsed) {
+    const progress = ease(Math.min(1, elapsed / EXIT_SECONDS));
+    walkers.blue.model.position.x = mix(meetCenter - meet, edge, progress);
+    walkers.navy.model.position.x = mix(meetCenter + meet, -edge, progress);
+    walkers.blue.model.rotation.y = 0.18;
+    walkers.navy.model.rotation.y = -0.18;
+    walkMotion(walkers.blue, elapsed);
+    walkMotion(walkers.navy, elapsed);
   }
 
   function frame(time) {
     requestAnimationFrame(frame);
     if (!running || time - lastFrame < 1000 / 30) return;
     lastFrame = time;
-    const elapsed = time / 1000;
-    const progress = (elapsed % duration) / duration;
-    walkers.forEach((walker) => animateWalker(walker, elapsed, progress));
+    const now = time / 1000;
+    const elapsed = now - cycleStarted;
+    poseHands();
+    if (testPattern === "highfive-up" || testPattern === "highfive-down") {
+      highFive(HIGH_FIVE_SECONDS / 2);
+      renderer.render(scene, camera);
+      return;
+    }
+    if (elapsed < APPROACH_SECONDS) {
+      approach(elapsed);
+    } else if (sameHands && elapsed < APPROACH_SECONDS + HIGH_FIVE_SECONDS) {
+      highFive(elapsed - APPROACH_SECONDS);
+    } else {
+      const exitElapsed = elapsed - APPROACH_SECONDS - (sameHands ? HIGH_FIVE_SECONDS : 0);
+      if (sameHands) retreat(exitElapsed);
+      else passBy(exitElapsed);
+      if (exitElapsed >= EXIT_SECONDS) {
+        chooseHands(now);
+        approach(0);
+      }
+    }
     renderer.render(scene, camera);
   }
 
   document.addEventListener("visibilitychange", () => { running = !document.hidden; });
   window.addEventListener("resize", resize, { passive: true });
   resize();
+  chooseHands(cycleStarted);
   requestAnimationFrame(frame);
 }
