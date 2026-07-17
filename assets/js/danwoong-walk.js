@@ -113,8 +113,8 @@ export function mountDanwoongWalk() {
     const controlRect = rightControl?.getBoundingClientRect();
     const gapLeft = brandRect ? brandRect.right - rect.left : width * 0.3;
     const gapRight = controlRect && controlRect.width ? controlRect.left - rect.left : width * 0.7;
-    const hasHeaderGap = gapRight - gapLeft >= 28;
-    const meetingPixel = gapRight - gapLeft >= 90
+    const hasHeaderGap = gapRight > gapLeft;
+    const meetingPixel = hasHeaderGap
       ? (gapLeft + gapRight) / 2 - (width > 820 ? 8 : 0)
       : width / 2;
     meetCenter = (meetingPixel / width * 2 - 1) * halfWidth;
@@ -123,15 +123,15 @@ export function mountDanwoongWalk() {
     camera.top = 2.65;
     camera.bottom = -2.65;
     camera.updateProjectionMatrix();
-    modelScale = width <= 820 ? 0.86 : 0.82;
+    modelScale = width <= 520 ? 0.72 : (width <= 820 ? 0.8 : 0.82);
     blue.scale.setScalar(modelScale);
     navy.scale.setScalar(modelScale);
     approachDuration = width <= 820 ? APPROACH_SECONDS : 13.5;
     highFiveDuration = width <= 820 ? HIGH_FIVE_SECONDS : 1.8;
     exitDuration = width <= 820 ? EXIT_SECONDS : 10.5;
     gaitSpeed = width <= 820 ? 9 : 6;
-    triggerLeft = hasHeaderGap ? gapLeft + 4 : meetingPixel - 26;
-    triggerWidth = hasHeaderGap ? Math.max(20, gapRight - gapLeft - 8) : 52;
+    triggerLeft = hasHeaderGap ? gapLeft + 2 : meetingPixel - 28;
+    triggerWidth = hasHeaderGap ? Math.max(24, gapRight - gapLeft - 4) : 56;
     poseButton.style.left = `${Math.round(triggerLeft)}px`;
     poseButton.style.width = `${Math.round(triggerWidth)}px`;
   }
