@@ -24,13 +24,13 @@ window.addEventListener("DOMContentLoaded", () => {
   const themeButtons = [...document.querySelectorAll(".banner-theme")];
   const themeStatus = $("#bannerThemeStatus");
   const selectTheme = (theme) => {
-    const selected = BANNER_THEME_LABELS[theme] ? theme : "navy";
+    const selected = BANNER_THEME_LABELS[theme] ? theme : "charcoal";
     localStorage.setItem(BANNER_THEME_KEY, selected);
     document.documentElement.dataset.bannerTheme = selected;
     themeButtons.forEach((button) => button.classList.toggle("active", button.dataset.theme === selected));
     themeStatus.textContent = `${BANNER_THEME_LABELS[selected]} 배너를 사용 중입니다.`;
   };
-  selectTheme(localStorage.getItem(BANNER_THEME_KEY) || "navy");
+  selectTheme(localStorage.getItem(BANNER_THEME_KEY) || "charcoal");
   themeButtons.forEach((button) => button.addEventListener("click", () => selectTheme(button.dataset.theme)));
 
   const showMessage = (text, ok = false) => {

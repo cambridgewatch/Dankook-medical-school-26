@@ -18,11 +18,11 @@
   --shadow: 0 10px 30px rgba(0, 32, 91, 0.08);
   --shadow-sm: 0 4px 14px rgba(0, 32, 91, 0.06);
   --max: 1120px;
-  --banner-start: #001640;
-  --banner-end: #00205b;
-  --hero-a: 0, 22, 64;
-  --hero-b: 0, 32, 91;
-  --hero-c: 0, 87, 184;
+  --banner-start: #1c2530;
+  --banner-end: #485666;
+  --hero-a: 24, 32, 41;
+  --hero-b: 42, 53, 65;
+  --hero-c: 83, 99, 114;
 }
 
 html[data-banner-theme="purple"] { --banner-start:#32155f; --banner-end:#7040a8; --hero-a:50,21,95; --hero-b:80,39,132; --hero-c:133,79,180; }
