@@ -1,0 +1,19 @@
+{
+  "name": "단국대학교 의과대학 26학번",
+  "short_name": "의대 26학번",
+  "description": "단국대학교 의과대학 26학번 공식 홈페이지",
+  "lang": "ko",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f8fc",
+  "theme_color": "#6fa8d6",
+  "icons": [
+    {
+      "src": "assets/img/logo.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

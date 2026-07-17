@@ -122,3 +122,12 @@ document.addEventListener("DOMContentLoaded", () => {
   /* 상단 헤더의 단웅이 3D 걷기 애니메이션 */
   if (savedMascotDisplay) mountHeaderMascots();
 });
+
+/* 설치형 웹앱(PWA) 등록 */
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register(new URL("service-worker.js", document.baseURI))
+      .catch((error) => console.warn("앱 설치 기능을 준비하지 못했습니다.", error));
+  });
+}
