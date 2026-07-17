@@ -292,6 +292,8 @@ html[data-mascots="hide"] .danwoong-walk-canvas {
 .btn-ghost:hover { background: rgba(255,255,255,0.12); }
 .btn-solid { background: var(--navy); color: #fff; }
 .btn-solid:hover { background: var(--blue); }
+.btn-outline { background: #fff; color: var(--navy); border: 1px solid #c7d6e8; }
+.btn-outline:hover { background: var(--blue-light); border-color: #8baed1; }
 
 /* ---------- 페이지 섹션 공통 ---------- */
 .page-head {
@@ -1454,6 +1456,11 @@ html[data-mascots="hide"] .danwoong-walk-canvas {
 .settings-form input { width: 100%; padding: 13px 14px; border: 1px solid var(--line); border-radius: 11px; font: inherit; outline: none; }
 .settings-form input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
 .settings-form .btn { margin-top: 8px; justify-content: center; }
+.settings-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.settings-actions .btn { justify-content: center; }
+@media (max-width: 520px) {
+  .settings-actions .btn { width: 100%; }
+}
 .danger-zone { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .settings-logout { border: 1px solid #e7a5a5; color: #b52f38; background: #fff6f6; font-weight: 800; }
 .settings-logout:hover { background: #b52f38; color: #fff; }

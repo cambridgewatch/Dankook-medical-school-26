@@ -27,6 +27,11 @@ export const db = getFirestore(app);
 /* 설정이 안 됐는지 확인용 */
 export const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
 
+/* Firebase Console → 프로젝트 설정 → Cloud Messaging에서 만든 웹 푸시 공개키(VAPID)를 넣으세요.
+   이 값은 공개키이므로 웹 코드에 있어도 안전합니다. */
+export const WEB_PUSH_VAPID_KEY = "";
+export const webPushReady = WEB_PUSH_VAPID_KEY.length > 20;
+
 /* ImgBB(무료 이미지 호스팅) API 키 — 사진 파일은 여기에 저장됩니다.
    https://api.imgbb.com 에서 무료 가입 후 발급받은 키를 붙여넣으세요. */
 export const IMGBB_API_KEY = "6c54866829e7fcc0813ff8de9407f892";

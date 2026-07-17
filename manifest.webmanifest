@@ -3,6 +3,7 @@
   "short_name": "의대 26학번",
   "description": "단국대학교 의과대학 26학번 공식 홈페이지",
   "lang": "ko",
+  "id": "./",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
