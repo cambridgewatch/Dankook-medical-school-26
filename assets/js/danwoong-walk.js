@@ -163,7 +163,7 @@ export function mountDanwoongWalk() {
     triggerWorldWidth = triggerWidth * 5.3 / height;
     poseButton.style.left = `${Math.round(triggerLeft)}px`;
     poseButton.style.width = `${Math.round(triggerWidth)}px`;
-    poseButton.style.setProperty("--mascot-contact-x", `${meetingPixel - triggerLeft}px`);
+    poseButton.style.setProperty("--mascot-contact-x", `${meetingPixel - triggerLeft - 4}px`);
   }
 
   function poseHandAngles(blueAngle, navyAngle) {
