@@ -113,6 +113,7 @@ export function mountDanwoongWalk() {
   } catch {}
   let triggerLeft = 0;
   let triggerWidth = 40;
+  let triggerWorldWidth = 8;
   const searchParams = new URLSearchParams(location.search);
   const testPattern = searchParams.get("danwoongTest");
   const poseTest = Number.parseInt(searchParams.get("mascotPose") || "", 10);
@@ -159,6 +160,7 @@ export function mountDanwoongWalk() {
     gaitSpeed = width <= 820 ? 9 : 6;
     triggerLeft = hasHeaderGap ? gapLeft + 2 : meetingPixel - 28;
     triggerWidth = hasHeaderGap ? Math.max(24, gapRight - gapLeft - 4) : 56;
+    triggerWorldWidth = triggerWidth * 5.3 / height;
     poseButton.style.left = `${Math.round(triggerLeft)}px`;
     poseButton.style.width = `${Math.round(triggerWidth)}px`;
   }
@@ -443,15 +445,21 @@ export function mountDanwoongWalk() {
         break;
       }
       case 9: addStar(gold,0,.28,.2,"joined"); break;
-      case 10:
-        tagProp(addText("DKU", "#79bfff",0,.9,8.4,210,.42),"dku");
-        tagProp(addText("MED", "#ffffff",0,-.9,8.4,210,.42),"med");
-        addStar(gold,-4.1,.18,.24,"pop"); addStar(0x8fd1ff,4.1,.18,.24,"pop");
+      case 10: {
+        const titleWidth = Math.min(33.6, triggerWorldWidth * 1.28);
+        tagProp(addText("DKU", "#79bfff",0,.92,titleWidth,230,2.3/titleWidth),"dku");
+        tagProp(addText("MED", "#ffffff",0,-.92,titleWidth,230,2.3/titleWidth),"med");
+        const sparkleX = Math.min(triggerWorldWidth * .48, titleWidth * .47);
+        addStar(gold,-sparkleX,.18,.25,"pop"); addStar(0x8fd1ff,sparkleX,.18,.25,"pop");
         break;
-      case 11:
-        tagProp(addText("26", "#79bfff",0,0,9,220,.5),"number");
-        addStar(gold,-4.1,.2,.24,"numberSpark"); addStar(gold,4.1,.2,.24,"numberSpark");
+      }
+      case 11: {
+        const numberWidth = Math.min(18, triggerWorldWidth * 1.75);
+        tagProp(addText("26", "#79bfff",0,0,numberWidth,230,4.65/numberWidth),"number");
+        const sparkleX = Math.min(triggerWorldWidth * .48, numberWidth * .47);
+        addStar(gold,-sparkleX,.2,.25,"numberSpark"); addStar(gold,sparkleX,.2,.25,"numberSpark");
         break;
+      }
       case 12: {
         [[0,.9,.12,.28,.08,-.55],[-.11,.62,.12,.3,.08,.55],[.08,.35,.13,.32,.08,-.52]].forEach(([x,y,sx,sy,sz,rz])=>tagProp(addBox(gold,x,y,sx,sy,sz,rz),"lightning"));
         const flash=addEllipse(white,0,.25,1.35,1.05,"lightFlash",.28); flash.material.depthTest=false;
