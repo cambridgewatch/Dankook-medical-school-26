@@ -75,6 +75,9 @@ export function mountDanwoongWalk() {
   let highFiveDuration = HIGH_FIVE_SECONDS;
   let exitDuration = EXIT_SECONDS;
   let gaitSpeed = 9;
+  let modelScale = 0.82;
+  let interaction = null;
+  let poseReady = false;
   const testPattern = new URLSearchParams(location.search).get("danwoongTest");
 
   function chooseHands(now) {
@@ -109,7 +112,7 @@ export function mountDanwoongWalk() {
     camera.top = 2.65;
     camera.bottom = -2.65;
     camera.updateProjectionMatrix();
-    const modelScale = width <= 820 ? 0.86 : 0.82;
+    modelScale = width <= 820 ? 0.86 : 0.82;
     blue.scale.setScalar(modelScale);
     navy.scale.setScalar(modelScale);
     approachDuration = width <= 820 ? APPROACH_SECONDS : 13.5;
@@ -145,6 +148,92 @@ export function mountDanwoongWalk() {
     walker.parts.rightLeg.rotation.z = 0;
   }
 
+  function resetPoseTransforms() {
+    blue.scale.setScalar(modelScale);
+    navy.scale.setScalar(modelScale);
+    blue.rotation.set(0, 0, 0);
+    navy.rotation.set(0, 0, 0);
+  }
+
+  function setPoseTrigger(enabled) {
+    poseReady = enabled;
+  }
+
+  function poseFrame(index, elapsed) {
+    const progress = Math.min(1, elapsed / 0.28);
+    const settle = ease(progress);
+    const held = Math.min(1, elapsed / 2.5);
+    const breathe = Math.sin(elapsed * 5) * 0.035;
+    const jump = index === 3 ? Math.abs(Math.sin(elapsed * 7)) * 0.44 : 0;
+    const blueX = meetCenter - meet;
+    const navyX = meetCenter + meet;
+    resetPoseTransforms();
+    walkers.blue.model.position.set(blueX, -2.53 + jump, 0.1);
+    walkers.navy.model.position.set(navyX, -2.53 + jump, 0.15);
+    walkers.blue.model.position.y += breathe;
+    walkers.navy.model.position.y += breathe;
+    stopLegs(walkers.blue);
+    stopLegs(walkers.navy);
+
+    // 손가락 없이 팔과 앞발의 방향만으로 표현하는 9가지 포즈입니다.
+    switch (index) {
+      case 0: // 옆으로 돌아서 양 앞발 하이파이브
+        walkers.blue.model.rotation.y = 0.55;
+        walkers.navy.model.rotation.y = -0.55;
+        poseHandAngles(2.05, -0.55);
+        break;
+      case 1: // 나란히 정면 브이
+        poseHandAngles(2.1, -0.8);
+        walkers.blue.parts.leftArm.rotation.z = -1.25;
+        walkers.navy.parts.rightArm.rotation.z = 1.25;
+        break;
+      case 2: // 옆으로 서서 어깨동무
+        walkers.blue.model.rotation.y = 0.28;
+        walkers.navy.model.rotation.y = -0.28;
+        poseHandAngles(1.9, -0.65);
+        break;
+      case 3: // 함께 정면 점프
+        poseHandAngles(2.0, -0.7);
+        break;
+      case 4: // 서로 마주 보고 인사
+        walkers.blue.model.rotation.y = 0.62;
+        walkers.navy.model.rotation.y = -0.62;
+        poseHandAngles(1.35 + Math.sin(elapsed * 4) * 0.2, -0.25 - Math.sin(elapsed * 4) * 0.2);
+        walkers.blue.model.rotation.z = 0.08;
+        walkers.navy.model.rotation.z = -0.08;
+        break;
+      case 5: // 단웅이 엄지척 느낌, 단비 브이
+        poseHandAngles(2.18, -0.8);
+        walkers.navy.parts.rightArm.rotation.z = 1.2;
+        break;
+      case 6: // 함께 한 앞발 흔들기
+        poseHandAngles(1.9 + Math.sin(elapsed * 7) * 0.25, -0.55 - Math.sin(elapsed * 7) * 0.25);
+        break;
+      case 7: // 앞발을 모아 하트
+        poseHandAngles(1.82, -0.32);
+        walkers.blue.parts.leftArm.rotation.z = -0.7;
+        walkers.navy.parts.rightArm.rotation.z = 0.7;
+        break;
+      case 8: // 단웅이는 앉고 단비는 손 흔들기
+        walkers.blue.model.position.y = -2.9 + breathe;
+        blue.scale.set(modelScale, modelScale * 0.84, modelScale);
+        poseHandAngles(1.0, -0.55 - Math.sin(elapsed * 7) * 0.3);
+        break;
+      default:
+        poseHands();
+    }
+    if (settle < 1 || held < 1) {
+      walkers.blue.model.rotation.z *= settle;
+      walkers.navy.model.rotation.z *= settle;
+    }
+  }
+
+  function beginRandomPose() {
+    if (interaction) return;
+    interaction = { index: Math.floor(Math.random() * 9), started: performance.now() / 1000 };
+    setPoseTrigger(false);
+  }
+
   function approach(elapsed) {
     const progress = ease(Math.min(1, elapsed / approachDuration));
     walkers.blue.model.position.x = mix(-edge, meetCenter - meet, progress);
@@ -160,7 +249,10 @@ export function mountDanwoongWalk() {
   function restartFromEdges() {
     const now = performance.now() / 1000;
     chooseHands(now);
+    interaction = null;
+    setPoseTrigger(false);
     lastFrame = 0;
+    resetPoseTransforms();
     poseHands();
     approach(0);
     renderer.render(scene, camera);
@@ -229,6 +321,17 @@ export function mountDanwoongWalk() {
     lastFrame = time;
     const now = time / 1000;
     const elapsed = now - cycleStarted;
+    if (interaction) {
+      const poseElapsed = now - interaction.started;
+      poseFrame(interaction.index, poseElapsed);
+      if (poseElapsed >= 2.5) {
+        interaction = null;
+        cycleStarted = now - approachDuration - highFiveDuration;
+      }
+      renderer.render(scene, camera);
+      return;
+    }
+    resetPoseTransforms();
     poseHands();
     if (testPattern === "highfive-up" || testPattern === "highfive-down") {
       highFive(highFiveDuration / 2);
@@ -254,6 +357,11 @@ export function mountDanwoongWalk() {
         approach(0);
       }
     }
+    const distance = Math.abs(walkers.blue.model.position.x - walkers.navy.model.position.x);
+    const canPose = elapsed >= approachDuration * 0.68
+      && elapsed < approachDuration + highFiveDuration
+      && distance <= 6.4;
+    setPoseTrigger(canPose);
     renderer.render(scene, camera);
   }
 
@@ -261,6 +369,7 @@ export function mountDanwoongWalk() {
     const shouldRestart = visible && (restart || !visibleState);
     visibleState = visible;
     canvas.hidden = !visible;
+    if (!visible) setPoseTrigger(false);
     if (visible) canvas.style.removeProperty("display");
     else canvas.style.setProperty("display", "none", "important");
     if (shouldRestart) {
@@ -282,6 +391,16 @@ export function mountDanwoongWalk() {
     running = document.documentElement.dataset.mascots !== "hide" && !document.hidden;
   });
   window.addEventListener("resize", resize, { passive: true });
+  header.addEventListener("click", (event) => {
+    if (!poseReady || interaction) return;
+    const rect = header.getBoundingClientRect();
+    const meetingPixel = ((meetCenter / halfWidth + 1) / 2) * rect.width;
+    const hitRadius = Math.min(82, Math.max(54, rect.width * 0.18));
+    if (Math.abs(event.clientX - rect.left - meetingPixel) > hitRadius) return;
+    event.preventDefault();
+    event.stopPropagation();
+    beginRandomPose();
+  }, true);
   resize();
   restartFromEdges();
   requestAnimationFrame(frame);
