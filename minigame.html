@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/img/logo.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=1"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=69" />
+<link rel="stylesheet" href="assets/css/style.css?v=70" />
 </head>
 <body class="locked">
 
@@ -160,7 +160,7 @@
       </div>
 
       <!-- 게임 5: 투표 -->
-      <div class="game-card game-launch-card poll-game">
+      <div class="game-card game-launch-card poll-game" id="pollGameCard">
         <div class="game-head">
           <h2>🗳️ 투표</h2>
           <p>누구나 투표를 만들고 참여할 수 있어요. 작성자는 이름과 함께 표시됩니다.</p>
@@ -249,12 +249,17 @@
           else openCard(card);
         };
       });
+
+      if (new URLSearchParams(location.search).get("poll")) {
+        var pollCard = document.querySelector("#pollGameCard");
+        if (pollCard) openCard(pollCard);
+      }
     })();
   </script>
   <script type="module" src="assets/js/minigame.js?v=34"></script>
   <script src="assets/js/ladder.js?v=5"></script>
   <script src="assets/js/teams.js?v=1"></script>
-  <script type="module" src="assets/js/polls.js?v=1"></script>
+  <script type="module" src="assets/js/polls.js?v=2"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=19"></script>
 </body>

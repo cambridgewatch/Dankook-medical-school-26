@@ -13,7 +13,7 @@ firebase.initializeApp({
 });
 
 const messaging = firebase.messaging();
-const CACHE_NAME = "dku-med26-app-v6";
+const CACHE_NAME = "dku-med26-app-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -33,7 +33,8 @@ const APP_SHELL = [
   "./assets/js/session-hint.js",
   "./assets/js/firebase-init.js",
   "./assets/js/attachments.js",
-  "./assets/js/teams.js"
+  "./assets/js/teams.js",
+  "./assets/js/home-polls.js"
 ];
 
 self.addEventListener("install", (event) => {

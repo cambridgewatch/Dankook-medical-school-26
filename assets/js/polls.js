@@ -20,6 +20,8 @@ window.addEventListener("DOMContentLoaded", () => {
   let polls = [];
   let members = [];
   let editingId = null;
+  const requestedPollId = new URLSearchParams(location.search).get("poll");
+  let requestedPollHandled = false;
   let editorOptions = [];
   const voteState = new Map();
   const voterState = new Map();
@@ -156,6 +158,15 @@ window.addEventListener("DOMContentLoaded", () => {
       }
       renderPoll(poll);
     });
+    if (requestedPollId && !requestedPollHandled) {
+      const target = document.querySelector(`#poll-${CSS.escape(requestedPollId)}`);
+      if (target) {
+        requestedPollHandled = true;
+        target.classList.add("poll-deep-link");
+        window.setTimeout(() => target.scrollIntoView({ behavior: "smooth", block: "center" }), 120);
+        window.setTimeout(() => target.classList.remove("poll-deep-link"), 2600);
+      }
+    }
   }
 
   function renderPoll(poll) {
@@ -176,7 +187,8 @@ window.addEventListener("DOMContentLoaded", () => {
       return `${voter.voterName || "이름 없음"} → ${option?.text || "확인 중"}`;
     }).sort((a, b) => a.localeCompare(b, "ko"));
 
-    shell.className = `poll-card ${poll.closed ? "closed" : ""}`;
+    const deepLinked = shell.classList.contains("poll-deep-link");
+    shell.className = `poll-card ${poll.closed ? "closed" : ""}${deepLinked ? " poll-deep-link" : ""}`;
     shell.innerHTML = `
       <div class="poll-card-head">
         <div class="poll-card-title">
