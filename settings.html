@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/img/logo.png" />
   <title>설정 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=1"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=72" />
+<link rel="stylesheet" href="assets/css/style.css?v=73" />
 </head>
 <body class="locked">
   <header class="site-header">
@@ -266,6 +266,19 @@
         </div>
       </div>
 
+      <details class="settings-card settings-guide" id="passwordHistoryPanel" hidden>
+        <summary>
+          <span class="settings-icon">🧾</span>
+          <span><strong>비밀번호 변경 내역</strong><small>설정에서 변경한 계정과 시각 확인</small></span>
+          <span class="settings-guide-arrow">⌄</span>
+        </summary>
+        <div class="settings-guide-body password-history-body">
+          <p class="settings-guide-intro">비밀번호 내용은 저장하지 않으며, 이 기능이 적용된 이후 설정에서 변경한 기록만 표시됩니다.</p>
+          <div class="password-history-list" id="passwordHistoryList"></div>
+          <p class="empty-note" id="passwordHistoryNote"></p>
+        </div>
+      </details>
+
       <div class="settings-card danger-zone">
         <div>
           <h2>로그아웃</h2>
@@ -291,8 +304,8 @@
   </footer>
 
 <script src="assets/js/main.js?v=58"></script>
-  <script type="module" src="assets/js/settings.js?v=9"></script>
-  <script type="module" src="assets/js/alerts.js?v=30"></script>
+  <script type="module" src="assets/js/settings.js?v=10"></script>
+  <script type="module" src="assets/js/alerts.js?v=31"></script>
   <script type="module" src="assets/js/gate.js?v=21"></script>
 </body>
 </html>

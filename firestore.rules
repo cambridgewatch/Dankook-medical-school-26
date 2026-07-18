@@ -54,22 +54,16 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    match /securityEvents/{eventId} {
-      allow read, update, delete: if isAdmin();
+    match /passwordChangeEvents/{eventId} {
+      allow read, delete: if isAdmin();
+      allow update: if false;
       allow create: if canUseSite()
         && request.resource.data.keys().hasOnly([
-          'kind', 'uid', 'accountName', 'deviceLabel', 'createdAt', 'read'
+          'uid', 'email', 'changedAt'
         ])
-        && request.resource.data.kind == 'newDevice'
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.accountName is string
-        && request.resource.data.accountName.size() >= 1
-        && request.resource.data.accountName.size() <= 30
-        && request.resource.data.deviceLabel is string
-        && request.resource.data.deviceLabel.size() >= 1
-        && request.resource.data.deviceLabel.size() <= 40
-        && request.resource.data.createdAt == request.time
-        && request.resource.data.read == false;
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.changedAt == request.time;
     }
 
     match /timetableGlobal/{entryId} {

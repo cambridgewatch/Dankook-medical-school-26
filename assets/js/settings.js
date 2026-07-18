@@ -1,4 +1,4 @@
-import { auth } from "./firebase-init.js?v=11";
+import { auth, db, ADMIN_EMAIL, emailToName } from "./firebase-init.js?v=12";
 import {
   onAuthStateChanged,
   setPersistence,
@@ -9,6 +9,9 @@ import {
   EmailAuthProvider,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  addDoc, collection, limit, onSnapshot, orderBy, query, serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = (s) => document.querySelector(s);
 const PREF_KEY = "dkuAutoLogin";
@@ -23,7 +26,38 @@ window.addEventListener("DOMContentLoaded", () => {
   const toggle = $("#autoLoginToggle");
   const status = $("#autoLoginStatus");
   const msg = $("#settingsMsg");
+  const passwordHistoryPanel = $("#passwordHistoryPanel");
+  const passwordHistoryList = $("#passwordHistoryList");
+  const passwordHistoryNote = $("#passwordHistoryNote");
   let user = null;
+  let passwordHistorySubscribed = false;
+
+  const formatHistoryTime = (timestamp) => {
+    try {
+      const date = timestamp?.toDate ? timestamp.toDate() : new Date();
+      const pad = (value) => String(value).padStart(2, "0");
+      return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    } catch { return ""; }
+  };
+
+  const renderPasswordHistory = (items) => {
+    if (!passwordHistoryList) return;
+    if (!items.length) {
+      passwordHistoryList.innerHTML = "";
+      passwordHistoryNote.textContent = "기록 기능 적용 이후의 변경 내역이 여기에 표시됩니다.";
+      return;
+    }
+    passwordHistoryNote.textContent = "";
+    passwordHistoryList.innerHTML = items.map((item) => `
+      <div class="password-history-item">
+        <span>🔑</span>
+        <div><strong>${escapeHtml(emailToName(item.email) || "계정")}</strong><small>${formatHistoryTime(item.changedAt)}</small></div>
+      </div>`).join("");
+  };
+
+  const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[char]));
 
   const bannerColor = $("#bannerColor");
   const bannerColorReset = $("#bannerColorReset");
@@ -92,6 +126,15 @@ window.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, (currentUser) => {
     user = currentUser;
     if (!user) location.replace("login.html");
+    if (user?.email === ADMIN_EMAIL && !passwordHistorySubscribed) {
+      passwordHistoryPanel.hidden = false;
+      passwordHistorySubscribed = true;
+      onSnapshot(
+        query(collection(db, "passwordChangeEvents"), orderBy("changedAt", "desc"), limit(200)),
+        (snapshot) => renderPasswordHistory(snapshot.docs.map((item) => ({ id: item.id, ...item.data() }))),
+        (error) => { passwordHistoryNote.textContent = "변경 내역을 불러오지 못했습니다: " + error.message; }
+      );
+    }
   });
 
   toggle.addEventListener("change", async () => {
@@ -125,6 +168,15 @@ window.addEventListener("DOMContentLoaded", () => {
       const credential = EmailAuthProvider.credential(user.email, current);
       await reauthenticateWithCredential(user, credential);
       await updatePassword(user, next);
+      try {
+        await addDoc(collection(db, "passwordChangeEvents"), {
+          uid: user.uid,
+          email: user.email,
+          changedAt: serverTimestamp(),
+        });
+      } catch (historyError) {
+        console.warn("비밀번호 변경 내역을 저장하지 못했습니다.", historyError);
+      }
       $("#currentPassword").value = "";
       $("#newPassword").value = "";
       $("#newPasswordConfirm").value = "";

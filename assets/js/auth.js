@@ -10,9 +10,7 @@ import {
   browserSessionPersistence,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  addDoc, collection, doc, getDoc, serverTimestamp,
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = (s) => document.querySelector(s);
 const safeGet = (storage, key) => { try { return storage.getItem(key); } catch { return null; } };
@@ -43,37 +41,10 @@ function recordLoginFailure() {
   }));
 }
 
-function deviceLabel() {
-  const ua = navigator.userAgent || "";
-  const form = /Android|iPhone|iPad|Mobile/i.test(ua) ? "모바일" : "PC";
-  const browser = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome"
-    : /Safari\//.test(ua) ? "Safari" : /Firefox\//.test(ua) ? "Firefox" : "브라우저";
-  return `${form} · ${browser}`;
-}
-
 async function verifyApproved(user) {
   if (user.email === ADMIN_EMAIL) return true;
   const member = await getDoc(doc(db, "users", user.uid));
   return member.exists() && member.data().status === "approved";
-}
-
-async function recordNewDevice(user, name) {
-  const knownKey = `dkuKnownDevice:${user.uid}`;
-  if (safeGet(localStorage, knownKey)) return;
-  const deviceId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  try {
-    await addDoc(collection(db, "securityEvents"), {
-      kind: "newDevice",
-      uid: user.uid,
-      accountName: String(name || emailToName(user.email) || "계정").slice(0, 30),
-      deviceLabel: deviceLabel(),
-      createdAt: serverTimestamp(),
-      read: false,
-    });
-    safeSet(localStorage, knownKey, deviceId);
-  } catch (error) {
-    console.warn("새 기기 보안 기록을 저장하지 못했습니다.", error);
-  }
 }
 
 function toast(msg, ok = false) {
@@ -149,7 +120,6 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!credential.user.displayName) {
         await updateProfile(credential.user, { displayName: name.normalize("NFC") });
       }
-      await recordNewDevice(credential.user, name.normalize("NFC"));
       const usesSharedPassword = pw.normalize("NFC") === "dku1842";
       toast(usesSharedPassword
         ? "보안을 위해 공용 초기 비밀번호를 개인 비밀번호로 변경해 주세요."
