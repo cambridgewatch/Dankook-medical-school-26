@@ -1650,12 +1650,16 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .password-reset-admin-body { padding-top: 4px; }
 .password-reset-generate-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 9px; align-items: stretch; }
 .password-reset-generate-row .btn { margin-top: 0; white-space: nowrap; }
+.password-visibility-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; align-items: stretch; }
+.password-visibility-row .btn { margin-top: 0; white-space: nowrap; }
 .settings-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
 .settings-actions .btn { justify-content: center; }
 @media (max-width: 520px) {
   .settings-actions .btn { width: 100%; }
   .password-reset-generate-row { grid-template-columns: 1fr; }
   .password-reset-generate-row .btn { width: 100%; }
+  .password-visibility-row { grid-template-columns: 1fr; }
+  .password-visibility-row .btn { width: 100%; }
 }
 .danger-zone { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .settings-logout { border: 1px solid #e7a5a5; color: #b52f38; background: #fff6f6; font-weight: 800; }

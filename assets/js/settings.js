@@ -156,7 +156,15 @@ window.addEventListener("DOMContentLoaded", () => {
     const input = $("#memberTemporaryPassword");
     const visible = input.type === "password";
     input.type = visible ? "text" : "password";
-    event.currentTarget.textContent = visible ? "숨기기" : "표시";
+    event.currentTarget.textContent = visible ? "비밀번호 숨기기" : "비밀번호 표시";
+    event.currentTarget.setAttribute("aria-pressed", String(visible));
+  });
+
+  $("#toggleNewPasswordBtn")?.addEventListener("click", (event) => {
+    const input = $("#newPassword");
+    const visible = input.type === "password";
+    input.type = visible ? "text" : "password";
+    event.currentTarget.textContent = visible ? "비밀번호 숨기기" : "비밀번호 표시";
     event.currentTarget.setAttribute("aria-pressed", String(visible));
   });
 
@@ -213,7 +221,7 @@ window.addEventListener("DOMContentLoaded", () => {
       $("#memberTemporaryPasswordConfirm").value = "";
       $("#adminCurrentPassword").value = "";
       $("#memberTemporaryPassword").type = "password";
-      $("#toggleTemporaryPasswordBtn").textContent = "표시";
+      $("#toggleTemporaryPasswordBtn").textContent = "비밀번호 표시";
       $("#toggleTemporaryPasswordBtn").setAttribute("aria-pressed", "false");
       showResetMessage(`${name} 회원의 비밀번호를 재설정했습니다. 임시 비밀번호를 회원에게 안전하게 전달해 주세요.`, true);
     } catch (error) {
@@ -271,6 +279,9 @@ window.addEventListener("DOMContentLoaded", () => {
       $("#currentPassword").value = "";
       $("#newPassword").value = "";
       $("#newPasswordConfirm").value = "";
+      $("#newPassword").type = "password";
+      $("#toggleNewPasswordBtn").textContent = "비밀번호 표시";
+      $("#toggleNewPasswordBtn").setAttribute("aria-pressed", "false");
       showMessage("비밀번호가 변경되었습니다.", true);
     } catch (err) {
       if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password")
