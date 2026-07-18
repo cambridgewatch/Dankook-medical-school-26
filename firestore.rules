@@ -59,11 +59,19 @@ service cloud.firestore {
       allow update: if false;
       allow create: if canUseSite()
         && request.resource.data.keys().hasOnly([
-          'uid', 'email', 'changedAt'
+          'uid', 'email', 'changedAt', 'type', 'changedBy'
         ])
-        && request.resource.data.uid == request.auth.uid
-        && request.resource.data.email == request.auth.token.email
-        && request.resource.data.changedAt == request.time;
+        && request.resource.data.keys().hasAll([
+          'uid', 'email', 'changedAt', 'type', 'changedBy'
+        ])
+        && request.resource.data.changedAt == request.time
+        && request.resource.data.changedBy == request.auth.token.email
+        && (
+          (request.resource.data.type == 'selfChange'
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.email == request.auth.token.email)
+          || (isAdmin() && request.resource.data.type == 'adminReset')
+        );
     }
 
     match /timetableGlobal/{entryId} {

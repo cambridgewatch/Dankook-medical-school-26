@@ -1,0 +1,11 @@
+name = "dku-med26-password-reset"
+main = "worker.js"
+compatibility_date = "2026-07-18"
+
+[vars]
+ADMIN_EMAIL = "ueca095eca780ed9b88@dkumed26.com"
+ALLOWED_ORIGINS = "https://dkumed26.com,https://www.dkumed26.com"
+
+# 아래 두 값은 파일에 적지 말고 Cloudflare의 암호화된 Secret으로 등록하세요.
+# FIREBASE_WEB_API_KEY
+# FIREBASE_SERVICE_ACCOUNT

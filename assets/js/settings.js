@@ -1,4 +1,4 @@
-import { auth, db, ADMIN_EMAIL, emailToName } from "./firebase-init.js?v=12";
+import { auth, db, ADMIN_EMAIL, emailToName, nameToEmail } from "./firebase-init.js?v=12";
 import {
   onAuthStateChanged,
   setPersistence,
@@ -29,6 +29,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const passwordHistoryPanel = $("#passwordHistoryPanel");
   const passwordHistoryList = $("#passwordHistoryList");
   const passwordHistoryNote = $("#passwordHistoryNote");
+  const memberPasswordResetPanel = $("#memberPasswordResetPanel");
   let user = null;
   let passwordHistorySubscribed = false;
 
@@ -51,7 +52,7 @@ window.addEventListener("DOMContentLoaded", () => {
     passwordHistoryList.innerHTML = items.map((item) => `
       <div class="password-history-item">
         <span>🔑</span>
-        <div><strong>${escapeHtml(emailToName(item.email) || "계정")}</strong><small>${formatHistoryTime(item.changedAt)}</small></div>
+        <div><strong>${escapeHtml(emailToName(item.email) || "계정")}</strong><small>${item.type === "adminReset" ? "관리자 재설정 · " : "직접 변경 · "}${formatHistoryTime(item.changedAt)}</small></div>
       </div>`).join("");
   };
 
@@ -127,6 +128,7 @@ window.addEventListener("DOMContentLoaded", () => {
     user = currentUser;
     if (!user) location.replace("login.html");
     if (user?.email === ADMIN_EMAIL && !passwordHistorySubscribed) {
+      memberPasswordResetPanel.hidden = false;
       passwordHistoryPanel.hidden = false;
       passwordHistorySubscribed = true;
       onSnapshot(
@@ -134,6 +136,93 @@ window.addEventListener("DOMContentLoaded", () => {
         (snapshot) => renderPasswordHistory(snapshot.docs.map((item) => ({ id: item.id, ...item.data() }))),
         (error) => { passwordHistoryNote.textContent = "변경 내역을 불러오지 못했습니다: " + error.message; }
       );
+    }
+  });
+
+  const generateTemporaryPassword = () => {
+    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%";
+    const bytes = crypto.getRandomValues(new Uint8Array(14));
+    return Array.from(bytes, (value) => alphabet[value % alphabet.length]).join("");
+  };
+
+  $("#generateTemporaryPasswordBtn")?.addEventListener("click", () => {
+    const temporary = generateTemporaryPassword();
+    $("#memberTemporaryPassword").value = temporary;
+    $("#memberTemporaryPasswordConfirm").value = temporary;
+    $("#memberTemporaryPassword").focus();
+  });
+
+  $("#toggleTemporaryPasswordBtn")?.addEventListener("click", (event) => {
+    const input = $("#memberTemporaryPassword");
+    const visible = input.type === "password";
+    input.type = visible ? "text" : "password";
+    event.currentTarget.textContent = visible ? "숨기기" : "표시";
+    event.currentTarget.setAttribute("aria-pressed", String(visible));
+  });
+
+  $("#resetMemberPasswordBtn")?.addEventListener("click", async () => {
+    if (!user || user.email !== ADMIN_EMAIL) return;
+    const name = $("#memberResetName").value.trim().normalize("NFC");
+    const temporary = $("#memberTemporaryPassword").value.normalize("NFC");
+    const confirmTemporary = $("#memberTemporaryPasswordConfirm").value.normalize("NFC");
+    const adminPassword = $("#adminCurrentPassword").value.normalize("NFC");
+    const resetMessage = $("#memberPasswordResetMsg");
+    const button = $("#resetMemberPasswordBtn");
+    const showResetMessage = (text, ok = false) => {
+      resetMessage.textContent = text;
+      resetMessage.className = `auth-msg ${ok ? "ok" : "err"}`;
+      resetMessage.style.display = "block";
+    };
+
+    if (!name) return showResetMessage("비밀번호를 재설정할 회원 이름을 입력해 주세요.");
+    if (nameToEmail(name) === ADMIN_EMAIL) return showResetMessage("관리자 계정은 위의 본인 비밀번호 변경 기능을 이용해 주세요.");
+    if (temporary.length < 8) return showResetMessage("임시 비밀번호는 8자 이상이어야 합니다.");
+    if (temporary !== confirmTemporary) return showResetMessage("임시 비밀번호가 서로 일치하지 않습니다.");
+    if (!adminPassword) return showResetMessage("관리자 본인 확인을 위해 현재 비밀번호를 입력해 주세요.");
+    if (!confirm(`${name} 회원의 비밀번호를 재설정할까요? 기존 비밀번호로는 더 이상 로그인할 수 없습니다.`)) return;
+
+    button.disabled = true;
+    try {
+      const credential = EmailAuthProvider.credential(user.email, adminPassword);
+      await reauthenticateWithCredential(user, credential);
+      const idToken = await user.getIdToken(true);
+      const response = await fetch("/api/admin-reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idToken,
+          targetEmail: nameToEmail(name),
+          newPassword: temporary,
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "비밀번호 재설정 서버 요청에 실패했습니다.");
+      try {
+        await addDoc(collection(db, "passwordChangeEvents"), {
+          uid: result.uid,
+          email: result.email,
+          changedAt: serverTimestamp(),
+          type: "adminReset",
+          changedBy: user.email,
+        });
+      } catch (historyError) {
+        console.warn("관리자 재설정 내역을 저장하지 못했습니다.", historyError);
+      }
+      $("#memberResetName").value = "";
+      $("#memberTemporaryPassword").value = "";
+      $("#memberTemporaryPasswordConfirm").value = "";
+      $("#adminCurrentPassword").value = "";
+      $("#memberTemporaryPassword").type = "password";
+      $("#toggleTemporaryPasswordBtn").textContent = "표시";
+      $("#toggleTemporaryPasswordBtn").setAttribute("aria-pressed", "false");
+      showResetMessage(`${name} 회원의 비밀번호를 재설정했습니다. 임시 비밀번호를 회원에게 안전하게 전달해 주세요.`, true);
+    } catch (error) {
+      const message = error.code === "auth/invalid-credential" || error.code === "auth/wrong-password"
+        ? "관리자 현재 비밀번호가 올바르지 않습니다."
+        : error.message;
+      showResetMessage(message || "비밀번호를 재설정하지 못했습니다.");
+    } finally {
+      button.disabled = false;
     }
   });
 
@@ -173,6 +262,8 @@ window.addEventListener("DOMContentLoaded", () => {
           uid: user.uid,
           email: user.email,
           changedAt: serverTimestamp(),
+          type: "selfChange",
+          changedBy: user.email,
         });
       } catch (historyError) {
         console.warn("비밀번호 변경 내역을 저장하지 못했습니다.", historyError);

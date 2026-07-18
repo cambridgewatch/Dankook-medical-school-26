@@ -7,3 +7,8 @@ desktop.ini
 .vscode/
 .idea/
 *.swp
+
+# Cloudflare Worker / Firebase administrator secrets
+cloudflare-password-reset/wrangler.toml
+cloudflare-password-reset/.dev.vars*
+cloudflare-password-reset/*service-account*.json

@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/img/logo.png" />
   <title>설정 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=1"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=73" />
+<link rel="stylesheet" href="assets/css/style.css?v=74" />
 </head>
 <body class="locked">
   <header class="site-header">
@@ -266,6 +266,33 @@
         </div>
       </div>
 
+      <details class="settings-card settings-guide" id="memberPasswordResetPanel" hidden>
+        <summary>
+          <span class="settings-icon">🛟</span>
+          <span><strong>회원 비밀번호 재설정</strong><small>비밀번호를 잊은 회원에게 임시 비밀번호 발급</small></span>
+          <span class="settings-guide-arrow">⌄</span>
+        </summary>
+        <div class="settings-guide-body password-reset-admin-body">
+          <p class="settings-guide-intro">회원 이름과 새 임시 비밀번호를 입력하세요. 재설정 전 관리자 현재 비밀번호로 본인 확인을 진행합니다.</p>
+          <div class="settings-form">
+            <label for="memberResetName">회원 이름</label>
+            <input type="text" id="memberResetName" autocomplete="off" placeholder="이름" />
+            <label for="memberTemporaryPassword">새 임시 비밀번호</label>
+            <div class="password-reset-generate-row">
+              <input type="password" id="memberTemporaryPassword" autocomplete="new-password" placeholder="8자 이상" />
+              <button class="btn btn-ghost-dark" id="generateTemporaryPasswordBtn" type="button">안전한 비밀번호 생성</button>
+              <button class="btn btn-ghost-dark" id="toggleTemporaryPasswordBtn" type="button" aria-pressed="false">표시</button>
+            </div>
+            <label for="memberTemporaryPasswordConfirm">새 임시 비밀번호 확인</label>
+            <input type="password" id="memberTemporaryPasswordConfirm" autocomplete="new-password" placeholder="임시 비밀번호 다시 입력" />
+            <label for="adminCurrentPassword">관리자 현재 비밀번호</label>
+            <input type="password" id="adminCurrentPassword" autocomplete="current-password" placeholder="관리자 본인 확인" />
+            <button class="btn btn-solid" id="resetMemberPasswordBtn" type="button">회원 비밀번호 재설정</button>
+            <div class="auth-msg" id="memberPasswordResetMsg"></div>
+          </div>
+        </div>
+      </details>
+
       <details class="settings-card settings-guide" id="passwordHistoryPanel" hidden>
         <summary>
           <span class="settings-icon">🧾</span>
@@ -304,7 +331,7 @@
   </footer>
 
 <script src="assets/js/main.js?v=58"></script>
-  <script type="module" src="assets/js/settings.js?v=10"></script>
+  <script type="module" src="assets/js/settings.js?v=11"></script>
   <script type="module" src="assets/js/alerts.js?v=31"></script>
   <script type="module" src="assets/js/gate.js?v=21"></script>
 </body>
