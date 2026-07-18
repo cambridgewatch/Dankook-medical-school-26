@@ -6,7 +6,7 @@
 import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, query, orderBy, limit, where, onSnapshot, getDocs, getDoc, deleteDoc, doc,
+  collection, query, orderBy, limit, where, onSnapshot, getDocs, getDoc, deleteDoc, doc, updateDoc, writeBatch,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const RKEY = "alertsRead";
@@ -23,10 +23,16 @@ window.addEventListener("DOMContentLoaded", () => {
   const noteEl = document.querySelector("#alertNote");
   const clearBtn = document.querySelector("#alertClear");
   const pagerEl = document.querySelector("#alertPager");
+  const securityPanel = document.querySelector("#securityAlertPanel");
+  const securityList = document.querySelector("#securityAlertList");
+  const securityNote = document.querySelector("#securityAlertNote");
+  const securityReadAll = document.querySelector("#securityReadAll");
   if (!listEl) return;
 
   let alerts = [];
+  let securityEvents = [];
   let subscribed = false;
+  let securitySubscribed = false;
   let isAdmin = false;
   let currentUid = "";
   let page = 1;
@@ -43,6 +49,18 @@ window.addEventListener("DOMContentLoaded", () => {
     readSet = getStoredSet(RKEY, currentUid);
     hiddenSet = getStoredSet(HKEY, currentUid);
     isAdmin = user.email === ADMIN_EMAIL;
+    securityPanel.hidden = !isAdmin;
+    if (isAdmin && !securitySubscribed) {
+      securitySubscribed = true;
+      onSnapshot(
+        query(collection(db, "securityEvents"), orderBy("createdAt", "desc"), limit(100)),
+        (snap) => {
+          securityEvents = snap.docs.map((item) => ({ id: item.id, ...item.data() }));
+          renderSecurity();
+        },
+        (err) => { securityNote.textContent = "보안 알림을 불러오지 못했습니다: " + err.message; }
+      );
+    }
     clearBtn.style.display = "inline-block"; // 삭제(모두)는 누구나 가능(비관리자는 본인만 숨김)
     if (!subscribed) {
       subscribed = true;
@@ -73,6 +91,60 @@ window.addEventListener("DOMContentLoaded", () => {
       return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())}`;
     } catch { return ""; }
   }
+
+  function renderSecurity() {
+    if (!isAdmin || !securityList) return;
+    if (!securityEvents.length) {
+      securityList.innerHTML = "";
+      securityNote.textContent = "새 기기 로그인 기록이 없습니다.";
+      securityReadAll.disabled = true;
+      return;
+    }
+    securityNote.textContent = "";
+    securityReadAll.disabled = !securityEvents.some((event) => event.read !== true);
+    securityList.innerHTML = securityEvents.map((event) => `
+      <article class="security-alert-item ${event.read === true ? "read" : ""}" data-id="${esc(event.id)}">
+        <span class="security-alert-icon" aria-hidden="true">🛡️</span>
+        <div>
+          <strong>${esc(event.accountName || "계정")} · 새 기기 로그인</strong>
+          <small>${esc(event.deviceLabel || "알 수 없는 기기")} · ${fmt(event.createdAt)}</small>
+          <p>본인 또는 해당 동기의 로그인이 아니라면 즉시 비밀번호를 변경하세요.</p>
+        </div>
+        ${event.read === true ? "" : '<button class="security-read" type="button">확인</button>'}
+        <button class="security-delete" type="button" aria-label="보안 알림 삭제">×</button>
+      </article>`).join("");
+
+    securityList.querySelectorAll(".security-read").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const card = button.closest(".security-alert-item");
+        button.disabled = true;
+        try { await updateDoc(doc(db, "securityEvents", card.dataset.id), { read: true }); }
+        catch (err) { button.disabled = false; alert("확인 처리에 실패했습니다: " + err.message); }
+      });
+    });
+    securityList.querySelectorAll(".security-delete").forEach((button) => {
+      button.addEventListener("click", async () => {
+        if (!confirm("이 보안 알림을 삭제할까요?")) return;
+        const card = button.closest(".security-alert-item");
+        try { await deleteDoc(doc(db, "securityEvents", card.dataset.id)); }
+        catch (err) { alert("삭제에 실패했습니다: " + err.message); }
+      });
+    });
+  }
+
+  securityReadAll?.addEventListener("click", async () => {
+    const unread = securityEvents.filter((event) => event.read !== true);
+    if (!unread.length) return;
+    securityReadAll.disabled = true;
+    try {
+      const batch = writeBatch(db);
+      unread.forEach((event) => batch.update(doc(db, "securityEvents", event.id), { read: true }));
+      await batch.commit();
+    } catch (err) {
+      securityReadAll.disabled = false;
+      alert("확인 처리에 실패했습니다: " + err.message);
+    }
+  });
 
   function renderPager(totalPages) {
     if (totalPages <= 1) { pagerEl.innerHTML = ""; return; }

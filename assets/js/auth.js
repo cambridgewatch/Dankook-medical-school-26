@@ -1,6 +1,6 @@
 /* 회원가입 / 로그인 로직 (login.html 전용) */
 
-import { auth, isConfigured, nameToEmail, emailToName } from "./firebase-init.js?v=12";
+import { auth, db, isConfigured, nameToEmail, emailToName, ADMIN_EMAIL } from "./firebase-init.js?v=12";
 import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
@@ -8,12 +8,73 @@ import {
   updateProfile,
   browserLocalPersistence,
   browserSessionPersistence,
+  signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  addDoc, collection, doc, getDoc, serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = (s) => document.querySelector(s);
 const safeGet = (storage, key) => { try { return storage.getItem(key); } catch { return null; } };
 const safeSet = (storage, key, value) => { try { storage.setItem(key, value); } catch {} };
 const safeRemove = (storage, key) => { try { storage.removeItem(key); } catch {} };
+const THROTTLE_KEY = "dkuLoginThrottle";
+const MAX_FAILURES = 5;
+const LOCK_MS = 5 * 60 * 1000;
+
+function throttleState() {
+  try { return JSON.parse(safeGet(localStorage, THROTTLE_KEY) || "null") || {}; }
+  catch { return {}; }
+}
+
+function remainingLockMs() {
+  return Math.max(0, Number(throttleState().lockUntil || 0) - Date.now());
+}
+
+function recordLoginFailure() {
+  const now = Date.now();
+  const previous = throttleState();
+  const recent = now - Number(previous.windowStart || 0) < LOCK_MS;
+  const count = recent ? Number(previous.count || 0) + 1 : 1;
+  safeSet(localStorage, THROTTLE_KEY, JSON.stringify({
+    windowStart: recent ? previous.windowStart : now,
+    count,
+    lockUntil: count >= MAX_FAILURES ? now + LOCK_MS : 0,
+  }));
+}
+
+function deviceLabel() {
+  const ua = navigator.userAgent || "";
+  const form = /Android|iPhone|iPad|Mobile/i.test(ua) ? "모바일" : "PC";
+  const browser = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome"
+    : /Safari\//.test(ua) ? "Safari" : /Firefox\//.test(ua) ? "Firefox" : "브라우저";
+  return `${form} · ${browser}`;
+}
+
+async function verifyApproved(user) {
+  if (user.email === ADMIN_EMAIL) return true;
+  const member = await getDoc(doc(db, "users", user.uid));
+  return member.exists() && member.data().status === "approved";
+}
+
+async function recordNewDevice(user, name) {
+  const knownKey = `dkuKnownDevice:${user.uid}`;
+  if (safeGet(localStorage, knownKey)) return;
+  const deviceId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  try {
+    await addDoc(collection(db, "securityEvents"), {
+      kind: "newDevice",
+      uid: user.uid,
+      accountName: String(name || emailToName(user.email) || "계정").slice(0, 30),
+      deviceLabel: deviceLabel(),
+      createdAt: serverTimestamp(),
+      read: false,
+    });
+    safeSet(localStorage, knownKey, deviceId);
+  } catch (error) {
+    console.warn("새 기기 보안 기록을 저장하지 못했습니다.", error);
+  }
+}
 
 function toast(msg, ok = false) {
   const box = $("#authMsg");
@@ -39,6 +100,8 @@ window.addEventListener("DOMContentLoaded", () => {
       status.style.display = "block";
       $("#loggedInName").textContent = user.displayName || emailToName(user.email) || "동기";
     } else {
+      safeRemove(sessionStorage, "dkuSessionKnown");
+      safeRemove(localStorage, "dkuSessionKnown");
       status.style.display = "none";
     }
   });
@@ -52,6 +115,8 @@ window.addEventListener("DOMContentLoaded", () => {
     const name = $("#liName").value.trim();
     const pw = $("#liPw").value;
     if (!name || !pw) return toast("이름과 비밀번호를 입력해 주세요.");
+    const lockMs = remainingLockMs();
+    if (lockMs > 0) return toast(`로그인 시도가 잠시 제한되었습니다. ${Math.ceil(lockMs / 60000)}분 후 다시 시도해 주세요.`);
 
     const button = $("#loginForm button[type='submit']");
     button.disabled = true;
@@ -67,22 +132,42 @@ window.addEventListener("DOMContentLoaded", () => {
         console.warn("로그인 유지 설정을 적용하지 못했습니다.", persistenceError);
       }
       const credential = await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
+      let approved = false;
+      try { approved = await verifyApproved(credential.user); }
+      catch {
+        await signOut(auth).catch(() => {});
+        throw Object.assign(new Error("승인 상태 확인 실패"), { code: "auth/approval-check-failed" });
+      }
+      if (!approved) {
+        await signOut(auth);
+        throw Object.assign(new Error("승인되지 않은 계정"), { code: "auth/not-approved" });
+      }
+      safeRemove(localStorage, THROTTLE_KEY);
       safeSet(sessionStorage, "dkuSessionKnown", "1");
       if (remember) safeSet(localStorage, "dkuSessionKnown", "1");
       else safeRemove(localStorage, "dkuSessionKnown");
       if (!credential.user.displayName) {
         await updateProfile(credential.user, { displayName: name.normalize("NFC") });
       }
-      toast(`${name} 님, 환영합니다! 이동합니다…`, true);
-      setTimeout(() => location.replace("index.html"), 500);
+      await recordNewDevice(credential.user, name.normalize("NFC"));
+      const usesSharedPassword = pw.normalize("NFC") === "dku1842";
+      toast(usesSharedPassword
+        ? "보안을 위해 공용 초기 비밀번호를 개인 비밀번호로 변경해 주세요."
+        : `${name} 님, 환영합니다! 이동합니다…`, true);
+      setTimeout(() => location.replace(usesSharedPassword ? "settings.html?security=change-password" : "index.html"), 700);
     } catch (err) {
-      if (
+      if (err.code === "auth/not-approved") {
+        toast("승인된 26학번 계정만 로그인할 수 있습니다.");
+      } else if (err.code === "auth/approval-check-failed") {
+        toast("접근 권한을 확인하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.");
+      } else if (
         err.code === "auth/invalid-credential" ||
         err.code === "auth/wrong-password" ||
         err.code === "auth/user-not-found"
-      )
+      ) {
+        recordLoginFailure();
         toast("이름 또는 비밀번호가 올바르지 않습니다.");
-      else toast("로그인 오류: " + (err.message || err.code));
+      } else toast("로그인 오류: " + (err.message || err.code));
     } finally {
       button.disabled = false;
       button.textContent = "로그인";

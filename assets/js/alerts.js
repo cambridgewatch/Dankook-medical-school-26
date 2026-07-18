@@ -2,7 +2,7 @@
    - 헤더에 🔔 벨 + 안 읽은 개수 배지. 클릭하면 알림 페이지(notify.html)로 이동.
    - 목록/세부내용/읽음 처리는 notify.html(notify.js)에서. */
 
-import { db, auth, isConfigured } from "./firebase-init.js?v=11";
+import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=12";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   collection, query, orderBy, limit, onSnapshot,
@@ -35,7 +35,9 @@ window.addEventListener("DOMContentLoaded", () => {
   bellBtn.addEventListener("click", () => { location.href = "notify.html"; });
 
   let alerts = [];
+  let securityEvents = [];
   let subscribed = false;
+  let securitySubscribed = false;
   let currentUid = "";
 
   function dedupe(list) {
@@ -52,7 +54,9 @@ window.addEventListener("DOMContentLoaded", () => {
   function updateBadge() {
     const read = getStoredSet(RKEY, currentUid);
     const hidden = getStoredSet("alertsHidden", currentUid);
-    const unread = dedupe(alerts).filter((a) => !read.has(a.id) && !hidden.has(a.id)).length;
+    const classUnread = dedupe(alerts).filter((a) => !read.has(a.id) && !hidden.has(a.id)).length;
+    const securityUnread = securityEvents.filter((event) => event.read !== true).length;
+    const unread = classUnread + securityUnread;
     if (unread > 0) { badge.textContent = unread > 99 ? "99+" : unread; badge.style.display = "grid"; }
     else badge.style.display = "none";
   }
@@ -62,6 +66,17 @@ window.addEventListener("DOMContentLoaded", () => {
     currentUid = user.uid;
     li.style.display = "";
     updateBadge();
+    if (user.email === ADMIN_EMAIL && !securitySubscribed) {
+      securitySubscribed = true;
+      onSnapshot(
+        query(collection(db, "securityEvents"), orderBy("createdAt", "desc"), limit(100)),
+        (snap) => {
+          securityEvents = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+          updateBadge();
+        },
+        () => {}
+      );
+    }
     if (!subscribed) {
       subscribed = true;
       onSnapshot(

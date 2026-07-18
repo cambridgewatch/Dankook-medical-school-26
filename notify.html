@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/img/logo.png" />
   <title>알림 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=1"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=71" />
+<link rel="stylesheet" href="assets/css/style.css?v=72" />
 </head>
 <body class="locked">
 
@@ -45,6 +45,18 @@
 
   <section class="section">
     <div class="container">
+      <section class="security-alert-panel" id="securityAlertPanel" hidden>
+        <div class="security-alert-head">
+          <div>
+            <span>SECURITY</span>
+            <h2>보안 알림</h2>
+            <p>계정이 새로운 기기에서 로그인하면 이곳에 기록됩니다.</p>
+          </div>
+          <button class="btn btn-ghost-dark" id="securityReadAll" type="button">모두 확인</button>
+        </div>
+        <div class="security-alert-list" id="securityAlertList"></div>
+        <p class="empty-note" id="securityAlertNote"></p>
+      </section>
       <div style="max-width:820px;margin:0 auto 16px;text-align:right;">
         <button class="btn btn-ghost-dark" id="alertClear" style="display:none;">전체 알림 삭제</button>
       </div>
@@ -76,8 +88,8 @@
 
 <script src="assets/js/main.js?v=57"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
-  <script type="module" src="assets/js/notify.js?v=31"></script>
-  <script type="module" src="assets/js/alerts.js?v=29"></script>
-  <script type="module" src="assets/js/gate.js?v=20"></script>
+  <script type="module" src="assets/js/notify.js?v=32"></script>
+  <script type="module" src="assets/js/alerts.js?v=30"></script>
+  <script type="module" src="assets/js/gate.js?v=21"></script>
 </body>
 </html>

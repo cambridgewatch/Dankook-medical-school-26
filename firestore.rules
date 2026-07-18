@@ -1,0 +1,138 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == "ueca095eca780ed9b88@dkumed26.com";
+    }
+
+    function isApproved() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == "approved";
+    }
+
+    function canUseSite() {
+      return isAdmin() || isApproved();
+    }
+
+    match /users/{uid} {
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /photos/{photoId} {
+      allow read, create: if canUseSite();
+      allow delete: if isAdmin()
+        || (isApproved() && request.auth.uid == resource.data.uid);
+      allow update: if false;
+    }
+
+    match /calendarEvents/{eventId} {
+      allow read: if canUseSite();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /calendarPersonal/{uid}/events/{eventId} {
+      allow read, create, update, delete: if canUseSite()
+        && request.auth.uid == uid;
+    }
+
+    match /members/{memberId} {
+      allow read: if canUseSite();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /notices/{noticeId} {
+      allow read: if canUseSite();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /alerts/{alertId} {
+      allow read: if canUseSite();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /securityEvents/{eventId} {
+      allow read, update, delete: if isAdmin();
+      allow create: if canUseSite()
+        && request.resource.data.keys().hasOnly([
+          'kind', 'uid', 'accountName', 'deviceLabel', 'createdAt', 'read'
+        ])
+        && request.resource.data.kind == 'newDevice'
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.accountName is string
+        && request.resource.data.accountName.size() >= 1
+        && request.resource.data.accountName.size() <= 30
+        && request.resource.data.deviceLabel is string
+        && request.resource.data.deviceLabel.size() >= 1
+        && request.resource.data.deviceLabel.size() <= 40
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.read == false;
+    }
+
+    match /timetableGlobal/{entryId} {
+      allow read: if canUseSite();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /timetablePersonal/{uid}/entries/{entryId} {
+      allow read, create, update, delete: if canUseSite()
+        && request.auth.uid == uid;
+    }
+
+    match /polls/{pollId} {
+      function poll() {
+        return get(/databases/$(database)/documents/polls/$(pollId)).data;
+      }
+
+      function isPollOwner() {
+        return request.auth != null && poll().creatorUid == request.auth.uid;
+      }
+
+      allow read: if canUseSite();
+      allow create: if canUseSite()
+        && request.resource.data.creatorUid == request.auth.uid;
+      allow update: if isAdmin() || isPollOwner()
+        || (isApproved()
+          && resource.data.closed == false
+          && resource.data.allowOptionAdd == true
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['options', 'updatedAt']));
+      allow delete: if isAdmin() || isPollOwner();
+
+      match /votes/{uid} {
+        allow read: if canUseSite()
+          && (isAdmin()
+            || request.auth.uid == uid
+            || isPollOwner()
+            || poll().closed == true
+            || poll().showResultsBeforeClose == true);
+        allow create: if canUseSite()
+          && request.auth.uid == uid
+          && poll().closed == false;
+        allow update: if canUseSite()
+          && request.auth.uid == uid
+          && poll().closed == false
+          && poll().allowVoteChange == true;
+        allow delete: if canUseSite()
+          && (isAdmin() || isPollOwner() || request.auth.uid == uid);
+      }
+
+      match /voters/{uid} {
+        allow read: if canUseSite()
+          && (isAdmin() || isPollOwner() || request.auth.uid == uid);
+        allow create, update: if canUseSite()
+          && request.auth.uid == uid
+          && poll().closed == false;
+        allow delete: if canUseSite()
+          && (isAdmin() || isPollOwner() || request.auth.uid == uid);
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

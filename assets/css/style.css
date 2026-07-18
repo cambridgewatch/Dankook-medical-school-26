@@ -1541,6 +1541,41 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 }
 .alert-card.open .alert-body { max-height: none; opacity: 1; overflow: visible; padding: 14px 20px 18px; border-top-color: var(--line); }
 
+.security-alert-panel {
+  max-width: 820px; margin: 0 auto 28px; padding: 24px;
+  border: 1px solid #f1d6a6; border-radius: 20px;
+  background: linear-gradient(145deg, #fffdf8, #fff8e9); box-shadow: var(--shadow-sm);
+}
+.security-alert-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+.security-alert-head span { color: #9a6518; font-size: 11px; font-weight: 800; letter-spacing: .12em; }
+.security-alert-head h2 { margin: 3px 0 4px; color: var(--ink); font-size: 22px; }
+.security-alert-head p { margin: 0; color: var(--gray); font-size: 13px; }
+.security-alert-list { display: flex; flex-direction: column; gap: 10px; }
+.security-alert-item {
+  display: flex; align-items: center; gap: 13px; padding: 14px 15px;
+  border: 1px solid #ecd7af; border-radius: 14px; background: #fff;
+}
+.security-alert-item.read { opacity: .58; }
+.security-alert-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border-radius: 12px; background: #fff1ce; }
+.security-alert-item > div { flex: 1; min-width: 0; }
+.security-alert-item strong, .security-alert-item small { display: block; }
+.security-alert-item strong { color: var(--ink); font-size: 14px; }
+.security-alert-item small { margin-top: 3px; color: var(--gray); font-size: 12px; }
+.security-alert-item p { margin: 6px 0 0; color: #855a1b; font-size: 12px; line-height: 1.5; }
+.security-read, .security-delete { border: 0; cursor: pointer; font: inherit; }
+.security-read { padding: 7px 11px; border-radius: 9px; background: #8b651f; color: #fff; font-size: 12px; font-weight: 700; }
+.security-delete { padding: 6px; background: transparent; color: var(--gray); font-size: 19px; }
+
+@media (max-width: 640px) {
+  .security-alert-panel { padding: 18px 14px; border-radius: 16px; }
+  .security-alert-head { align-items: center; }
+  .security-alert-head h2 { font-size: 19px; }
+  .security-alert-head p { display: none; }
+  .security-alert-item { align-items: flex-start; padding: 13px 11px; }
+  .security-alert-icon { width: 34px; height: 34px; flex-basis: 34px; }
+  .security-read { padding: 6px 8px; }
+}
+
 /* ---------- 푸터 ---------- */
 .site-footer {
   background: var(--navy-dark);

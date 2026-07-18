@@ -73,6 +73,11 @@ window.addEventListener("DOMContentLoaded", () => {
     msg.style.display = "block";
   };
 
+  if (new URLSearchParams(location.search).get("security") === "change-password") {
+    showMessage("공용 초기 비밀번호는 외부인이 추측하기 쉽습니다. 아래에서 본인만 아는 비밀번호로 변경해 주세요.");
+    document.querySelector("#currentPassword")?.focus();
+  }
+
   const updateAutoStatus = (enabled) => {
     status.textContent = enabled
       ? "자동 로그인이 켜져 있습니다."
@@ -111,7 +116,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const next = $("#newPassword").value.normalize("NFC");
     const confirmNext = $("#newPasswordConfirm").value.normalize("NFC");
     if (!current) return showMessage("현재 비밀번호를 입력해 주세요.");
-    if (next.length < 6) return showMessage("새 비밀번호는 6자 이상이어야 합니다.");
+    if (next.length < 8) return showMessage("새 비밀번호는 8자 이상이어야 합니다.");
     if (next !== confirmNext) return showMessage("새 비밀번호가 일치하지 않습니다.");
 
     const button = $("#changePasswordBtn");

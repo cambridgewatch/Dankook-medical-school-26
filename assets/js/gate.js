@@ -1,8 +1,9 @@
 /* 사이트 잠금: 로그인한 사람만 내용을 볼 수 있게 함.
    로그인 세션이 알려진 기기에서는 확인 창을 띄우지 않고 뒤에서 검증한다. */
 
-import { auth, isConfigured } from "./firebase-init.js?v=11";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { auth, db, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=12";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const SESSION_KEY = "dkuSessionKnown";
 const safeGet = (storage, key) => { try { return storage.getItem(key); } catch { return null; } };
@@ -49,8 +50,25 @@ if (hasSessionHint) {
 if (!isConfigured) {
   deny("사이트 설정이 필요합니다.");
 } else {
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
+      let approved = user.email === ADMIN_EMAIL;
+      if (!approved) {
+        try {
+          const member = await getDoc(doc(db, "users", user.uid));
+          approved = member.exists() && member.data().status === "approved";
+        } catch {
+          deny("접근 권한을 확인하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.");
+          return;
+        }
+      }
+      if (!approved) {
+        safeRemove(sessionStorage, SESSION_KEY);
+        safeRemove(localStorage, SESSION_KEY);
+        await signOut(auth).catch(() => {});
+        deny("승인된 26학번 계정만 이용할 수 있습니다.");
+        return;
+      }
       safeSet(sessionStorage, SESSION_KEY, "1");
       if (safeGet(localStorage, "dkuAutoLogin") !== "false") safeSet(localStorage, SESSION_KEY, "1");
       unlock();
