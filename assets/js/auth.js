@@ -11,6 +11,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const $ = (s) => document.querySelector(s);
+const safeGet = (storage, key) => { try { return storage.getItem(key); } catch { return null; } };
+const safeSet = (storage, key, value) => { try { storage.setItem(key, value); } catch {} };
+const safeRemove = (storage, key) => { try { storage.removeItem(key); } catch {} };
 
 function toast(msg, ok = false) {
   const box = $("#authMsg");
@@ -31,8 +34,8 @@ window.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, (user) => {
     const status = $("#loggedInBox");
     if (user) {
-      sessionStorage.setItem("dkuSessionKnown", "1");
-      if (localStorage.getItem("dkuAutoLogin") !== "false") localStorage.setItem("dkuSessionKnown", "1");
+      safeSet(sessionStorage, "dkuSessionKnown", "1");
+      if (safeGet(localStorage, "dkuAutoLogin") !== "false") safeSet(localStorage, "dkuSessionKnown", "1");
       status.style.display = "block";
       $("#loggedInName").textContent = user.displayName || emailToName(user.email) || "동기";
     } else {
@@ -56,7 +59,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     try {
       /* 설정 페이지에서 선택한 이 기기의 로그인 유지 방식을 적용 */
-      const remember = localStorage.getItem("dkuAutoLogin") !== "false";
+      const remember = safeGet(localStorage, "dkuAutoLogin") !== "false";
       try {
         await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
       } catch (persistenceError) {
@@ -64,9 +67,9 @@ window.addEventListener("DOMContentLoaded", () => {
         console.warn("로그인 유지 설정을 적용하지 못했습니다.", persistenceError);
       }
       const credential = await signInWithEmailAndPassword(auth, nameToEmail(name.normalize("NFC")), pw.normalize("NFC"));
-      sessionStorage.setItem("dkuSessionKnown", "1");
-      if (remember) localStorage.setItem("dkuSessionKnown", "1");
-      else localStorage.removeItem("dkuSessionKnown");
+      safeSet(sessionStorage, "dkuSessionKnown", "1");
+      if (remember) safeSet(localStorage, "dkuSessionKnown", "1");
+      else safeRemove(localStorage, "dkuSessionKnown");
       if (!credential.user.displayName) {
         await updateProfile(credential.user, { displayName: name.normalize("NFC") });
       }

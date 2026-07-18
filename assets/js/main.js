@@ -2,6 +2,8 @@
 
 const BANNER_COLOR_KEY = "dkuBannerColor";
 const DEFAULT_BANNER_COLOR = "#6fa8d6";
+const storageGet = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
+const storageSet = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
 const LEGACY_BANNER_COLORS = {
   navy: "#003b78", purple: "#62378f", green: "#146a55",
   burgundy: "#7b263e", orange: "#a95620", charcoal: DEFAULT_BANNER_COLOR,
@@ -33,12 +35,12 @@ function applyBannerColor(hex) {
 }
 window.applyBannerColor = applyBannerColor;
 
-const legacyBannerColor = LEGACY_BANNER_COLORS[localStorage.getItem("dkuBannerTheme")];
-const storedBannerColor = localStorage.getItem(BANNER_COLOR_KEY);
+const legacyBannerColor = LEGACY_BANNER_COLORS[storageGet("dkuBannerTheme")];
+const storedBannerColor = storageGet(BANNER_COLOR_KEY);
 const savedBannerColor = !storedBannerColor || storedBannerColor === "#334150"
   ? DEFAULT_BANNER_COLOR
   : (storedBannerColor || legacyBannerColor || DEFAULT_BANNER_COLOR);
-if (storedBannerColor !== savedBannerColor) localStorage.setItem(BANNER_COLOR_KEY, savedBannerColor);
+if (storedBannerColor !== savedBannerColor) storageSet(BANNER_COLOR_KEY, savedBannerColor);
 applyBannerColor(savedBannerColor);
 
 const MASCOT_DISPLAY_KEY = "dkuMascotDisplay";
@@ -56,14 +58,14 @@ function mountHeaderMascots() {
 
 function applyMascotDisplay(enabled, save = false) {
   const visible = enabled !== false;
-  if (save) localStorage.setItem(MASCOT_DISPLAY_KEY, String(visible));
+  if (save) storageSet(MASCOT_DISPLAY_KEY, String(visible));
   document.documentElement.dataset.mascots = visible ? "show" : "hide";
   window.dispatchEvent(new CustomEvent("dkuMascotVisibility", { detail: { visible, restart: visible } }));
   if (visible) mountHeaderMascots();
 }
 
 window.setMascotDisplay = (enabled) => applyMascotDisplay(Boolean(enabled), true);
-const savedMascotDisplay = localStorage.getItem(MASCOT_DISPLAY_KEY) !== "false";
+const savedMascotDisplay = storageGet(MASCOT_DISPLAY_KEY) !== "false";
 document.documentElement.dataset.mascots = savedMascotDisplay ? "show" : "hide";
 
 document.addEventListener("DOMContentLoaded", () => {

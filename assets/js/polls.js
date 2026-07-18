@@ -159,7 +159,7 @@ window.addEventListener("DOMContentLoaded", () => {
       renderPoll(poll);
     });
     if (requestedPollId && !requestedPollHandled) {
-      const target = document.querySelector(`#poll-${CSS.escape(requestedPollId)}`);
+      const target = document.getElementById(`poll-${requestedPollId}`);
       if (target) {
         requestedPollHandled = true;
         target.classList.add("poll-deep-link");
@@ -170,7 +170,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderPoll(poll) {
-    const shell = document.querySelector(`#poll-${poll.id}`);
+    const shell = document.getElementById(`poll-${poll.id}`);
     if (!shell) return;
     const votes = voteState.get(poll.id) || [];
     const myVote = votes.find((vote) => vote.uid === user.uid);

@@ -15,6 +15,9 @@ const PREF_KEY = "dkuAutoLogin";
 const BANNER_COLOR_KEY = "dkuBannerColor";
 const MASCOT_DISPLAY_KEY = "dkuMascotDisplay";
 const DEFAULT_BANNER_COLOR = "#6fa8d6";
+const safeGet = (storage, key) => { try { return storage.getItem(key); } catch { return null; } };
+const safeSet = (storage, key, value) => { try { storage.setItem(key, value); } catch {} };
+const safeRemove = (storage, key) => { try { storage.removeItem(key); } catch {} };
 
 window.addEventListener("DOMContentLoaded", () => {
   const toggle = $("#autoLoginToggle");
@@ -27,14 +30,14 @@ window.addEventListener("DOMContentLoaded", () => {
   const themeStatus = $("#bannerThemeStatus");
   const selectBannerColor = (color) => {
     const selected = /^#[0-9a-f]{6}$/i.test(color) ? color.toLowerCase() : DEFAULT_BANNER_COLOR;
-    localStorage.setItem(BANNER_COLOR_KEY, selected);
-    localStorage.removeItem("dkuBannerTheme");
+    safeSet(localStorage, BANNER_COLOR_KEY, selected);
+    safeRemove(localStorage, "dkuBannerTheme");
     bannerColor.value = selected;
     if (typeof window.applyBannerColor === "function") window.applyBannerColor(selected);
     else location.reload();
     themeStatus.textContent = `${selected.toUpperCase()} 색상을 사용 중입니다.`;
   };
-  bannerColor.value = localStorage.getItem(BANNER_COLOR_KEY) || DEFAULT_BANNER_COLOR;
+  bannerColor.value = safeGet(localStorage, BANNER_COLOR_KEY) || DEFAULT_BANNER_COLOR;
   themeStatus.textContent = `${bannerColor.value.toUpperCase()} 색상을 사용 중입니다.`;
   bannerColor.addEventListener("input", () => selectBannerColor(bannerColor.value));
   bannerColorReset.addEventListener("click", () => selectBannerColor(DEFAULT_BANNER_COLOR));
@@ -47,12 +50,12 @@ window.addEventListener("DOMContentLoaded", () => {
       : "단웅이와 단비가 숨겨져 있습니다.";
     mascotStatus.className = `settings-status ${enabled ? "on" : ""}`;
   };
-  const savedMascotDisplay = localStorage.getItem(MASCOT_DISPLAY_KEY) !== "false";
+  const savedMascotDisplay = safeGet(localStorage, MASCOT_DISPLAY_KEY) !== "false";
   mascotToggle.checked = savedMascotDisplay;
   updateMascotStatus(savedMascotDisplay);
   mascotToggle.addEventListener("change", () => {
     const enabled = mascotToggle.checked;
-    localStorage.setItem(MASCOT_DISPLAY_KEY, String(enabled));
+    safeSet(localStorage, MASCOT_DISPLAY_KEY, String(enabled));
     document.documentElement.dataset.mascots = enabled ? "show" : "hide";
     document.querySelectorAll(".danwoong-walk-canvas").forEach((canvas) => {
       canvas.hidden = !enabled;
@@ -77,7 +80,7 @@ window.addEventListener("DOMContentLoaded", () => {
     status.className = `settings-status ${enabled ? "on" : ""}`;
   };
 
-  const savedAutoLogin = localStorage.getItem(PREF_KEY) !== "false";
+  const savedAutoLogin = safeGet(localStorage, PREF_KEY) !== "false";
   toggle.checked = savedAutoLogin;
   updateAutoStatus(savedAutoLogin);
 
@@ -91,7 +94,7 @@ window.addEventListener("DOMContentLoaded", () => {
     toggle.disabled = true;
     try {
       await setPersistence(auth, enabled ? browserLocalPersistence : browserSessionPersistence);
-      localStorage.setItem(PREF_KEY, String(enabled));
+      safeSet(localStorage, PREF_KEY, String(enabled));
       updateAutoStatus(enabled);
     } catch (err) {
       toggle.checked = !enabled;
@@ -132,8 +135,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   $("#settingsLogoutBtn").addEventListener("click", async () => {
     if (!confirm("이 기기에서 로그아웃할까요?")) return;
-    sessionStorage.removeItem("dkuSessionKnown");
-    localStorage.removeItem("dkuSessionKnown");
+    safeRemove(sessionStorage, "dkuSessionKnown");
+    safeRemove(localStorage, "dkuSessionKnown");
     await signOut(auth);
     location.replace("login.html");
   });

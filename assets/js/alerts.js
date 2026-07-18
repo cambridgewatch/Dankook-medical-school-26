@@ -9,8 +9,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const RKEY = "alertsRead";
-const getRead = () => { try { return new Set(JSON.parse(localStorage.getItem(RKEY) || "[]")); } catch { return new Set(); } };
-const getHidden = () => { try { return new Set(JSON.parse(localStorage.getItem("alertsHidden") || "[]")); } catch { return new Set(); } };
+const storageKey = (base, uid) => `${base}:${uid || "guest"}`;
+const getStoredSet = (base, uid) => { try { return new Set(JSON.parse(localStorage.getItem(storageKey(base, uid)) || "[]")); } catch { return new Set(); } };
 
 window.addEventListener("DOMContentLoaded", () => {
   const menu = document.querySelector(".nav-menu");
@@ -36,27 +36,32 @@ window.addEventListener("DOMContentLoaded", () => {
 
   let alerts = [];
   let subscribed = false;
+  let currentUid = "";
 
   function dedupe(list) {
     const seen = new Set(); const out = [];
     for (const a of list) {
-      const key = a.type === "calendar" ? `c:${a.date}:${a.text || a.title}` : `n:${a.noticeId || a.title}`;
+      const key = a.type === "calendar"
+        ? `c:${a.calendarEventKey || `${a.date}:${a.text || a.title}`}`
+        : `n:${a.noticeId || a.title}`;
       if (seen.has(key)) continue;
       seen.add(key); out.push(a);
     }
     return out;
   }
   function updateBadge() {
-    const read = getRead();
-    const hidden = getHidden();
+    const read = getStoredSet(RKEY, currentUid);
+    const hidden = getStoredSet("alertsHidden", currentUid);
     const unread = dedupe(alerts).filter((a) => !read.has(a.id) && !hidden.has(a.id)).length;
     if (unread > 0) { badge.textContent = unread > 99 ? "99+" : unread; badge.style.display = "grid"; }
     else badge.style.display = "none";
   }
 
   onAuthStateChanged(auth, (user) => {
-    if (!user) { li.style.display = "none"; return; }
+    if (!user) { currentUid = ""; li.style.display = "none"; return; }
+    currentUid = user.uid;
     li.style.display = "";
+    updateBadge();
     if (!subscribed) {
       subscribed = true;
       onSnapshot(

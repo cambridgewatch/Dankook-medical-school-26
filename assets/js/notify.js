@@ -10,12 +10,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const RKEY = "alertsRead";
-const getRead = () => { try { return new Set(JSON.parse(localStorage.getItem(RKEY) || "[]")); } catch { return new Set(); } };
-const saveRead = (s) => localStorage.setItem(RKEY, JSON.stringify([...s]));
+const storageKey = (base, uid) => `${base}:${uid || "guest"}`;
+const getStoredSet = (base, uid) => { try { return new Set(JSON.parse(localStorage.getItem(storageKey(base, uid)) || "[]")); } catch { return new Set(); } };
+const saveStoredSet = (base, uid, values) => { try { localStorage.setItem(storageKey(base, uid), JSON.stringify([...values])); } catch {} };
 /* 다른 사람(비관리자)이 삭제한 알림 = 그 사람 기기에서만 숨김 */
 const HKEY = "alertsHidden";
-const getHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(HKEY) || "[]")); } catch { return new Set(); } };
-const saveHidden = (s) => localStorage.setItem(HKEY, JSON.stringify([...s]));
 
 const PER_PAGE = 10;
 
@@ -29,14 +28,20 @@ window.addEventListener("DOMContentLoaded", () => {
   let alerts = [];
   let subscribed = false;
   let isAdmin = false;
+  let currentUid = "";
   let page = 1;
-  const readSet = getRead();
-  const hiddenSet = getHidden();
+  let readSet = new Set();
+  let hiddenSet = new Set();
+  const saveRead = () => saveStoredSet(RKEY, currentUid, readSet);
+  const saveHidden = () => saveStoredSet(HKEY, currentUid, hiddenSet);
 
   if (!isConfigured) { noteEl.textContent = "Firebase 설정 후 알림을 볼 수 있습니다."; return; }
 
   onAuthStateChanged(auth, (user) => {
     if (!user) return;
+    currentUid = user.uid;
+    readSet = getStoredSet(RKEY, currentUid);
+    hiddenSet = getStoredSet(HKEY, currentUid);
     isAdmin = user.email === ADMIN_EMAIL;
     clearBtn.style.display = "inline-block"; // 삭제(모두)는 누구나 가능(비관리자는 본인만 숨김)
     if (!subscribed) {
@@ -52,7 +57,9 @@ window.addEventListener("DOMContentLoaded", () => {
   function dedupe(list) {
     const seen = new Set(); const out = [];
     for (const a of list) {
-      const key = a.type === "calendar" ? `c:${a.date}:${a.text || a.title}` : `n:${a.noticeId || a.title}`;
+      const key = a.type === "calendar"
+        ? `c:${a.calendarEventKey || `${a.date}:${a.text || a.title}`}`
+        : `n:${a.noticeId || a.title}`;
       if (seen.has(key)) continue;
       seen.add(key); out.push(a);
     }
@@ -129,7 +136,7 @@ window.addEventListener("DOMContentLoaded", () => {
       card.querySelector(".alert-head").addEventListener("click", async (e) => {
         if (e.target.closest(".alert-del")) return;
         const id = card.dataset.id;
-        if (!readSet.has(id)) { readSet.add(id); saveRead(readSet); card.classList.add("read"); }
+        if (!readSet.has(id)) { readSet.add(id); saveRead(); card.classList.add("read"); }
         if (!card.classList.contains("has-detail")) return;
         const willOpen = !card.classList.contains("open");
         if (willOpen) {
@@ -154,7 +161,7 @@ window.addEventListener("DOMContentLoaded", () => {
           catch (err) { alert("삭제에 실패했습니다: " + err.message); }
         } else {
           if (!confirm("내 알림 목록에서만 삭제할까요?")) return;
-          hiddenSet.add(id); saveHidden(hiddenSet); render();
+          hiddenSet.add(id); saveHidden(); render();
         }
       });
     });
@@ -172,7 +179,7 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       if (!confirm("내 화면에서 모든 알림을 지울까요? (다른 사람에겐 그대로 남아요)")) return;
       dedupe(alerts).forEach((a) => hiddenSet.add(a.id));
-      saveHidden(hiddenSet);
+      saveHidden();
       render();
     }
   });

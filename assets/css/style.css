@@ -1539,7 +1539,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   color: var(--gray); font-size: 14.5px; line-height: 1.7;
   border-top: 1px solid transparent; transition: all 0.28s ease;
 }
-.alert-card.open .alert-body { max-height: 600px; opacity: 1; padding: 14px 20px 18px; border-top-color: var(--line); }
+.alert-card.open .alert-body { max-height: none; opacity: 1; overflow: visible; padding: 14px 20px 18px; border-top-color: var(--line); }
 
 /* ---------- 푸터 ---------- */
 .site-footer {

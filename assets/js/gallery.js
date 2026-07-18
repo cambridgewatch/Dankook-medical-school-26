@@ -24,6 +24,7 @@ const normalizeHashtags = (value = "") => [...new Set(
     .map((tag) => tag.replace(/^#+/, "").replace(/[^0-9A-Za-z가-힣_]/g, ""))
     .filter(Boolean)
 )].slice(0, 10);
+const safePhotoUrl = (value = "") => /^https:\/\//i.test(String(value)) ? String(value) : "";
 
 window.addEventListener("DOMContentLoaded", () => {
   const grid = $("#galleryGrid");
@@ -58,7 +59,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let photos = [];
   const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
   onSnapshot(q, (snap) => {
-    photos = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    photos = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((photo) => safePhotoUrl(photo.url));
     renderGrid();
   }, (err) => {
     authBar.innerHTML = "사진 목록을 불러오지 못했습니다: " + err.message;
@@ -77,12 +78,13 @@ window.addEventListener("DOMContentLoaded", () => {
         p.uploader && p.uploader !== "동기" ? p.uploader : (mine ? currentName : "동기")
       );
       const tags = Array.isArray(p.hashtags) ? p.hashtags : [];
+      const photoUrl = escapeHtml(safePhotoUrl(p.url));
       const tagHtml = tags.length
         ? `<span class="photo-hashtags">${tags.map((tag) => `<span>#${escapeHtml(tag)}</span>`).join(" ")}</span>`
         : "";
       html += `
         <figure data-id="${p.id}">
-          <img src="${p.url}" alt="${uploader}님이 올린 사진" loading="lazy" />
+          <img src="${photoUrl}" alt="${uploader}님이 올린 사진" loading="lazy" />
           <figcaption><span class="photo-uploader">🙋 ${uploader}</span>
             ${mine ? '<button class="del-btn" title="삭제">🗑</button>' : ""}${tagHtml}
           </figcaption>
@@ -143,7 +145,6 @@ window.addEventListener("DOMContentLoaded", () => {
       /* 2) Firebase(데이터베이스)에 URL + 올린 사람 정보 저장 → 모두에게 공유 */
       await addDoc(collection(db, "photos"), {
         url,
-        deleteUrl: data.data.delete_url || "",
         hashtags,
         uploader: currentName,
         uid: currentUser.uid,

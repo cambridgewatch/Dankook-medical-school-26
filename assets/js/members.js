@@ -31,7 +31,8 @@ window.addEventListener("DOMContentLoaded", () => {
       subscribed = true;
       onSnapshot(collection(db, "members"), (snap) => {
         members = snap.docs
-          .map((d) => ({ id: d.id, name: d.data().name }))
+          .map((d) => ({ id: d.id, name: typeof d.data().name === "string" ? d.data().name.trim() : "" }))
+          .filter((member) => member.name)
           .sort((a, b) => a.name.localeCompare(b.name, "ko"));
         render();
       }, (err) => { note.textContent = "명단을 불러오지 못했습니다: " + err.message; });

@@ -5,8 +5,11 @@ import { auth, isConfigured } from "./firebase-init.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const SESSION_KEY = "dkuSessionKnown";
-const hasSessionHint = sessionStorage.getItem(SESSION_KEY) === "1"
-  || (localStorage.getItem("dkuAutoLogin") !== "false" && localStorage.getItem(SESSION_KEY) === "1");
+const safeGet = (storage, key) => { try { return storage.getItem(key); } catch { return null; } };
+const safeSet = (storage, key, value) => { try { storage.setItem(key, value); } catch {} };
+const safeRemove = (storage, key) => { try { storage.removeItem(key); } catch {} };
+const hasSessionHint = safeGet(sessionStorage, SESSION_KEY) === "1"
+  || (safeGet(localStorage, "dkuAutoLogin") !== "false" && safeGet(localStorage, SESSION_KEY) === "1");
 let overlay = null;
 
 function ensureOverlay() {
@@ -48,12 +51,12 @@ if (!isConfigured) {
 } else {
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      sessionStorage.setItem(SESSION_KEY, "1");
-      if (localStorage.getItem("dkuAutoLogin") !== "false") localStorage.setItem(SESSION_KEY, "1");
+      safeSet(sessionStorage, SESSION_KEY, "1");
+      if (safeGet(localStorage, "dkuAutoLogin") !== "false") safeSet(localStorage, SESSION_KEY, "1");
       unlock();
     } else {
-      sessionStorage.removeItem(SESSION_KEY);
-      localStorage.removeItem(SESSION_KEY);
+      safeRemove(sessionStorage, SESSION_KEY);
+      safeRemove(localStorage, SESSION_KEY);
       deny("이 사이트는 비공개입니다. 로그인해 주세요.");
     }
   });
