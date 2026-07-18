@@ -260,7 +260,7 @@
           <label for="newPassword">새 비밀번호</label>
           <div class="password-visibility-row">
             <input type="password" id="newPassword" autocomplete="new-password" placeholder="새 비밀번호 (8자 이상)" />
-            <button class="btn btn-ghost-dark" id="toggleNewPasswordBtn" type="button" aria-pressed="false">비밀번호 표시</button>
+            <button class="btn btn-ghost-dark" id="toggleNewPasswordBtn" type="button" data-password-target="newPassword" aria-controls="newPassword" aria-pressed="false">비밀번호 표시</button>
           </div>
           <label for="newPasswordConfirm">새 비밀번호 확인</label>
           <input type="password" id="newPasswordConfirm" autocomplete="new-password" placeholder="새 비밀번호 다시 입력" />
@@ -284,7 +284,7 @@
             <div class="password-reset-generate-row">
               <input type="password" id="memberTemporaryPassword" autocomplete="new-password" placeholder="8자 이상" />
               <button class="btn btn-ghost-dark" id="generateTemporaryPasswordBtn" type="button">안전한 비밀번호 생성</button>
-              <button class="btn btn-ghost-dark" id="toggleTemporaryPasswordBtn" type="button" aria-pressed="false">비밀번호 표시</button>
+              <button class="btn btn-ghost-dark" id="toggleTemporaryPasswordBtn" type="button" data-password-target="memberTemporaryPassword" aria-controls="memberTemporaryPassword" aria-pressed="false">비밀번호 표시</button>
             </div>
             <label for="memberTemporaryPasswordConfirm">새 임시 비밀번호 확인</label>
             <input type="password" id="memberTemporaryPasswordConfirm" autocomplete="new-password" placeholder="임시 비밀번호 다시 입력" />
@@ -334,7 +334,8 @@
   </footer>
 
 <script src="assets/js/main.js?v=58"></script>
-  <script type="module" src="assets/js/settings.js?v=12"></script>
+  <script src="assets/js/password-visibility.js?v=1"></script>
+  <script type="module" src="assets/js/settings.js?v=13"></script>
   <script type="module" src="assets/js/alerts.js?v=31"></script>
   <script type="module" src="assets/js/gate.js?v=21"></script>
 </body>

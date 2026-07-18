@@ -152,22 +152,6 @@ window.addEventListener("DOMContentLoaded", () => {
     $("#memberTemporaryPassword").focus();
   });
 
-  $("#toggleTemporaryPasswordBtn")?.addEventListener("click", (event) => {
-    const input = $("#memberTemporaryPassword");
-    const visible = input.type === "password";
-    input.type = visible ? "text" : "password";
-    event.currentTarget.textContent = visible ? "비밀번호 숨기기" : "비밀번호 표시";
-    event.currentTarget.setAttribute("aria-pressed", String(visible));
-  });
-
-  $("#toggleNewPasswordBtn")?.addEventListener("click", (event) => {
-    const input = $("#newPassword");
-    const visible = input.type === "password";
-    input.type = visible ? "text" : "password";
-    event.currentTarget.textContent = visible ? "비밀번호 숨기기" : "비밀번호 표시";
-    event.currentTarget.setAttribute("aria-pressed", String(visible));
-  });
-
   $("#resetMemberPasswordBtn")?.addEventListener("click", async () => {
     if (!user || user.email !== ADMIN_EMAIL) return;
     const name = $("#memberResetName").value.trim().normalize("NFC");
