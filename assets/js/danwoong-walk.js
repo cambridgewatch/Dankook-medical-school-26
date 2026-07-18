@@ -134,7 +134,7 @@ export function mountDanwoongWalk() {
     poseRequestCount = 0;
     try {
       const saved = JSON.parse(localStorage.getItem(sequenceStorageKey) || "null");
-      if (Number.isInteger(saved?.cursor) && saved.cursor >= 0) sequenceCursor = saved.cursor % 72;
+      if (Number.isInteger(saved?.cursor) && saved.cursor >= 0) sequenceCursor = saved.cursor % SEQUENCE_CYCLE_LENGTH;
       if (Number.isInteger(saved?.count) && saved.count >= 0) poseRequestCount = saved.count;
     } catch {}
     sequenceReady = true;
@@ -262,14 +262,15 @@ export function mountDanwoongWalk() {
   ];
   const DKU_MED_POSE_INDEX = 10;
   const NUMBER_POSE_INDEX = 11;
+  const SEQUENCE_CYCLE_LENGTH = 108;
   const REGULAR_POSE_ORDER = POSE_NAMES.map((_, index) => index)
     .filter((index) => index !== DKU_MED_POSE_INDEX && index !== NUMBER_POSE_INDEX);
 
   function getSequencedPose(cursor) {
-    if (cursor % 4 === 0) {
-      return Math.floor(cursor / 4) % 2 === 0 ? DKU_MED_POSE_INDEX : NUMBER_POSE_INDEX;
+    if (cursor % 2 === 0) {
+      return Math.floor(cursor / 2) % 2 === 0 ? DKU_MED_POSE_INDEX : NUMBER_POSE_INDEX;
     }
-    const previousSpecialCount = Math.floor(cursor / 4) + 1;
+    const previousSpecialCount = Math.floor(cursor / 2) + 1;
     const regularIndex = cursor - previousSpecialCount;
     return REGULAR_POSE_ORDER[regularIndex % REGULAR_POSE_ORDER.length];
   }
@@ -948,7 +949,7 @@ export function mountDanwoongWalk() {
       ? poseTest - 1
       : getSequencedPose(sequenceCursor);
     if (!forcedPose) {
-      sequenceCursor = (sequenceCursor + 1) % 72;
+      sequenceCursor = (sequenceCursor + 1) % SEQUENCE_CYCLE_LENGTH;
       poseRequestCount += 1;
       saveAccountSequence();
     }
