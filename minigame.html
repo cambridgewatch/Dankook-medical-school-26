@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/img/logo.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=1"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=66" />
+<link rel="stylesheet" href="assets/css/style.css?v=69" />
 </head>
 <body class="locked">
 
@@ -129,7 +129,37 @@
         </div>
       </div>
 
-      <!-- 게임 4: 투표 -->
+      <!-- 게임 4: 팀 나누기 -->
+      <div class="game-card game-launch-card team-game">
+        <div class="game-head">
+          <h2>👥 팀 나누기</h2>
+          <p>참가자를 무작위로 섞어 팀별 인원 차이가 1명 이하가 되도록 나눕니다.</p>
+        </div>
+        <button class="btn btn-solid game-toggle" type="button" aria-expanded="false">게임 열기</button>
+        <div class="game-panel" hidden>
+          <div class="team-config">
+            <label for="teamMemberCount"><span>참가 인원</span><input type="number" id="teamMemberCount" min="2" max="44" value="8" inputmode="numeric" /></label>
+            <label for="teamCount"><span>팀 개수</span><input type="number" id="teamCount" min="2" max="8" value="2" inputmode="numeric" /></label>
+          </div>
+
+          <div class="team-name-section">
+            <div class="team-section-head"><strong>참가자 이름</strong><small>모든 칸을 입력해 주세요.</small></div>
+            <div class="team-name-inputs" id="teamNameInputs"></div>
+          </div>
+
+          <div class="team-separate-box">
+            <label for="teamSeparateNames">서로 다른 팀에 반드시 배치할 사람 <small>(선택)</small></label>
+            <textarea id="teamSeparateNames" rows="2" placeholder="이름을 쉼표나 줄바꿈으로 구분해 입력하세요.&#10;예: 김철수, 이영희"></textarea>
+            <p>입력한 사람들은 서로 같은 팀에 들어가지 않습니다. 지정 인원은 팀 개수 이하여야 합니다.</p>
+          </div>
+
+          <button type="button" class="btn btn-solid team-divide-btn" id="teamDivideBtn">팀 나누기</button>
+          <p class="team-message" id="teamMessage" aria-live="polite"></p>
+          <div class="team-results" id="teamResults"></div>
+        </div>
+      </div>
+
+      <!-- 게임 5: 투표 -->
       <div class="game-card game-launch-card poll-game">
         <div class="game-head">
           <h2>🗳️ 투표</h2>
@@ -223,6 +253,7 @@
   </script>
   <script type="module" src="assets/js/minigame.js?v=34"></script>
   <script src="assets/js/ladder.js?v=5"></script>
+  <script src="assets/js/teams.js?v=1"></script>
   <script type="module" src="assets/js/polls.js?v=1"></script>
   <script type="module" src="assets/js/alerts.js?v=28"></script>
   <script type="module" src="assets/js/gate.js?v=19"></script>

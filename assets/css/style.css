@@ -1373,6 +1373,44 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .ladder-table tbody tr:last-child td { border-bottom: 0; }
 .ladder-table tbody tr:nth-child(even) { background: #fafcff; }
 
+/* ---------- 미니게임: 팀 나누기 ---------- */
+.team-game { max-width: 900px; }
+.team-game .game-panel { text-align: left; }
+.team-config { display: grid; grid-template-columns: repeat(2, minmax(0, 180px)); justify-content: center; gap: 12px; }
+.team-config label { display: grid; gap: 7px; color: var(--navy); font-size: 13px; font-weight: 800; }
+.team-config input {
+  width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 11px;
+  color: var(--ink); background: #fff; font: inherit; font-weight: 750; outline: none;
+}
+.team-config input:focus, .team-name-inputs input:focus, .team-separate-box textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.team-name-section { margin-top: 20px; padding: 18px; border: 1px solid #e1e8f0; border-radius: 16px; background: #f9fbfd; }
+.team-section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.team-section-head strong { color: var(--navy); font-size: 14px; }
+.team-section-head small { color: var(--gray); font-size: 11px; }
+.team-name-inputs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.team-name-inputs label { display: grid; grid-template-columns: 25px minmax(0, 1fr); align-items: center; overflow: hidden; border: 1px solid #dce5ef; border-radius: 10px; background: #fff; }
+.team-name-inputs label > span { color: #718197; font-size: 11px; font-weight: 800; text-align: center; }
+.team-name-inputs input { min-width: 0; width: 100%; padding: 9px 8px; border: 0; border-left: 1px solid #e5ebf2; color: var(--ink); background: transparent; font: inherit; font-size: 13px; outline: none; }
+.team-separate-box { margin-top: 14px; padding: 16px; border: 1px dashed #b8c8da; border-radius: 14px; background: #f6f9fc; }
+.team-separate-box label { display: block; margin-bottom: 8px; color: var(--navy); font-size: 13px; font-weight: 800; }
+.team-separate-box label small { color: var(--gray); font-weight: 600; }
+.team-separate-box textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: 13px; line-height: 1.5; resize: vertical; outline: none; }
+.team-separate-box p { margin-top: 7px; color: var(--gray); font-size: 11px; line-height: 1.5; }
+.team-divide-btn { display: flex; margin: 18px auto 0; min-width: 150px; justify-content: center; }
+.team-message { min-height: 22px; margin-top: 13px; text-align: center; color: var(--gray); font-size: 13px; }
+.team-message.error { color: #b43e48; font-weight: 700; }
+.team-message.success { color: #316b58; }
+.team-results { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.team-result-card { overflow: hidden; border: 1px solid #dce5ef; border-radius: 15px; background: #fff; box-shadow: var(--shadow-sm); }
+.team-result-card header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; color: #fff; background: linear-gradient(135deg, var(--navy), var(--blue)); }
+.team-result-card header strong { font-size: 15px; }
+.team-result-card header span { padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,.18); font-size: 11px; }
+.team-result-card ol { margin: 0; padding: 8px 14px 11px 36px; }
+.team-result-card li { padding: 7px 0; color: var(--ink); font-size: 13px; border-bottom: 1px solid #edf1f5; }
+.team-result-card li:last-child { border-bottom: 0; }
+.team-result-card li > span { overflow-wrap: anywhere; }
+.team-result-card li small { float: right; padding: 2px 6px; border-radius: 999px; color: #356e5e; background: #e7f5ef; font-size: 9px; font-weight: 800; }
+
 /* ---------- 미니게임: 투표 ---------- */
 .poll-game .game-panel { text-align: left; }
 .poll-new-btn { display: block; margin: 0 0 18px auto; }
@@ -1427,6 +1465,11 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .ladder-scroll-hint { display: block; }
   .ladder-play { align-items: stretch; flex-direction: column; }
   .ladder-play select, .ladder-play .btn { width: 100%; }
+  .team-game { padding-left: 18px; padding-right: 18px; }
+  .team-config { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .team-name-section { padding: 14px; }
+  .team-name-inputs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .team-results { grid-template-columns: 1fr; }
   .poll-editor, .poll-card { padding: 16px; }
   .poll-card-head { align-items: flex-start; }
   .poll-actions button { flex: 1 1 calc(50% - 4px); }
