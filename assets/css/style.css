@@ -1025,14 +1025,15 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   margin: 20px auto 0; max-width: 940px;
   font-size: 13px; color: var(--gray);
 }
-.cal-category { min-width: 0; flex: 1 1 0; }
+.cal-category { min-width: 0; flex: 0 0 auto; }
 .cal-category[open] { flex: 0 0 100%; }
 .cal-category > summary {
   display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 34px;
-  width: 100%; box-sizing: border-box; padding: 7px 8px; border: 1px solid #dfe6ee; border-radius: 999px; background: #fff;
+  width: auto; box-sizing: border-box; padding: 7px 10px; border: 1px solid #dfe6ee; border-radius: 999px; background: #fff;
   color: var(--gray); cursor: pointer; list-style: none; transition: border-color .18s ease, background .18s ease, color .18s ease;
 }
 .cal-category > summary::-webkit-details-marker { display: none; }
+.cal-category > summary span { white-space: nowrap; }
 .cal-category > summary:hover { border-color: #b9cdf0; background: #f7faff; color: var(--navy); }
 .cal-category > summary b {
   display: grid; place-items: center; min-width: 19px; height: 19px; padding: 0 5px;
