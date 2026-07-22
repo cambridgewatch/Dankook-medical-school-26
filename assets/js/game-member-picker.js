@@ -36,7 +36,6 @@ window.addEventListener("DOMContentLoaded", () => {
     mount.innerHTML = `
       <div class="member-picker-toolbar">
         <label><input type="search" placeholder="이름 검색" aria-label="동기 이름 검색" autocomplete="off" /></label>
-        <button type="button" class="member-picker-reset">명단 초기화</button>
       </div>
       <p class="member-picker-guide">${kind === "wheel" ? "이름을 누를 때마다 룰렛에 한 칸씩 추가됩니다." : "이름을 누르면 참가자 입력칸에 바로 반영됩니다."}</p>
       <div class="member-picker-list" role="list"></div>
@@ -47,7 +46,8 @@ window.addEventListener("DOMContentLoaded", () => {
     const list = mount.querySelector(".member-picker-list");
     const status = mount.querySelector(".member-picker-status");
     search.addEventListener("input", render);
-    mount.querySelector(".member-picker-reset").addEventListener("click", () => resetNames(kind, status));
+    const resetButton = document.querySelector(`[data-picker-reset="${kind}"]`);
+    if (resetButton) resetButton.onclick = () => resetNames(kind, status);
     list.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-name]");
       if (!button) return;

@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/img/logo.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=1"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=87" />
+<link rel="stylesheet" href="assets/css/style.css?v=88" />
 </head>
 <body class="locked">
 
@@ -79,6 +79,7 @@
           <summary><span>동기 명단에서 선택</span><small>같은 이름을 여러 번 추가할 수 있어요</small></summary>
           <div class="member-picker-mount"></div>
         </details>
+        <button type="button" class="member-picker-reset" data-picker-reset="wheel">명단 초기화</button>
         <div class="wheel-wrap">
           <div class="wheel-pointer"></div>
           <svg id="wheelSvg" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
@@ -109,6 +110,7 @@
           <summary><span>동기 명단에서 선택</span><small>참가자는 한 번씩만 선택돼요</small></summary>
           <div class="member-picker-mount"></div>
         </details>
+        <button type="button" class="member-picker-reset" data-picker-reset="ladder">명단 초기화</button>
 
         <div class="ladder-input-scroll" aria-label="사다리 참가자와 결과 입력">
           <div class="ladder-inputs" id="ladderInputs"></div>
@@ -157,6 +159,7 @@
               <summary><span>동기 명단에서 선택</span><small>참가자는 한 번씩만 선택돼요</small></summary>
               <div class="member-picker-mount"></div>
             </details>
+            <button type="button" class="member-picker-reset" data-picker-reset="team">명단 초기화</button>
             <div class="team-name-inputs" id="teamNameInputs"></div>
           </div>
 
@@ -278,7 +281,7 @@
   <script type="module" src="assets/js/minigame.js?v=34"></script>
   <script src="assets/js/ladder.js?v=5"></script>
   <script src="assets/js/teams.js?v=2"></script>
-  <script type="module" src="assets/js/game-member-picker.js?v=2"></script>
+  <script type="module" src="assets/js/game-member-picker.js?v=3"></script>
   <script type="module" src="assets/js/polls.js?v=3"></script>
   <script type="module" src="assets/js/alerts.js?v=32"></script>
   <script type="module" src="assets/js/gate.js?v=21"></script>
