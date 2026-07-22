@@ -101,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const assignmentDdayList = document.querySelector("#assignmentDdayList");
   const calendarSearch = document.querySelector("#calendarSearch");
   const calendarSearchResults = document.querySelector("#calendarSearchResults");
+  const categoryRange = document.querySelector("#calCategoryRange");
 
   const today = new Date();
   const todayKey = key(today.getFullYear(), today.getMonth(), today.getDate());
@@ -186,11 +187,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderCategoryLists() {
-    const year = view.getFullYear();
-    const month = view.getMonth();
-    const monthStart = key(year, month, 1);
-    const monthEnd = key(year, month, new Date(year, month + 1, 0).getDate());
+    const rangeStart = todayKey;
+    const rangeEndDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    rangeEndDate.setMonth(rangeEndDate.getMonth() + 1);
+    rangeEndDate.setDate(Math.min(
+      today.getDate(),
+      new Date(rangeEndDate.getFullYear(), rangeEndDate.getMonth() + 1, 0).getDate()
+    ));
+    const rangeEnd = key(rangeEndDate.getFullYear(), rangeEndDate.getMonth(), rangeEndDate.getDate());
     const allEvents = allCalendarEvents();
+    if (categoryRange) {
+      categoryRange.textContent = `${rangeStart.replaceAll("-", ".")} ~ ${rangeEnd.replaceAll("-", ".")} · 분류별 일정`;
+    }
 
     LIST_TYPES.forEach((type) => {
       const category = document.querySelector(`.cal-category[data-type="${type}"]`);
@@ -199,21 +207,21 @@ document.addEventListener("DOMContentLoaded", () => {
       const list = category.querySelector(".cal-category-list");
       const events = allEvents
         .filter((event) => event.type === type
-          && event.date <= monthEnd
-          && (event.endDate || event.date) >= monthStart)
+          && event.date <= rangeEnd
+          && (event.endDate || event.date) >= rangeStart)
         .sort((a, b) => a.date.localeCompare(b.date) || a.text.localeCompare(b.text, "ko"));
 
       count.textContent = String(events.length);
       list.innerHTML = events.length
         ? events.map((event) => {
-          const targetDate = event.date < monthStart ? monthStart : event.date;
+          const targetDate = event.date < rangeStart ? rangeStart : event.date;
           return `<button type="button" class="cal-category-item" data-date="${targetDate}" data-event="${esc(event.text)}">
             <time>${eventDateLabel(event)}</time>
             <span>${esc(event.text)}${event.personal ? '<small>개인</small>' : ""}</span>
             <i aria-hidden="true">›</i>
           </button>`;
         }).join("")
-        : `<p class="cal-category-empty">${year}년 ${month + 1}월에 등록된 ${LABEL[type]} 일정이 없습니다.</p>`;
+        : `<p class="cal-category-empty">오늘부터 1개월 안에 등록된 ${LABEL[type]} 일정이 없습니다.</p>`;
 
       list.querySelectorAll(".cal-category-item").forEach((button) => {
         button.addEventListener("click", () => goToEvent(button.dataset.date, true, button.dataset.event));

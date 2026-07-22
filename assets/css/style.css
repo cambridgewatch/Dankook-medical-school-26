@@ -1017,6 +1017,9 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .d.holi { background: #9aa3b2; }
 .d.etc { background: #7a8699; }
 
+.cal-category-range {
+  margin: 18px auto -8px; color: #7b8796; font-size: 12px; font-weight: 700; text-align: center;
+}
 .cal-legend {
   display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
   margin: 20px auto 0; max-width: 940px;
@@ -1055,6 +1058,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cal-category-empty { grid-column: 1 / -1; padding: 8px; color: var(--gray); font-size: 12px; text-align: center; }
 .cal-legend + .cal-banner { margin-top: 20px; }
 @media (max-width: 620px) {
+  .cal-category-range { margin-top: 14px; font-size: 10px; }
   .cal-legend { gap: 7px; margin-top: 14px; }
   .cal-category { min-width: 76px; }
   .cal-category > summary { min-height: 31px; padding: 6px 8px; font-size: 11px; }
