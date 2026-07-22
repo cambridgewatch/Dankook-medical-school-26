@@ -1490,7 +1490,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   background: #fff; color: var(--ink); font: inherit; font-size: 12px; outline: none;
 }
 .member-picker-toolbar input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
-.member-picker-clear {
+.member-picker-reset {
   flex: 0 0 auto; padding: 9px 10px; border: 1px solid #d5e0eb; border-radius: 10px;
   background: #fff; color: #64758a; font: inherit; font-size: 11px; font-weight: 750; cursor: pointer;
 }
@@ -1679,7 +1679,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .member-picker > summary { align-items: flex-start; flex-wrap: wrap; }
   .member-picker > summary small { width: 100%; margin: -6px 24px 0 0; }
   .member-picker-toolbar { align-items: stretch; flex-direction: column; }
-  .member-picker-clear { width: 100%; }
+  .member-picker-reset { width: 100%; }
   .member-picker-list { max-height: 210px; }
   .ladder-game { padding-left: 18px; padding-right: 18px; }
   .ladder-scroll-hint { display: block; }
