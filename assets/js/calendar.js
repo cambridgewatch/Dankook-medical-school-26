@@ -54,6 +54,7 @@ const LABEL = {
 };
 /* 관리자가 추가할 때 고를 수 있는 분류 */
 const ADD_TYPES = ["acad", "exam", "event", "vac", "holi", "assignment", "todo", "meet", "etc"];
+const LIST_TYPES = ["acad", "exam", "event", "todo", "assignment", "meet", "vac", "holi"];
 
 /* 단국대/의과대학 학사일정 (기본 표시, 수정 불가) */
 const DEFAULTS = {
@@ -182,6 +183,42 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!event.endDate || event.endDate <= event.date) return start;
     const end = short ? event.endDate.slice(5).replace("-", ".") : event.endDate.replaceAll("-", ".");
     return `${start}–${end}`;
+  }
+
+  function renderCategoryLists() {
+    const year = view.getFullYear();
+    const month = view.getMonth();
+    const monthStart = key(year, month, 1);
+    const monthEnd = key(year, month, new Date(year, month + 1, 0).getDate());
+    const allEvents = allCalendarEvents();
+
+    LIST_TYPES.forEach((type) => {
+      const category = document.querySelector(`.cal-category[data-type="${type}"]`);
+      if (!category) return;
+      const count = category.querySelector("summary b");
+      const list = category.querySelector(".cal-category-list");
+      const events = allEvents
+        .filter((event) => event.type === type
+          && event.date <= monthEnd
+          && (event.endDate || event.date) >= monthStart)
+        .sort((a, b) => a.date.localeCompare(b.date) || a.text.localeCompare(b.text, "ko"));
+
+      count.textContent = String(events.length);
+      list.innerHTML = events.length
+        ? events.map((event) => {
+          const targetDate = event.date < monthStart ? monthStart : event.date;
+          return `<button type="button" class="cal-category-item" data-date="${targetDate}" data-event="${esc(event.text)}">
+            <time>${eventDateLabel(event)}</time>
+            <span>${esc(event.text)}${event.personal ? '<small>개인</small>' : ""}</span>
+            <i aria-hidden="true">›</i>
+          </button>`;
+        }).join("")
+        : `<p class="cal-category-empty">${year}년 ${month + 1}월에 등록된 ${LABEL[type]} 일정이 없습니다.</p>`;
+
+      list.querySelectorAll(".cal-category-item").forEach((button) => {
+        button.addEventListener("click", () => goToEvent(button.dataset.date, true, button.dataset.event));
+      });
+    });
   }
 
   function renderDdays() {
@@ -408,6 +445,7 @@ document.addEventListener("DOMContentLoaded", () => {
         openDay(cell.dataset.key, readOnly, eventText);
       });
     });
+    renderCategoryLists();
   }
 
   /* ---- 날짜 클릭 시 모달 ---- */
