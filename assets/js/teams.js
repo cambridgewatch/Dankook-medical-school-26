@@ -4,6 +4,9 @@ window.addEventListener("DOMContentLoaded", () => {
   const teamCountInput = document.querySelector("#teamCount");
   const nameInputs = document.querySelector("#teamNameInputs");
   const separateInput = document.querySelector("#teamSeparateNames");
+  const separatePickerList = document.querySelector("#teamSeparatePickerList");
+  const separatePickerStatus = document.querySelector("#teamSeparatePickerStatus");
+  const separateLimit = document.querySelector("#teamSeparateLimit");
   const divideButton = document.querySelector("#teamDivideBtn");
   const message = document.querySelector("#teamMessage");
   const results = document.querySelector("#teamResults");
@@ -45,6 +48,7 @@ window.addEventListener("DOMContentLoaded", () => {
     results.innerHTML = "";
     message.textContent = "";
     divideButton.textContent = "팀 나누기";
+    sanitizeSeparatedNames();
   }
 
   function parseSeparatedNames() {
@@ -53,6 +57,42 @@ window.addEventListener("DOMContentLoaded", () => {
       .map(normalize)
       .filter(Boolean);
     return [...new Set(values)];
+  }
+
+  function setSeparatedNames(values) {
+    separateInput.value = values.join(", ");
+    separateInput.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  function participantNames() {
+    return [...new Set(currentNames().map(normalize).filter(Boolean))];
+  }
+
+  function renderSeparatePicker(message = "") {
+    if (!separatePickerList) return;
+    const participants = participantNames();
+    const participantSet = new Set(participants);
+    const selected = parseSeparatedNames().filter((name) => participantSet.has(name));
+    const selectedSet = new Set(selected);
+    const max = Number(teamCountInput.value) || 2;
+
+    separateLimit.textContent = `최대 ${max}명`;
+    separatePickerList.innerHTML = participants.length ? participants.map((name) => `
+      <button type="button" class="team-separate-person${selectedSet.has(name) ? " selected" : ""}"
+        data-name="${escapeHtml(name)}" aria-pressed="${selectedSet.has(name)}" role="listitem">
+        <span>${escapeHtml(name)}</span><b>${selectedSet.has(name) ? "✓" : "+"}</b>
+      </button>
+    `).join("") : '<span class="team-separate-empty">위에서 참가자를 먼저 선택하거나 입력해 주세요.</span>';
+    separatePickerStatus.textContent = message || (participants.length
+      ? `${participants.length}명 중 ${selected.length}명 지정`
+      : "");
+  }
+
+  function sanitizeSeparatedNames() {
+    const participantSet = new Set(participantNames());
+    const max = Number(teamCountInput.value) || 2;
+    const valid = parseSeparatedNames().filter((name) => participantSet.has(name)).slice(0, max);
+    setSeparatedNames(valid);
   }
 
   function showError(text) {
@@ -109,11 +149,32 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   memberCountInput.addEventListener("change", renderNameInputs);
+  nameInputs.addEventListener("input", sanitizeSeparatedNames);
+  separateInput.addEventListener("input", () => renderSeparatePicker());
+  separatePickerList.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-name]");
+    if (!button) return;
+    const name = normalize(button.dataset.name);
+    const selected = parseSeparatedNames();
+    const index = selected.indexOf(name);
+    if (index >= 0) selected.splice(index, 1);
+    else {
+      const max = Number(teamCountInput.value) || 2;
+      if (selected.length >= max) {
+        renderSeparatePicker(`팀 개수와 같은 최대 ${max}명까지만 지정할 수 있어요.`);
+        return;
+      }
+      selected.push(name);
+    }
+    setSeparatedNames(selected);
+  });
   teamCountInput.addEventListener("change", () => {
     updateTeamLimit();
+    sanitizeSeparatedNames();
     results.innerHTML = "";
     message.textContent = "";
     divideButton.textContent = "팀 나누기";
+    renderSeparatePicker();
   });
   divideButton.addEventListener("click", divideTeams);
   renderNameInputs();

@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/img/logo.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=1"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=86" />
+<link rel="stylesheet" href="assets/css/style.css?v=87" />
 </head>
 <body class="locked">
 
@@ -164,6 +164,14 @@
             <label for="teamSeparateNames">서로 다른 팀에 반드시 배치할 사람 <small>(선택)</small></label>
             <textarea id="teamSeparateNames" rows="2" placeholder="이름을 쉼표나 줄바꿈으로 구분해 입력하세요.&#10;예: 김철수, 이영희"></textarea>
             <p>입력한 사람들은 서로 같은 팀에 들어가지 않습니다. 지정 인원은 팀 개수 이하여야 합니다.</p>
+            <div class="team-separate-picker">
+              <div class="team-separate-picker-head">
+                <strong>참가자 명단에서 선택</strong>
+                <small id="teamSeparateLimit"></small>
+              </div>
+              <div class="team-separate-picker-list" id="teamSeparatePickerList" role="list"></div>
+              <p class="team-separate-picker-status" id="teamSeparatePickerStatus" aria-live="polite"></p>
+            </div>
           </div>
 
           <button type="button" class="btn btn-solid team-divide-btn" id="teamDivideBtn">팀 나누기</button>
@@ -269,7 +277,7 @@
   </script>
   <script type="module" src="assets/js/minigame.js?v=34"></script>
   <script src="assets/js/ladder.js?v=5"></script>
-  <script src="assets/js/teams.js?v=1"></script>
+  <script src="assets/js/teams.js?v=2"></script>
   <script type="module" src="assets/js/game-member-picker.js?v=1"></script>
   <script type="module" src="assets/js/polls.js?v=3"></script>
   <script type="module" src="assets/js/alerts.js?v=32"></script>
