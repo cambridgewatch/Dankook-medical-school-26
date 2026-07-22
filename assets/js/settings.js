@@ -10,7 +10,7 @@ import {
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  addDoc, collection, limit, onSnapshot, orderBy, query, serverTimestamp,
+  addDoc, collection, doc, getDoc, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = (s) => document.querySelector(s);
@@ -18,6 +18,7 @@ const PREF_KEY = "dkuAutoLogin";
 const BANNER_COLOR_KEY = "dkuBannerColor";
 const MASCOT_DISPLAY_KEY = "dkuMascotDisplay";
 const DEFAULT_BANNER_COLOR = "#6fa8d6";
+const INITIAL_SETUP_KEY = "dkuInitialSetupRequiredUid";
 const safeGet = (storage, key) => { try { return storage.getItem(key); } catch { return null; } };
 const safeSet = (storage, key, value) => { try { storage.setItem(key, value); } catch {} };
 const safeRemove = (storage, key) => { try { storage.removeItem(key); } catch {} };
@@ -39,6 +40,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const resourceFormLink = $("#resourceFormLink");
   const changePasswordButton = $("#changePasswordBtn");
   let initialPasswordFlow = false;
+  let initialSetupRequiredOnServer = false;
   let user = null;
   let passwordHistorySubscribed = false;
 
@@ -117,7 +119,8 @@ window.addEventListener("DOMContentLoaded", () => {
     msg.style.display = "block";
   };
 
-  if (new URLSearchParams(location.search).get("security") === "change-password") {
+  const activateInitialPasswordFlow = () => {
+    if (initialPasswordFlow) return;
     initialPasswordFlow = true;
     passwordChangeCard?.classList.add("initial-password-required");
     initialPasswordFormNotice.classList.add("is-required");
@@ -128,6 +131,10 @@ window.addEventListener("DOMContentLoaded", () => {
     changePasswordButton.disabled = true;
     showMessage("공용 초기 비밀번호는 외부인이 추측하기 쉽습니다. 아래에서 본인만 아는 비밀번호로 변경해 주세요.");
     document.querySelector("#currentPassword")?.focus();
+  };
+
+  if (new URLSearchParams(location.search).get("security") === "change-password") {
+    activateInitialPasswordFlow();
   }
 
   initialFormCompleted?.addEventListener("change", () => {
@@ -146,9 +153,22 @@ window.addEventListener("DOMContentLoaded", () => {
   toggle.checked = savedAutoLogin;
   updateAutoStatus(savedAutoLogin);
 
-  onAuthStateChanged(auth, (currentUser) => {
+  onAuthStateChanged(auth, async (currentUser) => {
     user = currentUser;
     if (!user) location.replace("login.html");
+    if (!user) return;
+    let setupRequired = safeGet(sessionStorage, INITIAL_SETUP_KEY) === user.uid
+      || safeGet(localStorage, INITIAL_SETUP_KEY) === user.uid;
+    try {
+      const setupSnapshot = await getDoc(doc(db, "initialPasswordSetup", user.uid));
+      if (setupSnapshot.exists()) {
+        setupRequired = setupSnapshot.data().required === true;
+        initialSetupRequiredOnServer = setupRequired;
+      }
+    } catch (setupError) {
+      console.warn("초기 비밀번호 변경 상태를 확인하지 못했습니다.", setupError);
+    }
+    if (setupRequired) activateInitialPasswordFlow();
     if (user?.email === ADMIN_EMAIL && !passwordHistorySubscribed) {
       memberPasswordResetPanel.hidden = false;
       passwordHistoryPanel.hidden = false;
@@ -266,14 +286,34 @@ window.addEventListener("DOMContentLoaded", () => {
     const confirmNext = $("#newPasswordConfirm").value.normalize("NFC");
     if (!current) return showMessage("현재 비밀번호를 입력해 주세요.");
     if (next.length < 8) return showMessage("새 비밀번호는 8자 이상이어야 합니다.");
+    if (next === "dku1842") return showMessage("공용 초기 비밀번호는 새 비밀번호로 다시 사용할 수 없습니다.");
     if (next !== confirmNext) return showMessage("새 비밀번호가 일치하지 않습니다.");
 
     const button = $("#changePasswordBtn");
     button.disabled = true;
+    const completingInitialSetup = initialPasswordFlow;
     try {
       const credential = EmailAuthProvider.credential(user.email, current);
       await reauthenticateWithCredential(user, credential);
       await updatePassword(user, next);
+      if (completingInitialSetup) {
+        try {
+          await setDoc(doc(db, "initialPasswordSetup", user.uid), {
+            uid: user.uid,
+            email: user.email,
+            required: false,
+            formConfirmed: true,
+            completedAt: serverTimestamp(),
+          }, { merge: true });
+        } catch (setupError) {
+          console.warn("초기 비밀번호 변경 완료 상태를 서버에 저장하지 못했습니다.", setupError);
+          if (initialSetupRequiredOnServer) {
+            throw new Error("비밀번호는 변경되었지만 완료 상태를 저장하지 못했습니다. 인터넷 연결을 확인한 뒤 새 비밀번호로 다시 완료해 주세요.");
+          }
+        }
+        safeRemove(sessionStorage, INITIAL_SETUP_KEY);
+        safeRemove(localStorage, INITIAL_SETUP_KEY);
+      }
       try {
         await addDoc(collection(db, "passwordChangeEvents"), {
           uid: user.uid,
@@ -302,7 +342,10 @@ window.addEventListener("DOMContentLoaded", () => {
       if (new URLSearchParams(location.search).get("security") === "change-password") {
         history.replaceState(null, "", "settings.html");
       }
-      showMessage("비밀번호가 변경되었습니다.", true);
+      showMessage(completingInitialSetup ? "비밀번호 변경이 완료되었습니다. 홈으로 이동합니다." : "비밀번호가 변경되었습니다.", true);
+      if (completingInitialSetup) {
+        setTimeout(() => location.replace("index.html"), 800);
+      }
     } catch (err) {
       if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password")
         showMessage("현재 비밀번호가 올바르지 않습니다.");
@@ -316,6 +359,8 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!confirm("이 기기에서 로그아웃할까요?")) return;
     safeRemove(sessionStorage, "dkuSessionKnown");
     safeRemove(localStorage, "dkuSessionKnown");
+    safeRemove(sessionStorage, INITIAL_SETUP_KEY);
+    safeRemove(localStorage, INITIAL_SETUP_KEY);
     await signOut(auth);
     location.replace("login.html");
   });

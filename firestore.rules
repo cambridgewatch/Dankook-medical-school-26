@@ -14,12 +14,34 @@ service cloud.firestore {
     }
 
     function canUseSite() {
-      return isAdmin() || isApproved();
+      return isAdmin() || (isApproved() && initialPasswordChangeComplete());
+    }
+
+    function initialPasswordChangeComplete() {
+      return !exists(/databases/$(database)/documents/initialPasswordSetup/$(request.auth.uid))
+        || get(/databases/$(database)/documents/initialPasswordSetup/$(request.auth.uid)).data.required != true;
     }
 
     match /users/{uid} {
       allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
       allow create, update, delete: if isAdmin();
+    }
+
+    match /initialPasswordSetup/{uid} {
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      allow create, update: if (isAdmin() || isApproved())
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly([
+          'uid', 'email', 'required', 'formConfirmed', 'triggeredAt', 'completedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'uid', 'email', 'required', 'formConfirmed'
+        ])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.required is bool
+        && request.resource.data.formConfirmed is bool;
+      allow delete: if isAdmin();
     }
 
     match /photos/{photoId} {
@@ -68,7 +90,7 @@ service cloud.firestore {
     match /passwordChangeEvents/{eventId} {
       allow read, delete: if isAdmin();
       allow update: if false;
-      allow create: if canUseSite()
+      allow create: if (isAdmin() || isApproved())
         && request.resource.data.keys().hasOnly([
           'uid', 'email', 'changedAt', 'type', 'changedBy'
         ])

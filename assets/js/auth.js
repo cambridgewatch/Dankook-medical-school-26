@@ -10,13 +10,14 @@ import {
   browserSessionPersistence,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const $ = (s) => document.querySelector(s);
 const safeGet = (storage, key) => { try { return storage.getItem(key); } catch { return null; } };
 const safeSet = (storage, key, value) => { try { storage.setItem(key, value); } catch {} };
 const safeRemove = (storage, key) => { try { storage.removeItem(key); } catch {} };
 const THROTTLE_KEY = "dkuLoginThrottle";
+const INITIAL_SETUP_KEY = "dkuInitialSetupRequiredUid";
 const MAX_FAILURES = 5;
 const LOCK_MS = 5 * 60 * 1000;
 
@@ -121,6 +122,22 @@ window.addEventListener("DOMContentLoaded", () => {
         await updateProfile(credential.user, { displayName: name.normalize("NFC") });
       }
       const usesSharedPassword = pw.normalize("NFC") === "dku1842";
+      if (usesSharedPassword) {
+        safeSet(sessionStorage, INITIAL_SETUP_KEY, credential.user.uid);
+        safeSet(localStorage, INITIAL_SETUP_KEY, credential.user.uid);
+        try {
+          await setDoc(doc(db, "initialPasswordSetup", credential.user.uid), {
+            uid: credential.user.uid,
+            email: credential.user.email,
+            required: true,
+            formConfirmed: false,
+            triggeredAt: serverTimestamp(),
+          }, { merge: true });
+        } catch (setupError) {
+          /* 규칙 배포 전이거나 일시적인 네트워크 오류여도 기기 내 강제 흐름은 유지 */
+          console.warn("초기 비밀번호 변경 상태를 서버에 기록하지 못했습니다.", setupError);
+        }
+      }
       toast(usesSharedPassword
         ? "보안을 위해 공용 초기 비밀번호를 개인 비밀번호로 변경해 주세요."
         : `${name} 님, 환영합니다! 이동합니다…`, true);
