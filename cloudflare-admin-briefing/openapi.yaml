@@ -1,0 +1,196 @@
+openapi: 3.1.0
+info:
+  title: DKU MED 26 Admin Briefing
+  version: 1.0.0
+  description: 관리자 전용 홈페이지 브리핑 데이터를 읽기 전용으로 조회합니다.
+servers:
+  - url: https://dkumed26.com
+paths:
+  /api/admin-briefing:
+    get:
+      operationId: getAdminBriefing
+      summary: 오늘 및 향후 7일의 관리자 브리핑 데이터를 조회합니다.
+      description: 공지, 전체·개인 일정, 알림, 투표 참여 인원 집계를 반환합니다. 직접 식별 필드는 제외하고 등록 명단의 이름과 이메일 패턴은 치환합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: days
+          in: query
+          required: false
+          description: 오늘을 포함한 조회 일수입니다. 1~7만 허용됩니다.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 7
+            default: 7
+      responses:
+        "200":
+          description: 정상 응답
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BriefingResponse"
+        "400":
+          description: 잘못된 요청
+        "401":
+          description: 인증 실패
+        "429":
+          description: 요청 횟수 초과
+        "500":
+          description: 서버 오류
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+  schemas:
+    BriefingResponse:
+      type: object
+      required: [ok, generatedAt, timeZone, range, summary, briefing, data, privacy]
+      properties:
+        ok:
+          type: boolean
+        generatedAt:
+          type: string
+          format: date-time
+        timeZone:
+          type: string
+          example: Asia/Seoul
+        range:
+          type: object
+          properties:
+            startDate: { type: string, format: date }
+            endDate: { type: string, format: date }
+            days: { type: integer }
+        summary:
+          type: object
+          additionalProperties:
+            type: integer
+        briefing:
+          type: object
+          properties:
+            todayItems:
+              type: array
+              items: { $ref: "#/components/schemas/CalendarItem" }
+            upcomingByDate:
+              type: object
+              additionalProperties:
+                type: array
+                items: { $ref: "#/components/schemas/CalendarItem" }
+            urgentItems:
+              type: array
+              items: { $ref: "#/components/schemas/CalendarItem" }
+            activePolls:
+              type: array
+              items: { $ref: "#/components/schemas/PollItem" }
+            pinnedNotices:
+              type: array
+              items: { $ref: "#/components/schemas/NoticeItem" }
+            recentAlerts:
+              type: array
+              items: { $ref: "#/components/schemas/AlertItem" }
+        data:
+          type: object
+          properties:
+            calendar:
+              type: array
+              items: { $ref: "#/components/schemas/CalendarItem" }
+            notices:
+              type: array
+              items: { $ref: "#/components/schemas/NoticeItem" }
+            alerts:
+              type: array
+              items: { $ref: "#/components/schemas/AlertItem" }
+            polls:
+              type: array
+              items: { $ref: "#/components/schemas/PollItem" }
+        privacy:
+          type: object
+          properties:
+            directIdentityFieldsExcluded: { type: boolean }
+            knownMemberNamesRedacted: { type: boolean }
+            emailPatternsRedacted: { type: boolean }
+            uidFieldsExcluded: { type: boolean }
+            passwordFieldsExcluded: { type: boolean }
+            attachmentContentIncluded: { type: boolean }
+            pollParticipantIdentityIncluded: { type: boolean }
+    CalendarItem:
+      type: object
+      properties:
+        scope: { type: string, enum: [global, personal] }
+        date: { type: string, format: date }
+        endDate:
+          anyOf:
+            - { type: string, format: date }
+            - { type: "null" }
+        title: { type: string }
+        detail: { type: string }
+        category: { type: string }
+        attachmentCount: { type: integer }
+        updatedAt:
+          anyOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+    NoticeItem:
+      type: object
+      properties:
+        title: { type: string }
+        detail: { type: string }
+        category: { type: string }
+        pinned: { type: boolean }
+        attachmentCount: { type: integer }
+        createdAt:
+          anyOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+        updatedAt:
+          anyOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+    AlertItem:
+      type: object
+      properties:
+        type: { type: string }
+        title: { type: string }
+        detail: { type: string }
+        date:
+          anyOf:
+            - { type: string, format: date }
+            - { type: "null" }
+        createdAt:
+          anyOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+        updatedAt:
+          anyOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+    PollItem:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              label: { type: string }
+        closed: { type: boolean }
+        allowVoteChange: { type: boolean }
+        allowOptionAdd: { type: boolean }
+        showResultsBeforeClose: { type: boolean }
+        participantCount: { type: integer }
+        createdAt:
+          anyOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+        updatedAt:
+          anyOf:
+            - { type: string, format: date-time }
+            - { type: "null" }
+        closedAt:
+          anyOf:
+            - { type: string, format: date-time }
+            - { type: "null" }

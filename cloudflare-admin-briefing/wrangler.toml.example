@@ -1,0 +1,19 @@
+name = "dku-med26-admin-briefing"
+main = "worker.js"
+compatibility_date = "2026-07-22"
+
+[vars]
+FIREBASE_PROJECT_ID = "YOUR_FIREBASE_PROJECT_ID"
+
+# 아래 값은 실제 파일에 쓰지 말고 Cloudflare Secret으로 등록하세요.
+# ACTION_AUTH_TOKEN
+# FIREBASE_SERVICE_ACCOUNT
+# ADMIN_UID
+# REDACT_TERMS (선택)
+
+# 선택 사항: KV Namespace를 만든 뒤 아래 주석을 풀고 실제 ID로 교체하세요.
+# KV를 사용하지 않아도 Worker는 메모리 기반 요청 제한으로 작동합니다.
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT"
+# id = "YOUR_KV_NAMESPACE_ID"
+# preview_id = "YOUR_KV_PREVIEW_NAMESPACE_ID"
