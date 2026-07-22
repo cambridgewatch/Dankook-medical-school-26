@@ -1,4 +1,4 @@
-const CACHE_NAME = "dku-med26-app-v17";
+const CACHE_NAME = "dku-med26-app-v18";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -13,6 +13,7 @@ const APP_SHELL = [
   "./login.html",
   "./manifest.webmanifest",
   "./assets/css/style.css",
+  "./assets/css/resource-room.css",
   "./assets/img/logo.png",
   "./assets/js/main.js",
   "./assets/js/session-hint.js",
@@ -56,7 +57,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(
-    caches.match(request, { ignoreSearch: true }).then((cached) => {
+    caches.match(request).then((cached) => {
       const network = fetch(request)
         .then((response) => {
           if (response.ok) {

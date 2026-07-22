@@ -1,0 +1,139 @@
+.drive-resource-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "main action" "access action";
+  align-items: center;
+  gap: 18px 28px;
+  margin-bottom: 48px;
+  padding: 30px 32px;
+  overflow: hidden;
+  border: 1px solid #d8e5ef;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(111, 168, 214, .22), transparent 35%),
+    linear-gradient(145deg, #ffffff 0%, #f3f8fc 100%);
+  box-shadow: 0 18px 50px rgba(29, 70, 101, .12);
+}
+
+.drive-resource-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: linear-gradient(180deg, #4285f4, #0f9d58, #f4b400);
+}
+
+.drive-resource-main {
+  grid-area: main;
+  display: flex;
+  align-items: center;
+  gap: 19px;
+  min-width: 0;
+}
+
+.drive-resource-icon {
+  width: 66px;
+  height: 66px;
+  flex: 0 0 66px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e2eaf1;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(33, 72, 102, .10);
+}
+
+.drive-resource-icon svg { width: 38px; height: 38px; }
+.drive-resource-copy { min-width: 0; }
+.drive-resource-card .drive-resource-copy > .drive-resource-label {
+  display: inline-flex;
+  margin: 0 0 5px;
+  color: #3578ad;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: .04em;
+}
+.drive-resource-copy h2 {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(22px, 2.2vw, 28px);
+  line-height: 1.25;
+}
+.drive-resource-copy p {
+  margin: 7px 0 0;
+  color: var(--gray);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.drive-resource-access {
+  grid-area: access;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  padding: 9px 13px;
+  border: 1px solid #d9e9df;
+  border-radius: 11px;
+  background: #f3faf6;
+  color: #35634a;
+}
+.drive-resource-access > span {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #16845b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+}
+.drive-resource-access p { margin: 0; font-size: 13px; line-height: 1.45; }
+
+.drive-resource-action {
+  grid-area: action;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 194px;
+  padding: 15px 20px;
+  border-radius: 14px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 850;
+  box-shadow: 0 10px 22px rgba(5, 43, 100, .18);
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.drive-resource-action:hover {
+  transform: translateY(-2px);
+  background: #164d83;
+  box-shadow: 0 14px 28px rgba(5, 43, 100, .24);
+}
+
+.gallery-section-heading {
+  padding-top: 2px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 680px) {
+  .drive-resource-card {
+    grid-template-columns: 1fr;
+    grid-template-areas: "main" "access" "action";
+    gap: 18px;
+    margin-bottom: 38px;
+    padding: 24px 21px 22px;
+    border-radius: 22px;
+  }
+  .drive-resource-main { align-items: flex-start; gap: 14px; }
+  .drive-resource-icon { width: 52px; height: 52px; flex-basis: 52px; border-radius: 16px; }
+  .drive-resource-icon svg { width: 31px; height: 31px; }
+  .drive-resource-copy h2 { font-size: 21px; }
+  .drive-resource-copy p { font-size: 13px; }
+  .drive-resource-access { width: 100%; align-items: flex-start; box-sizing: border-box; }
+  .drive-resource-action { width: 100%; min-width: 0; box-sizing: border-box; }
+}

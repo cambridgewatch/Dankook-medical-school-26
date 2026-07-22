@@ -1052,41 +1052,6 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   gap: 16px;
 }
 
-/* ---------- 자료실 ---------- */
-.drive-resource-card {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 18px;
-  margin-bottom: 42px; padding: 24px 26px; border: 1px solid #cdddea; border-radius: 22px;
-  background: linear-gradient(135deg, #f7fbff 0%, #edf6fd 100%);
-  box-shadow: 0 14px 35px rgba(41, 89, 124, .10); color: inherit;
-  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
-}
-.drive-resource-card:hover {
-  transform: translateY(-3px); border-color: var(--blue);
-  box-shadow: 0 18px 42px rgba(41, 89, 124, .16);
-}
-.drive-resource-icon {
-  width: 58px; height: 58px; display: grid; place-items: center; border-radius: 18px;
-  background: #fff; box-shadow: 0 8px 20px rgba(41, 89, 124, .11); font-size: 28px;
-}
-.drive-resource-copy { min-width: 0; }
-.drive-resource-copy small { display: block; margin-bottom: 3px; color: var(--blue); font-size: 11px; font-weight: 900; letter-spacing: .12em; }
-.drive-resource-copy strong { display: block; color: var(--navy); font-size: 21px; }
-.drive-resource-copy > span { display: block; margin-top: 5px; color: var(--gray); font-size: 14px; }
-.drive-resource-action {
-  padding: 12px 17px; border-radius: 12px; background: var(--navy); color: #fff;
-  font-size: 13px; font-weight: 800; white-space: nowrap;
-}
-.gallery-section-heading { margin-bottom: 20px; }
-.gallery-section-heading > span { color: var(--blue); font-size: 11px; font-weight: 900; letter-spacing: .12em; }
-.gallery-section-heading h2 { margin: 4px 0 5px; color: var(--navy); font-size: 24px; }
-.gallery-section-heading p { margin: 0; color: var(--gray); font-size: 14px; }
-@media (max-width: 620px) {
-  .drive-resource-card { grid-template-columns: auto minmax(0, 1fr); gap: 14px; padding: 20px; }
-  .drive-resource-icon { width: 50px; height: 50px; border-radius: 15px; font-size: 24px; }
-  .drive-resource-copy strong { font-size: 18px; }
-  .drive-resource-copy > span { font-size: 13px; line-height: 1.55; }
-  .drive-resource-action { grid-column: 1 / -1; text-align: center; }
-}
 .gallery-grid figure {
   border-radius: var(--radius);
   overflow: hidden;
