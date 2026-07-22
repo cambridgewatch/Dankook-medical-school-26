@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>설정 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=95" />
+<link rel="stylesheet" href="assets/css/style.css?v=96" />
 </head>
 <body class="locked">
   <header class="site-header">
@@ -46,10 +46,10 @@
   <section class="section">
     <div class="container settings-wrap">
       <section class="settings-group screen" aria-labelledby="screenSettingsTitle">
-        <div class="settings-group-title"><span>🎨</span><div><h2 id="screenSettingsTitle">화면</h2><p>색상과 상단 캐릭터 표시를 설정합니다.</p></div></div>
+        <div class="settings-group-title"><span data-icon="palette"></span><div><h2 id="screenSettingsTitle">화면</h2><p>색상과 상단 캐릭터 표시를 설정합니다.</p></div></div>
       <div class="settings-card">
         <div class="settings-card-head">
-          <div><span class="settings-icon">🎨</span><h2>배너 색상</h2></div>
+          <div><span class="settings-icon" data-icon="palette"></span><h2>배너 색상</h2></div>
         </div>
         <p>홈 화면과 각 페이지 상단 배너에 사용할 색상을 선택하세요. 이 기기에만 저장됩니다.</p>
         <div class="banner-color-picker">
@@ -61,7 +61,7 @@
 
       <div class="settings-card">
         <div class="settings-card-head">
-          <div><span class="settings-icon">🐻</span><h2>단웅이 단비 표시</h2></div>
+          <div><span class="settings-icon" data-icon="sparkles"></span><h2>단웅이 단비 표시</h2></div>
           <label class="switch" aria-label="단웅이 단비 표시 설정">
             <input type="checkbox" id="mascotDisplayToggle" />
             <span class="switch-track"></span>
@@ -73,10 +73,10 @@
       </section>
 
       <section class="settings-group guide" aria-labelledby="guideSettingsTitle">
-        <div class="settings-group-title"><span>📖</span><div><h2 id="guideSettingsTitle">사용 안내</h2><p>홈페이지의 기능과 이용 방법을 확인합니다.</p></div></div>
+        <div class="settings-group-title"><span data-icon="book"></span><div><h2 id="guideSettingsTitle">사용 안내</h2><p>홈페이지의 기능과 이용 방법을 확인합니다.</p></div></div>
       <details class="settings-card settings-guide">
         <summary>
-          <span class="settings-icon">?</span>
+          <span class="settings-icon" data-icon="help"></span>
           <span><strong>사용 안내</strong><small>홈페이지의 주요 기능과 이용 방법</small></span>
           <span class="settings-guide-arrow">⌄</span>
         </summary>
@@ -84,7 +84,7 @@
           <p class="settings-guide-intro">화면 이름을 누르면 설명이 펼쳐집니다. 다시 누르면 접을 수 있습니다.</p>
           <div class="settings-guide-sections">
             <details class="settings-guide-section">
-              <summary><span class="guide-section-icon">🏠</span><span><strong>홈</strong><small>주요 일정, 과제, 투표와 모바일 새로고침</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <summary><span class="guide-section-icon" data-icon="home"></span><span><strong>홈</strong><small>주요 일정, 과제, 투표와 모바일 새로고침</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
               <div class="settings-guide-section-body">
                 <h4>일정 요약 확인</h4>
                 <ul>
@@ -107,7 +107,7 @@
             </details>
 
             <details class="settings-guide-section">
-              <summary><span class="guide-section-icon">📚</span><span><strong>시간표</strong><small>공통 수업 확인과 내 시간표 제작</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <summary><span class="guide-section-icon" data-icon="book"></span><span><strong>시간표</strong><small>공통 수업 확인과 내 시간표 제작</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
               <div class="settings-guide-section-body">
                 <h4>수업 추가</h4>
                 <ul>
@@ -128,7 +128,7 @@
             </details>
 
             <details class="settings-guide-section">
-              <summary><span class="guide-section-icon">📌</span><span><strong>공지사항</strong><small>공지 열람, 검색과 페이지 이동</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <summary><span class="guide-section-icon" data-icon="pin"></span><span><strong>공지사항</strong><small>공지 열람, 검색과 페이지 이동</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
               <div class="settings-guide-section-body">
                 <h4>공지 확인</h4>
                 <ul>
@@ -144,7 +144,7 @@
             </details>
 
             <details class="settings-guide-section">
-              <summary><span class="guide-section-icon">📅</span><span><strong>캘린더</strong><small>월별 달력, 분류별 목록, 개인 일정과 D-Day</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <summary><span class="guide-section-icon" data-icon="calendar"></span><span><strong>캘린더</strong><small>월별 달력, 분류별 목록, 개인 일정과 D-Day</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
               <div class="settings-guide-section-body">
                 <h4>달력과 검색</h4>
                 <ul>
@@ -172,7 +172,7 @@
             </details>
 
             <details class="settings-guide-section">
-              <summary><span class="guide-section-icon">🔔</span><span><strong>알림</strong><small>새 알림 확인과 삭제</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <summary><span class="guide-section-icon" data-icon="bell"></span><span><strong>알림</strong><small>새 알림 확인과 삭제</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
               <div class="settings-guide-section-body">
                 <h4>알림 확인</h4>
                 <ul>
@@ -192,7 +192,7 @@
             </details>
 
             <details class="settings-guide-section">
-              <summary><span class="guide-section-icon">📁</span><span><strong>자료실</strong><small>Google Drive 자료와 사진 공유</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <summary><span class="guide-section-icon" data-icon="folder"></span><span><strong>자료실</strong><small>Google Drive 자료와 사진 공유</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
               <div class="settings-guide-section-body">
                 <h4>공유 자료 확인</h4>
                 <ul>
@@ -216,7 +216,7 @@
             </details>
 
             <details class="settings-guide-section">
-              <summary><span class="guide-section-icon">👥</span><span><strong>동기 명단</strong><small>가입된 동기 계정 확인</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <summary><span class="guide-section-icon" data-icon="users"></span><span><strong>동기 명단</strong><small>가입된 동기 계정 확인</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
               <div class="settings-guide-section-body">
                 <h4>명단 확인</h4>
                 <ul>
@@ -229,7 +229,7 @@
             </details>
 
             <details class="settings-guide-section">
-              <summary><span class="guide-section-icon">🧰</span><span><strong>도구</strong><small>룰렛, 사다리타기, 팀 나누기와 투표</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <summary><span class="guide-section-icon" data-icon="tools"></span><span><strong>도구</strong><small>룰렛, 사다리타기, 팀 나누기와 투표</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
               <div class="settings-guide-section-body">
                 <h4>도구 열기와 명단 선택</h4>
                 <ul>
@@ -263,7 +263,7 @@
             </details>
 
             <details class="settings-guide-section">
-              <summary><span class="guide-section-icon">⚙️</span><span><strong>설정과 계정</strong><small>색상, 로그인 유지와 비밀번호</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
+              <summary><span class="guide-section-icon" data-icon="settings"></span><span><strong>설정과 계정</strong><small>색상, 로그인 유지와 비밀번호</small></span><span class="settings-guide-section-arrow">⌄</span></summary>
               <div class="settings-guide-section-body">
                 <h4>화면과 로그인 설정</h4>
                 <ul>
@@ -310,10 +310,10 @@
       </section>
 
       <section class="settings-group account" aria-labelledby="accountSettingsTitle">
-        <div class="settings-group-title"><span>👤</span><div><h2 id="accountSettingsTitle">계정</h2><p>로그인 유지, 비밀번호와 로그아웃을 관리합니다.</p></div></div>
+        <div class="settings-group-title"><span data-icon="user"></span><div><h2 id="accountSettingsTitle">계정</h2><p>로그인 유지, 비밀번호와 로그아웃을 관리합니다.</p></div></div>
       <div class="settings-card">
         <div class="settings-card-head">
-          <div><span class="settings-icon">✓</span><h2>로그인 유지</h2></div>
+          <div><span class="settings-icon" data-icon="check"></span><h2>로그인 유지</h2></div>
           <label class="switch" aria-label="자동 로그인 설정">
             <input type="checkbox" id="autoLoginToggle" />
             <span class="switch-track"></span>
@@ -325,7 +325,7 @@
 
       <div class="settings-card" id="passwordChangeCard">
         <div class="settings-card-head">
-          <div><span class="settings-icon">🔑</span><h2>비밀번호 변경</h2></div>
+          <div><span class="settings-icon" data-icon="key"></span><h2>비밀번호 변경</h2></div>
         </div>
         <div class="initial-password-form-notice" id="initialPasswordFormNotice">
           <div class="initial-password-form-copy">
@@ -363,10 +363,10 @@
       </section>
 
       <section class="settings-group admin" id="adminSettingsGroup" aria-labelledby="adminSettingsTitle" hidden>
-        <div class="settings-group-title"><span>🛡️</span><div><h2 id="adminSettingsTitle">관리자 기능</h2><p>회원 관리와 홈페이지 데이터를 관리합니다.</p></div></div>
+        <div class="settings-group-title"><span data-icon="shield"></span><div><h2 id="adminSettingsTitle">관리자 기능</h2><p>회원 관리와 홈페이지 데이터를 관리합니다.</p></div></div>
       <details class="settings-card settings-guide" id="memberPasswordResetPanel" hidden>
         <summary>
-          <span class="settings-icon">🛟</span>
+          <span class="settings-icon" data-icon="life"></span>
           <span><strong>회원 비밀번호 재설정</strong><small>비밀번호를 잊은 회원에게 임시 비밀번호 발급</small></span>
           <span class="settings-guide-arrow">⌄</span>
         </summary>
@@ -393,7 +393,7 @@
 
       <details class="settings-card settings-guide" id="passwordHistoryPanel" hidden>
         <summary>
-          <span class="settings-icon">🧾</span>
+          <span class="settings-icon" data-icon="history"></span>
           <span><strong>비밀번호 변경 내역</strong><small>설정에서 변경한 계정과 시각 확인</small></span>
           <span class="settings-guide-arrow">⌄</span>
         </summary>
@@ -406,7 +406,7 @@
 
       <details class="settings-card settings-guide admin-backup-panel" id="adminBackupPanel" hidden>
         <summary>
-          <span class="settings-icon">💾</span>
+          <span class="settings-icon" data-icon="database"></span>
           <span><strong>데이터 백업·복구</strong><small>홈페이지 운영 자료를 파일로 보관하고 복원</small></span>
           <span class="settings-guide-arrow">⌄</span>
         </summary>
@@ -450,11 +450,11 @@
     </div>
   </footer>
 
-<script src="assets/js/main.js?v=64"></script>
+<script src="assets/js/main.js?v=65"></script>
   <script src="assets/js/password-visibility.js?v=1"></script>
-  <script type="module" src="assets/js/settings.js?v=18"></script>
+  <script type="module" src="assets/js/settings.js?v=19"></script>
   <script type="module" src="assets/js/admin-backup.js?v=2"></script>
   <script type="module" src="assets/js/alerts.js?v=32"></script>
-  <script type="module" src="assets/js/gate.js?v=22"></script>
+  <script type="module" src="assets/js/gate.js?v=23"></script>
 </body>
 </html>

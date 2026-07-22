@@ -48,16 +48,18 @@ window.addEventListener("DOMContentLoaded", () => {
       note.textContent = isAdmin
         ? "아직 등록된 이름이 없어요. 위에서 명단을 추가해 주세요."
         : "등록된 명단이 없습니다.";
+      note.classList.add("empty-state");
       return;
     }
-    if (!list.length) { grid.innerHTML = ""; note.textContent = "검색 결과가 없습니다."; return; }
+    if (!list.length) { grid.innerHTML = ""; note.textContent = "검색 결과가 없습니다."; note.classList.add("empty-state"); return; }
     note.textContent = `총 ${members.length}명`;
+    note.classList.remove("empty-state");
     grid.innerHTML = list.map((m) => `
       <div class="member">
         <div class="avatar">${esc(m.name[0] || "?")}</div>
         <strong>${esc(m.name)}</strong>
         <span>26학번</span>
-        ${isAdmin ? `<button class="mem-del" data-id="${m.id}" title="삭제">🗑</button>` : ""}
+          ${isAdmin ? `<button class="mem-del icon-action danger" data-id="${m.id}" title="삭제" aria-label="명단에서 삭제">${window.dkuIcon("trash")}</button>` : ""}
       </div>`).join("");
     grid.querySelectorAll(".mem-del").forEach((b) => {
       b.addEventListener("click", async () => {

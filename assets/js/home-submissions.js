@@ -130,7 +130,7 @@ window.addEventListener("DOMContentLoaded", () => {
                   @ 미제출자 명단
                 </button>
                 <button class="submission-notify" type="button" data-notify-id="${escapeHtml(checklist.id)}"${submittedCount >= members.length ? " disabled" : ""}>
-                  🔔 미제출 ${Math.max(0, members.length - submittedCount)}명에게 알림
+              ${window.dkuIcon("bell")} 미제출 ${Math.max(0, members.length - submittedCount)}명에게 알림
                 </button>
                 <button class="submission-delete" type="button" data-delete-id="${escapeHtml(checklist.id)}">항목 삭제</button>
               </div>

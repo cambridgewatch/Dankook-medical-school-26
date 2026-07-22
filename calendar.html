@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>캘린더 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=95" />
+<link rel="stylesheet" href="assets/css/style.css?v=96" />
 </head>
 <body class="locked">
 
@@ -49,7 +49,7 @@
 
       <div class="calendar-search-wrap">
         <div class="content-search">
-          <span>🔎</span>
+        <span data-icon="search"></span>
           <input type="search" id="calendarSearch" placeholder="일정명이나 세부 내용 검색" autocomplete="off" />
           <button type="button" id="calendarSearchClear" aria-label="검색어 지우기">×</button>
         </div>
@@ -124,7 +124,7 @@
         </div>
         <textarea id="cmDetail" placeholder="세부 내용 (선택)" rows="2"></textarea>
         <div class="attachment-field">
-          <label class="attachment-picker" for="cmFiles"><span>🖼️ 사진 첨부</span><small>사진당 32MB · 최대 5장</small></label>
+          <label class="attachment-picker" for="cmFiles"><span><span data-icon="image"></span>사진 첨부</span><small>사진당 32MB · 최대 5장</small></label>
           <input type="file" id="cmFiles" accept="image/*" multiple />
           <div class="attachment-edit-list" id="cmAttachmentEditList"></div>
         </div>
@@ -151,10 +151,10 @@
     </div>
   </footer>
 
-<script src="assets/js/main.js?v=64"></script>
+<script src="assets/js/main.js?v=65"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
-  <script type="module" src="assets/js/calendar.js?v=57"></script>
+  <script type="module" src="assets/js/calendar.js?v=58"></script>
   <script type="module" src="assets/js/alerts.js?v=32"></script>
-  <script type="module" src="assets/js/gate.js?v=22"></script>
+  <script type="module" src="assets/js/gate.js?v=23"></script>
 </body>
 </html>

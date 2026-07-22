@@ -13,7 +13,7 @@ import {
 import {
   normalizeAttachments, validateAttachmentFiles, uploadAttachmentFiles, deleteAttachmentFiles,
   attachmentMarkup, attachmentEditorMarkup, bindAttachmentOpen, formatAttachmentSize,
-} from "./attachments.js?v=2";
+} from "./attachments.js?v=3";
 
 /* 특정 날짜+내용의 캘린더 알림 모두 삭제 */
 async function deleteCalAlerts(date, text, eventKey = "", relatedDates = [date]) {
@@ -230,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <i aria-hidden="true">›</i>
           </button>`;
         }).join("")
-        : `<p class="cal-category-empty">오늘부터 1개월 안에 등록된 ${LABEL[type]} 일정이 없습니다.</p>`;
+        : `<p class="cal-category-empty empty-state">오늘부터 1개월 안에 등록된 ${LABEL[type]} 일정이 없습니다.</p>`;
 
       list.querySelectorAll(".cal-category-item").forEach((button) => {
         button.addEventListener("click", () => goToEvent(button.dataset.date, true, button.dataset.event));
@@ -252,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .sort((a, b) => a.days - b.days || a.date.localeCompare(b.date))
       .slice(0, 4);
     if (!upcoming.length) {
-      ddayList.innerHTML = `<p class="dday-empty">등록된 예정 시험이나 주요 일정이 없습니다.</p>`;
+      ddayList.innerHTML = `<p class="dday-empty empty-state">등록된 예정 시험이나 주요 일정이 없습니다.</p>`;
       return;
     }
     ddayList.innerHTML = upcoming.map((event) => `
@@ -279,7 +279,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .sort((a, b) => a.days - b.days || a.date.localeCompare(b.date))
       .slice(0, 6);
     if (!assignments.length) {
-      assignmentDdayList.innerHTML = `<p class="dday-empty">등록된 과제가 없습니다.</p>`;
+      assignmentDdayList.innerHTML = `<p class="dday-empty empty-state">등록된 과제가 없습니다.</p>`;
       return;
     }
     assignmentDdayList.innerHTML = assignments.map((event) => `
@@ -309,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <button type="button" class="cal-search-item" data-date="${event.date}" data-event="${esc(event.text)}">
         <time>${eventDateLabel(event, true)}</time>
         <span>${esc(event.text)}</span>
-      </button>`).join("") : `<p class="empty-note">검색 결과가 없습니다.</p>`;
+      </button>`).join("") : `<p class="empty-note empty-state">검색 결과가 없습니다.</p>`;
     calendarSearchResults.querySelectorAll(".cal-search-item").forEach((button) => {
       button.addEventListener("click", () => {
         goToEvent(button.dataset.date, true, button.dataset.event);
@@ -412,11 +412,11 @@ document.addEventListener("DOMContentLoaded", () => {
       migrateAllToEditable();
     });
   } else {
-    banner.textContent = "⚠️ 일정 편집은 Firebase 설정 후 사용할 수 있어요. (지금은 학사일정만 표시)";
+    banner.textContent = "일정 편집은 Firebase 설정 후 사용할 수 있어요. (지금은 학사일정만 표시)";
   }
 
   function updateBanner() {
-    if (isAdmin) banner.innerHTML = `✏️ <strong>${ADMIN_NAME}</strong> 님(관리자) — 기본은 전체 일정이며, 필요할 때 개인 일정으로 저장할 수 있어요.`;
+    if (isAdmin) banner.innerHTML = `${window.dkuIcon("edit")} <strong>${ADMIN_NAME}</strong> 님(관리자) — 기본은 전체 일정이며, 필요할 때 개인 일정으로 저장할 수 있어요.`;
     else banner.innerHTML = `날짜를 클릭해 전체 일정과 내 개인 일정을 확인하고 개인 일정을 추가하세요.`;
   }
 
@@ -529,7 +529,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function drawList() {
     const evs = eventsOf(activeKey);
     if (!evs.length) {
-      cmList.innerHTML = `<li class="none">등록된 일정이 없어요.</li>`;
+      cmList.innerHTML = `<li class="none empty-state">등록된 일정이 없어요.</li>`;
       return;
     }
     cmList.innerHTML = evs.map((e) => {
@@ -549,9 +549,9 @@ document.addEventListener("DOMContentLoaded", () => {
           ${e.personal ? `<span class="ev-private">개인</span>` : ""}
           ${period ? `<span class="ev-period">${period}</span>` : ""}
           ${hasDetail ? `<span class="ev-chev">▾</span>` : ""}
-          ${!modalReadOnly && isAdmin && !e.personal ? `<button class="ev-alert" data-key="${esc(e.eventKey)}" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기">🔔</button>` : ""}
-          ${canManage ? `<button class="ev-edit" data-key="${e.eventKey}" title="수정">✏️</button>` : ""}
-          ${canManage ? `<button class="ev-del" data-key="${e.eventKey}" data-text="${esc(e.text)}" title="삭제">🗑</button>` : ""}
+        ${!modalReadOnly && isAdmin && !e.personal ? `<button class="ev-alert icon-action" data-key="${esc(e.eventKey)}" data-text="${esc(e.text)}" data-detail="${esc(e.detail || "")}" title="알림 보내기" aria-label="알림 보내기">${window.dkuIcon("bell")}</button>` : ""}
+        ${canManage ? `<button class="ev-edit icon-action" data-key="${e.eventKey}" title="수정" aria-label="수정">${window.dkuIcon("edit")}</button>` : ""}
+        ${canManage ? `<button class="ev-del icon-action danger" data-key="${e.eventKey}" data-text="${esc(e.text)}" title="삭제" aria-label="삭제">${window.dkuIcon("trash")}</button>` : ""}
         </div>
         ${hasDetail ? `<div class="cm-ev-body">${body}</div>` : ""}
       </li>`;
@@ -640,7 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
             date: activeKey, text: b.dataset.text, calendarEventKey: b.dataset.key,
             createdAt: serverTimestamp(),
           });
-          alert("🔔 알림을 보냈어요!");
+          alert("알림을 보냈어요!");
         } catch (err) { alert("알림 실패: " + err.message); }
       });
     });

@@ -36,7 +36,7 @@ function renderList(box, events, emptyText) {
     .slice(0, 3);
 
   if (!upcoming.length) {
-    box.innerHTML = `<p>${emptyText}</p>`;
+    box.innerHTML = `<p class="home-schedule-empty empty-state">${emptyText}</p>`;
     return;
   }
   box.innerHTML = upcoming.map((event) => {
@@ -66,13 +66,13 @@ onAuthStateChanged(auth, (user) => {
     globalEvents = snap.docs.map((item) => validEvent(item.id, item.data())).filter(Boolean);
     render();
   }, () => {
-    majorBox.innerHTML = "<p>일정을 불러오지 못했습니다.</p>";
+    majorBox.innerHTML = '<p class="home-schedule-empty empty-state">일정을 불러오지 못했습니다.</p>';
   });
 
   unsubscribePersonal = onSnapshot(collection(db, "calendarPersonal", user.uid, "events"), (snap) => {
     personalEvents = snap.docs.map((item) => validEvent(item.id, item.data(), true)).filter(Boolean);
     render();
   }, () => {
-    assignmentBox.innerHTML = "<p>개인 일정을 불러오지 못했습니다.</p>";
+    assignmentBox.innerHTML = '<p class="home-schedule-empty empty-state">개인 일정을 불러오지 못했습니다.</p>';
   });
 });

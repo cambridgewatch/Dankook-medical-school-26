@@ -15,8 +15,13 @@
   --bg: #f6f8fc;
   --white: #ffffff;
   --radius: 14px;
+  --radius-card: 16px;
+  --radius-control: 11px;
   --shadow: 0 10px 30px rgba(0, 32, 91, 0.08);
   --shadow-sm: 0 4px 14px rgba(0, 32, 91, 0.06);
+  --shadow-card: 0 8px 24px rgba(25, 53, 84, 0.055);
+  --danger: #b8323d;
+  --success: #23835b;
   --max: 1120px;
   --banner-start: #40617c;
   --banner-end: #6497c1;
@@ -2123,3 +2128,195 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .settings-logout { border: 1px solid #e7a5a5; color: #b52f38; background: #fff6f6; font-weight: 800; }
 .settings-logout:hover { background: #b52f38; color: #fff; }
 @media (max-width: 560px) { .settings-card { padding: 20px; } .settings-guide { padding: 0; } .settings-guide > summary { padding: 18px; } .settings-guide-body { padding: 15px; } .settings-guide-section > summary { padding: 13px; } .settings-guide-section-body { padding: 2px 14px 16px; } .danger-zone { align-items: stretch; flex-direction: column; } }
+
+/* ===========================================================
+   2026 UI system: line icons, restrained cards and shared states
+   =========================================================== */
+.ui-line-icon {
+  display: block;
+  width: 1em;
+  height: 1em;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+[data-icon] { display: inline-grid; place-items: center; }
+[data-icon] > .ui-line-icon { width: 100%; height: 100%; }
+.heading-icon { width: 28px; height: 28px; flex: 0 0 28px; color: var(--blue); }
+.inline-status-icon {
+  width: 18px; height: 18px; margin-right: 5px; color: var(--success);
+  vertical-align: -4px;
+}
+.settings-group-title > [data-icon],
+.settings-icon, .guide-section-icon {
+  color: var(--blue);
+}
+.settings-group-title .ui-line-icon,
+.settings-icon .ui-line-icon { width: 17px; height: 17px; }
+.guide-section-icon .ui-line-icon { width: 18px; height: 18px; }
+.game-head h2, .notice-admin h3, .upload-box h3 {
+  display: flex; align-items: center; gap: 9px;
+}
+.game-head h2 { justify-content: center; }
+.attachment-picker > span { display: inline-flex; align-items: center; gap: 7px; }
+.attachment-picker [data-icon] { width: 18px; height: 18px; color: var(--blue); }
+.attachment-edit-item > span { display: inline-flex; align-items: center; gap: 6px; }
+.attachment-edit-item .ui-line-icon { width: 15px; height: 15px; color: var(--blue); }
+.gate-logo .ui-line-icon { width: 27px; height: 27px; }
+.content-search > [data-icon] { width: 19px; height: 19px; flex: 0 0 19px; color: #74859a; }
+
+.icon-action {
+  display: inline-grid !important; place-items: center; width: 34px !important; height: 34px !important;
+  min-width: 34px !important; padding: 0 !important; border: 1px solid transparent !important;
+  border-radius: 10px !important; background: transparent !important; color: #667587 !important;
+  font-size: 16px !important; line-height: 1 !important; opacity: 1 !important; cursor: pointer;
+  transition: color .16s ease, background .16s ease, border-color .16s ease !important;
+}
+.icon-action .ui-line-icon { width: 17px; height: 17px; }
+.icon-action:hover { border-color: #dbe4ed !important; background: #eef4fa !important; color: var(--navy) !important; }
+.icon-action.danger { color: #a84a52 !important; }
+.icon-action.danger:hover { border-color: #f0c8cc !important; background: #fff0f1 !important; color: var(--danger) !important; }
+.notice-pin.active { border-color: #bed5ea !important; background: #e7f2fb !important; color: var(--blue) !important; filter: none; }
+.nt-pinned { width: 17px; height: 17px; color: var(--blue); filter: none; }
+.nt-pinned .ui-line-icon { width: 100%; height: 100%; }
+.photo-uploader { display: inline-flex; align-items: center; gap: 5px; }
+.photo-uploader .ui-line-icon { width: 15px; height: 15px; color: #7a8795; }
+.gallery-grid figcaption > .ui-line-icon { width: 18px; height: 18px; color: #7b8795; }
+.alert-ic .ui-line-icon { width: 21px; height: 21px; color: var(--blue); }
+.alert-ic.cal .ui-line-icon { color: #25805e; }
+.alert-ic.submission .ui-line-icon { color: #9a6a11; }
+.roulette-result > .ui-line-icon, .wheel-result > .ui-line-icon { display: inline-block; width: 21px; height: 21px; margin-right: 6px; vertical-align: -3px; }
+
+body { font-size: 15px; }
+.page-head { padding: 46px 0 40px; }
+.page-head .eyebrow { font-size: 11px; letter-spacing: 1.7px; }
+.page-head h1 { margin-top: 5px; font-size: 30px; }
+.page-head p { margin-top: 6px; font-size: 14px; }
+.section { padding: 54px 0; }
+.section-title { margin-bottom: 32px; }
+.section-title h2 { font-size: 28px; }
+.section-title p { margin-top: 6px; font-size: 14px; }
+
+.btn {
+  min-height: 42px; padding: 0 18px; border-radius: var(--radius-control);
+  font-size: 14px; font-weight: 750; line-height: 1; justify-content: center;
+}
+.btn [data-icon], .btn > .ui-line-icon { width: 17px; height: 17px; }
+.btn-solid { border-color: var(--blue); background: var(--blue); color: #fff; }
+.btn-solid:hover { border-color: #004a9c; background: #004a9c; transform: none; box-shadow: none; }
+.btn-outline, .btn-ghost-dark {
+  border: 1px solid #cbd7e3; background: #fff; color: var(--navy);
+}
+.btn-outline:hover, .btn-ghost-dark:hover { border-color: #aebfd0; background: #f4f7fa; transform: none; box-shadow: none; }
+.btn-danger {
+  border-color: #e3aeb3; background: #fff; color: var(--danger);
+}
+.btn-danger:hover { border-color: var(--danger); background: var(--danger); color: #fff; }
+.settings-logout {
+  min-height: 42px; padding: 0 18px; border: 1px solid #e3aeb3;
+  border-radius: var(--radius-control); background: #fff; color: var(--danger);
+}
+.settings-logout:hover { border-color: var(--danger); background: var(--danger); color: #fff; }
+.member-picker-reset {
+  min-height: 38px; border-color: #e3b9be; border-radius: 10px; background: #fff; color: #a73843;
+}
+.member-picker-reset:hover { border-color: #cf8f96; background: #fff4f5; color: var(--danger); }
+.poll-actions button, .submission-checklist-actions button, .submission-mention-box button {
+  min-height: 38px; padding: 0 13px; border-radius: 10px; font-size: 12px; line-height: 1;
+}
+.poll-actions .poll-vote, .submission-notify {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border-color: var(--blue); background: var(--blue); color: #fff;
+}
+.submission-notify .ui-line-icon { width: 15px; height: 15px; }
+.poll-actions .poll-vote:hover:not(:disabled), .submission-notify:hover:not(:disabled) {
+  border-color: #004a9c; background: #004a9c;
+}
+.submission-mentions, .submission-mention-box button, .poll-actions .poll-close, .poll-actions .poll-edit {
+  border: 1px solid #cbd7e3; background: #fff; color: var(--navy);
+}
+.submission-delete, .poll-actions .danger {
+  min-height: 38px; padding: 0 13px; border: 1px solid #e3aeb3;
+  border-radius: 10px; background: #fff; color: var(--danger);
+}
+.submission-delete:hover, .poll-actions .danger:hover { border-color: var(--danger); background: #fff2f3; }
+
+.card, .notice-card, .alert-card, .member, .gallery-grid figure, .poll-card,
+.game-card, .settings-card, .notice-admin, .upload-box, .member-admin,
+.submission-checklist, .home-submission-create, .team-result-card {
+  border-color: #dce4ec;
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+.card:hover, .notice-card:hover, .alert-card:hover, .member:hover {
+  transform: none; border-color: #bccbda; box-shadow: none;
+}
+.cal-card, .auth-card, .home-submission-panel, .drive-resource-card {
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+}
+.notice-admin { background: #fff; }
+.game-card { max-width: 760px; margin-bottom: 16px; padding: 26px 28px; }
+.game-launch-card.game-open { border-color: #adc4dc; box-shadow: var(--shadow-card); }
+.game-panel { margin-top: 20px; padding-top: 20px; }
+.poll-editor, .team-name-section, .member-picker, .team-separate-box,
+.home-submission-create, .settings-guide-body {
+  background: #f8fafc;
+  box-shadow: none;
+}
+.settings-card { border-radius: var(--radius-card); padding: 22px; }
+.settings-guide-section { border-radius: 12px; }
+.settings-guide-section > summary { padding: 14px 15px; }
+.content-search { border-radius: var(--radius-control); box-shadow: none; }
+.notice-search-box { min-height: 50px; border-radius: 13px; background: #fff; box-shadow: none; }
+.notice-search-box input { height: 48px; }
+
+.member-search-field {
+  display: flex; align-items: center; gap: 9px; width: 280px; max-width: 100%;
+  padding: 0 13px; border: 1px solid var(--line); border-radius: var(--radius-control); background: #fff;
+}
+.member-search-field:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.member-search-field > [data-icon] { width: 18px; height: 18px; flex: 0 0 18px; color: #74859a; }
+.member-tools .member-search-field input {
+  width: 100%; min-width: 0; padding: 11px 0; border: 0; border-radius: 0; outline: 0; box-shadow: none;
+}
+.member-tools .member-search-field input:focus { border: 0; box-shadow: none; }
+
+.empty-state {
+  --empty-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm2 5h10V7H7v2Zm0 4h10v-2H7v2Zm0 4h7v-2H7v2Z'/%3E%3C/svg%3E");
+  display: flex !important; flex-direction: column; align-items: center; justify-content: center;
+  gap: 9px; min-height: 112px; width: 100%; margin: 12px 0; padding: 23px !important;
+  border: 1px dashed #d4dee8; border-radius: 14px; background: #fafbfd;
+  color: #718092 !important; font-size: 13px !important; line-height: 1.5; text-align: center;
+}
+.empty-state::before {
+  content: ""; width: 29px; height: 29px; opacity: .72; background: #8294a7;
+  -webkit-mask: var(--empty-state-icon) center / contain no-repeat;
+  mask: var(--empty-state-icon) center / contain no-repeat;
+}
+#noticeNote.empty-state { --empty-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 10v4h3l4 4V6l-4 4H4Zm9-2v8c3-1 5-2 7-4-2-2-4-3-7-4Z'/%3E%3C/svg%3E"); }
+#alertNote.empty-state { --empty-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M12 2a6 6 0 0 0-6 6v4l-2 3v2h16v-2l-2-3V8a6 6 0 0 0-6-6Zm-2 17h4a2 2 0 0 1-4 0Z'/%3E%3C/svg%3E"); }
+#memberNote.empty-state { --empty-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm6 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 21v-2a6 6 0 0 1 12 0v2H2Zm13-1v-1a8 8 0 0 0-2-5 5 5 0 0 1 9 3v3h-7Z'/%3E%3C/svg%3E"); }
+.member-picker-empty.empty-state, .calendar-search-results .empty-state { --empty-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M10 3a7 7 0 1 0 4.5 12.4L20 21l1-1-5.6-5.5A7 7 0 0 0 10 3Zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z'/%3E%3C/svg%3E"); }
+.cal-category-empty.empty-state, .dday-empty.empty-state, .cm-list .empty-state,
+.home-schedule-empty.empty-state { --empty-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 2h2v2h6V2h2v2h2a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2h2V2Zm12 7H5v9h14V9Z'/%3E%3C/svg%3E"); }
+.poll-empty.empty-state { --empty-state-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 20h16v2H4v-2Zm2-8h3v6H6v-6Zm5-5h3v11h-3V7Zm5-4h3v15h-3V3Z'/%3E%3C/svg%3E"); }
+.cm-list .empty-state { min-height: 90px; list-style: none; }
+.member-picker-empty.empty-state { min-height: 86px; margin: 5px 0 0; }
+
+@media (max-width: 760px) {
+  .container { padding-right: 17px; padding-left: 17px; }
+  .page-head { padding: 24px 0 22px; text-align: left; }
+  .page-head .eyebrow { font-size: 10px; letter-spacing: 1.3px; }
+  .page-head h1 { margin-top: 3px; font-size: 24px; line-height: 1.25; }
+  .page-head p { margin-top: 5px; font-size: 12.5px; line-height: 1.45; }
+  .section { padding: 32px 0 42px; }
+  .section-title { margin-bottom: 24px; }
+  .section-title h2 { font-size: 24px; }
+  .game-card { padding: 22px 17px; }
+  .game-head h2 { font-size: 21px; }
+  .empty-state { min-height: 100px; padding: 20px !important; }
+}

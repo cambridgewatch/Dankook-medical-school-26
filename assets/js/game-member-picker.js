@@ -97,7 +97,7 @@ window.addEventListener("DOMContentLoaded", () => {
         list.appendChild(item);
       });
 
-      if (!visible.length) list.innerHTML = '<p class="member-picker-empty">검색 결과가 없어요.</p>';
+      if (!visible.length) list.innerHTML = '<p class="member-picker-empty empty-state">검색 결과가 없어요.</p>';
       const rosterSelections = values.filter((name) => roster.includes(name)).length;
       status.textContent = kind === "wheel"
         ? `현재 ${values.length}칸 · 명단에서 ${rosterSelections}번 추가`

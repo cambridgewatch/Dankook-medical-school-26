@@ -133,7 +133,7 @@ window.addEventListener("DOMContentLoaded", () => {
     voteState.clear();
     voterState.clear();
     if (!polls.length) {
-      list.innerHTML = `<p class="game-status">아직 등록된 투표가 없습니다.</p>`;
+      list.innerHTML = `<p class="game-status empty-state poll-empty">아직 등록된 투표가 없습니다.</p>`;
       return;
     }
     list.innerHTML = polls.map((poll) => `<article class="poll-card-shell" id="poll-${poll.id}"></article>`).join("");

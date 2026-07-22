@@ -22,7 +22,7 @@ function ensureOverlay() {
   overlay.id = "gateOverlay";
   overlay.innerHTML = `
     <div class="gate-box">
-      <div class="gate-logo">🔒</div>
+      <div class="gate-logo">${window.dkuIcon?.("lock") || ""}</div>
       <h2>비공개 페이지</h2>
       <p id="gateMsg">로그인이 필요합니다.</p>
       <a id="gateLogin" class="btn btn-primary" href="login.html" style="display:none;">로그인하러 가기</a>

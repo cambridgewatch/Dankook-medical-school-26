@@ -60,7 +60,7 @@ window.addEventListener("DOMContentLoaded", () => {
     spinning = true;
     spinBtn.disabled = true;
     resultEl.textContent = "";
-    infoEl.textContent = "🎲 두구두구두구…";
+  infoEl.textContent = "추첨 중…";
 
     const winner = names[Math.floor(Math.random() * names.length)];
     const reel = buildReel(WIN_IDX + 8); // 전체 인원 셔플로 채움
@@ -82,7 +82,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const done = () => {
       track.removeEventListener("transitionend", done);
-      resultEl.innerHTML = `🎉 당첨: <strong>${esc(winner)}</strong> 🎉`;
+    resultEl.innerHTML = `${window.dkuIcon("target")}<span>당첨</span><strong>${esc(winner)}</strong>`;
       infoEl.textContent = `총 ${names.length}명 참여 · 다시 돌릴 수 있어요!`;
       spinning = false;
       spinBtn.disabled = false;
@@ -156,7 +156,7 @@ window.addEventListener("DOMContentLoaded", () => {
       wheelGroup.style.transform = `rotate(${wheelRot}deg)`;
       const done = () => {
         wheelGroup.removeEventListener("transitionend", done);
-        wheelResult.innerHTML = `🎉 당첨: <strong>${esc(wheelList[w])}</strong> 🎉`;
+    wheelResult.innerHTML = `${window.dkuIcon("target")}<span>당첨</span><strong>${esc(wheelList[w])}</strong>`;
         wheelSpinning = false; wheelSpin.disabled = false;
       };
       wheelGroup.addEventListener("transitionend", done);

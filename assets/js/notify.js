@@ -134,8 +134,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function render() {
     const all = dedupe(alerts).filter((a) => !hiddenSet.has(a.storageId || a.id));
-    if (!all.length) { listEl.innerHTML = ""; noteEl.textContent = "받은 알림이 없습니다."; pagerEl.innerHTML = ""; return; }
+    if (!all.length) { listEl.innerHTML = ""; noteEl.textContent = "받은 알림이 없습니다."; noteEl.classList.add("empty-state"); pagerEl.innerHTML = ""; return; }
     noteEl.textContent = "";
+    noteEl.classList.remove("empty-state");
     const totalPages = Math.ceil(all.length / PER_PAGE);
     if (page > totalPages) page = totalPages;
     const shown = all.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -145,7 +146,7 @@ window.addEventListener("DOMContentLoaded", () => {
       /* 저장된 세부내용이 있거나, 원본에서 가져올 수 있으면 펼치기 가능 */
       const expandable = !!(a.detail && a.detail.trim()) || (a.type === "notice" ? !!a.noticeId : !!a.date);
       const src = a.type === "submission" ? "제출 안내" : (a.type === "calendar" ? "캘린더" : "공지사항");
-      const icon = a.type === "submission" ? "📋" : (a.type === "calendar" ? "📅" : "📢");
+      const icon = a.type === "submission" ? window.dkuIcon("clipboard") : (a.type === "calendar" ? window.dkuIcon("calendar") : window.dkuIcon("megaphone"));
       return `
         <div class="alert-card ${read ? "read" : ""} ${expandable ? "has-detail" : ""}" data-id="${a.id}" data-storage-id="${storageId}" data-source="${a.sourceCollection || "alerts"}" data-loaded="0">
           <div class="alert-head">

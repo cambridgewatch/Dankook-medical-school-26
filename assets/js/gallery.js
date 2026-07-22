@@ -64,7 +64,7 @@ window.addEventListener("DOMContentLoaded", () => {
     let html = `
       <figure>
         <img src="assets/img/photo1.png" alt="의대과잠" loading="lazy" />
-        <figcaption>📸 의대과잠</figcaption>
+        <figcaption>${window.dkuIcon("camera")}<span>의대과잠</span></figcaption>
       </figure>`;
     photos.forEach((p) => {
       const mine = currentUser && currentUser.uid === p.uid;
@@ -79,8 +79,8 @@ window.addEventListener("DOMContentLoaded", () => {
       html += `
         <figure data-id="${p.id}">
           <img src="${photoUrl}" alt="${uploader}님이 올린 사진" loading="lazy" />
-          <figcaption><span class="photo-uploader">🙋 ${uploader}</span>
-            ${mine ? '<button class="del-btn" title="삭제">🗑</button>' : ""}${tagHtml}
+        <figcaption><span class="photo-uploader">${window.dkuIcon("user")} ${uploader}</span>
+          ${mine ? `<button class="del-btn icon-action danger" title="삭제" aria-label="사진 삭제">${window.dkuIcon("trash")}</button>` : ""}${tagHtml}
           </figcaption>
         </figure>`;
     });
@@ -118,7 +118,7 @@ window.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     if (!currentUser) return alert("로그인이 필요합니다.");
     if (!imgbbReady)
-      return alert("⚠️ ImgBB API 키가 아직 설정되지 않았습니다. (firebase-설정안내.md 참고)");
+      return alert("ImgBB API 키가 아직 설정되지 않았습니다. (firebase-설정안내.md 참고)");
     const file = $("#photoFile").files[0];
     const hashtags = normalizeHashtags($("#photoHashtags")?.value || "");
     if (!file) return alert("사진 파일을 선택해 주세요.");

@@ -110,7 +110,7 @@ export function attachmentEditorMarkup(attachments) {
   if (!items.length) return "";
   return items.map((item, index) => `
     <span class="attachment-edit-item">
-      <span>🖼️ ${escapeHtml(item.name)}</span>
+      <span>${window.dkuIcon?.("image") || ""}${escapeHtml(item.name)}</span>
       <button type="button" data-attachment-index="${index}" aria-label="${escapeHtml(item.name)} 첨부 해제">&times;</button>
     </span>`).join("");
 }

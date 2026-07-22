@@ -11,7 +11,7 @@ import {
 import {
   normalizeAttachments, validateAttachmentFiles, uploadAttachmentFiles, deleteAttachmentFiles,
   attachmentMarkup, attachmentEditorMarkup, bindAttachmentOpen, formatAttachmentSize,
-} from "./attachments.js?v=2";
+} from "./attachments.js?v=3";
 
 /* 특정 공지에 연결된 알림 모두 삭제 */
 async function deleteAlertsByNotice(id) {
@@ -88,6 +88,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!notices.length) {
       list.innerHTML = "";
       note.textContent = isAdmin ? "아직 공지가 없어요. 위에서 등록해 보세요." : "등록된 공지가 없습니다.";
+      note.classList.add("empty-state");
       if (pagerEl) pagerEl.innerHTML = "";
       return;
     }
@@ -98,10 +99,12 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!filtered.length) {
       list.innerHTML = "";
       note.textContent = `“${searchEl.value.trim()}” 검색 결과가 없습니다.`;
+      note.classList.add("empty-state");
       if (pagerEl) pagerEl.innerHTML = "";
       return;
     }
     note.textContent = "";
+    note.classList.remove("empty-state");
     const ordered = [...filtered].sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned));
     if (openId && !openHandled) {
       const idx = ordered.findIndex((n) => n.id === openId);
@@ -124,13 +127,13 @@ window.addEventListener("DOMContentLoaded", () => {
           <div class="notice-head">
             <span class="tag ${tag}">${TAG_LABEL[n.tag] || "공지"}</span>
             <span class="nt-title">${esc(n.title)}</span>
-            ${n.pinned && !isAdmin ? `<span class="nt-pinned" title="고정된 공지">📌</span>` : ""}
+          ${n.pinned && !isAdmin ? `<span class="nt-pinned" title="고정된 공지">${window.dkuIcon("pin")}</span>` : ""}
             <span class="nt-date">${date}</span>
             ${hasDetail ? `<span class="nt-chev">▾</span>` : ""}
-            ${isAdmin ? `<button class="notice-pin ${n.pinned ? "active" : ""}" data-id="${n.id}" title="${n.pinned ? "고정 해제" : "공지 고정"}" aria-label="${n.pinned ? "고정 해제" : "공지 고정"}">📌</button>` : ""}
-            ${isAdmin ? `<button class="notice-alert" data-id="${n.id}" data-title="${esc(n.title)}" data-detail="${esc(n.detail || "")}" title="알림 보내기">🔔</button>` : ""}
-            ${isAdmin ? `<button class="notice-edit" data-id="${n.id}" title="수정">✏️</button>` : ""}
-            ${isAdmin ? `<button class="notice-del" data-id="${n.id}" title="삭제">🗑</button>` : ""}
+          ${isAdmin ? `<button class="notice-pin icon-action ${n.pinned ? "active" : ""}" data-id="${n.id}" title="${n.pinned ? "고정 해제" : "공지 고정"}" aria-label="${n.pinned ? "고정 해제" : "공지 고정"}">${window.dkuIcon("pin")}</button>` : ""}
+          ${isAdmin ? `<button class="notice-alert icon-action" data-id="${n.id}" data-title="${esc(n.title)}" data-detail="${esc(n.detail || "")}" title="알림 보내기" aria-label="알림 보내기">${window.dkuIcon("bell")}</button>` : ""}
+          ${isAdmin ? `<button class="notice-edit icon-action" data-id="${n.id}" title="수정" aria-label="수정">${window.dkuIcon("edit")}</button>` : ""}
+          ${isAdmin ? `<button class="notice-del icon-action danger" data-id="${n.id}" title="삭제" aria-label="삭제">${window.dkuIcon("trash")}</button>` : ""}
           </div>
           ${hasDetail ? `<div class="notice-body">${body}</div>` : ""}
         </div>`;
@@ -170,7 +173,7 @@ window.addEventListener("DOMContentLoaded", () => {
         $("#naTag").value = notice.tag || "notice";
         filesInput.value = "";
         renderAttachmentEditor();
-        $("#noticeAdmin h3").textContent = "✏️ 공지 수정";
+    $("#noticeAdmin h3").innerHTML = `${window.dkuIcon("edit", "heading-icon")}공지 수정`;
         $("#naAdd").textContent = "수정 저장";
         adminBar.scrollIntoView({ behavior: "smooth", block: "center" });
         $("#naTitle").focus();
@@ -187,7 +190,7 @@ window.addEventListener("DOMContentLoaded", () => {
         try {
           await deleteAlertsByNotice(b.dataset.id); // 같은 공지의 기존 알림 정리(중복/누적 방지)
           await addDoc(collection(db, "alerts"), { type: "notice", title: b.dataset.title, detail: b.dataset.detail || "", noticeId: b.dataset.id, createdAt: serverTimestamp() });
-          alert("🔔 알림을 보냈어요!");
+          alert("알림을 보냈어요!");
         } catch (err) { alert("알림 실패: " + err.message); }
       });
     });
@@ -267,7 +270,7 @@ window.addEventListener("DOMContentLoaded", () => {
     editingAttachments = [];
     removedAttachments = [];
     renderAttachmentEditor();
-    $("#noticeAdmin h3").textContent = "✏️ 새 공지 작성";
+    $("#noticeAdmin h3").innerHTML = `${window.dkuIcon("edit", "heading-icon")}새 공지 작성`;
     $("#naAdd").textContent = "공지 등록";
   }
 

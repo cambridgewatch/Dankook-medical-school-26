@@ -63,7 +63,7 @@ window.addEventListener("DOMContentLoaded", () => {
     passwordHistoryNote.textContent = "";
     passwordHistoryList.innerHTML = items.map((item) => `
       <div class="password-history-item">
-        <span>🔑</span>
+          <span>${window.dkuIcon("key")}</span>
         <div><strong>${escapeHtml(emailToName(item.email) || "계정")}</strong><small>${item.type === "adminReset" ? "관리자 재설정 · " : "직접 변경 · "}${formatHistoryTime(item.changedAt)}</small></div>
       </div>`).join("");
   };

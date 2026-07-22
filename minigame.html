@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>도구 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=95" />
+<link rel="stylesheet" href="assets/css/style.css?v=96" />
 </head>
 <body class="locked">
 
@@ -50,7 +50,7 @@
       <!-- 게임 1: 랜덤 뽑기 룰렛 -->
       <div class="game-card game-launch-card">
         <div class="game-head">
-          <h2>🎯 랜덤 뽑기 룰렛</h2>
+          <h2><span class="heading-icon" data-icon="target"></span>랜덤 뽑기 룰렛</h2>
           <p>동기 명단 전체에서 한 명을 무작위로 뽑습니다.</p>
         </div>
         <button class="btn btn-solid game-toggle" type="button" aria-expanded="false">열기</button>
@@ -63,14 +63,14 @@
         </div>
 
         <div class="roulette-result" id="rouletteResult"></div>
-        <button class="btn btn-solid roulette-btn" id="spinBtn">돌리기 🎲</button>
+        <button class="btn btn-solid roulette-btn" id="spinBtn"><span data-icon="dice"></span>돌리기</button>
         </div>
       </div>
 
       <!-- 게임 2: 이름 원판 룰렛 -->
       <div class="game-card game-launch-card">
         <div class="game-head">
-          <h2>🎡 이름 원판 룰렛</h2>
+          <h2><span class="heading-icon" data-icon="wheel"></span>이름 원판 룰렛</h2>
           <p>이름을 줄바꿈이나 쉼표로 적으면 자동으로 원판이 만들어져요.</p>
         </div>
         <button class="btn btn-solid game-toggle" type="button" aria-expanded="false">열기</button>
@@ -89,14 +89,14 @@
           </svg>
         </div>
         <div class="wheel-result" id="wheelResult"></div>
-        <button class="btn btn-solid roulette-btn" id="wheelSpin">돌리기 🎡</button>
+        <button class="btn btn-solid roulette-btn" id="wheelSpin"><span data-icon="wheel"></span>돌리기</button>
         </div>
       </div>
 
       <!-- 게임 3: 사다리타기 -->
       <div class="game-card game-launch-card ladder-game">
         <div class="game-head">
-          <h2>🪜 사다리타기</h2>
+          <h2><span class="heading-icon" data-icon="ladder"></span>사다리타기</h2>
           <p>인원을 선택하고 참가자 이름과 도착 결과를 입력하세요.</p>
         </div>
         <button class="btn btn-solid game-toggle" type="button" aria-expanded="false">열기</button>
@@ -144,7 +144,7 @@
       <!-- 게임 4: 팀 나누기 -->
       <div class="game-card game-launch-card team-game">
         <div class="game-head">
-          <h2>👥 팀 나누기</h2>
+          <h2><span class="heading-icon" data-icon="users"></span>팀 나누기</h2>
           <p>참가자를 무작위로 섞어 팀별 인원 차이가 1명 이하가 되도록 나눕니다.</p>
         </div>
         <button class="btn btn-solid game-toggle" type="button" aria-expanded="false">열기</button>
@@ -187,7 +187,7 @@
       <!-- 게임 5: 투표 -->
       <div class="game-card game-launch-card poll-game" id="pollGameCard">
         <div class="game-head">
-          <h2>🗳️ 투표</h2>
+          <h2><span class="heading-icon" data-icon="vote"></span>투표</h2>
           <p>누구나 투표를 만들고 참여할 수 있어요. 작성자는 이름과 함께 표시됩니다.</p>
         </div>
         <button class="btn btn-solid game-toggle" type="button" aria-expanded="false">열기</button>
@@ -238,7 +238,7 @@
     </div>
   </footer>
 
-<script src="assets/js/main.js?v=64"></script>
+<script src="assets/js/main.js?v=65"></script>
   <script src="assets/js/effects3d.js?v=17"></script>
   <script>
     (function () {
@@ -279,12 +279,12 @@
       }
     })();
   </script>
-  <script type="module" src="assets/js/minigame.js?v=34"></script>
+  <script type="module" src="assets/js/minigame.js?v=35"></script>
   <script src="assets/js/ladder.js?v=5"></script>
   <script src="assets/js/teams.js?v=2"></script>
-  <script type="module" src="assets/js/game-member-picker.js?v=3"></script>
-  <script type="module" src="assets/js/polls.js?v=4"></script>
+  <script type="module" src="assets/js/game-member-picker.js?v=4"></script>
+  <script type="module" src="assets/js/polls.js?v=5"></script>
   <script type="module" src="assets/js/alerts.js?v=32"></script>
-  <script type="module" src="assets/js/gate.js?v=22"></script>
+  <script type="module" src="assets/js/gate.js?v=23"></script>
 </body>
 </html>

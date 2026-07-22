@@ -58,7 +58,7 @@ function toast(msg, ok = false) {
 /* 설정 안 된 경우 안내 */
 if (!isConfigured) {
   window.addEventListener("DOMContentLoaded", () => {
-    toast("⚠️ 아직 Firebase 설정이 안 됐습니다. firebase-설정안내.md 파일을 참고해 설정을 완료해 주세요.");
+    toast("아직 Firebase 설정이 안 됐습니다. firebase-설정안내.md 파일을 참고해 설정을 완료해 주세요.");
   });
 }
 
@@ -83,7 +83,7 @@ window.addEventListener("DOMContentLoaded", () => {
   /* 로그인 */
   $("#loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    if (!isConfigured) return toast("⚠️ Firebase 설정을 먼저 완료해 주세요.");
+    if (!isConfigured) return toast("Firebase 설정을 먼저 완료해 주세요.");
     const name = $("#liName").value.trim();
     const pw = $("#liPw").value;
     if (!name || !pw) return toast("이름과 비밀번호를 입력해 주세요.");
