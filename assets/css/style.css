@@ -625,11 +625,11 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .timetable-head span:first-child { border-left: 0; color: var(--gray); }
 .timetable-grid { position: relative; grid-template-rows: repeat(24, 32px); user-select: none; }
 .tt-time {
-  grid-column: 1; display: flex; align-items: center; justify-content: flex-end; gap: 4px;
-  padding: 0 7px 0 3px; color: #8791a0; text-align: right; border-top: 1px solid #edf0f5;
+  grid-column: 1; display: grid; grid-template-columns: 18px 1fr; align-items: start;
+  padding: 2px 8px 0 3px; color: #8791a0; text-align: right; border-top: 1px solid #edf0f5;
 }
-.tt-time b { color: var(--navy); font-size: 10px; line-height: 1; font-weight: 850; }
-.tt-time small { width: 28px; color: #8791a0; font-size: 8px; line-height: 1; letter-spacing: -.2px; }
+.tt-time b { color: var(--navy); font-size: 9px; line-height: 1; font-weight: 850; text-align: left; }
+.tt-time small { color: #8791a0; font-size: 10px; line-height: 1; letter-spacing: 0; }
 .tt-cell { border-left: 1px solid #e4e8ef; border-top: 1px solid #edf0f5; background: #fff; touch-action: none; }
 .tt-cell.hour { border-top-color: #cfd7e3; }
 .tt-cell.selecting { background: #dce9fb; }
@@ -658,9 +658,9 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   }
   .timetable-head span { height: 36px; font-size: 11px; }
   .timetable-grid { grid-template-rows: repeat(24, 24px); }
-  .tt-time { flex-direction: column; justify-content: center; gap: 1px; padding: 0 2px; text-align: center; }
+  .tt-time { grid-template-columns: 12px 1fr; padding: 1px 4px 0 2px; text-align: right; }
   .tt-time b { font-size: 8px; }
-  .tt-time small { width: auto; min-height: 6px; font-size: 6px; }
+  .tt-time small { font-size: 8px; }
   .tt-block { margin: 1px; padding: 3px 16px 2px 4px; border-radius: 5px; font-size: 9px; line-height: 1.1; box-shadow: 0 2px 5px rgba(20,40,70,.14); }
   .tt-block.personal { border-width: 1px; }
   .tt-block strong { font-size: 9px; line-height: 1.15; }
