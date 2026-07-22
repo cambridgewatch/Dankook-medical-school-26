@@ -25,8 +25,11 @@ window.addEventListener("DOMContentLoaded", () => {
   const pagerEl = document.querySelector("#alertPager");
   if (!listEl) return;
 
+  let globalAlerts = [];
+  let submissionAlerts = [];
   let alerts = [];
-  let subscribed = false;
+  let stopGlobal = null;
+  let stopSubmission = null;
   let isAdmin = false;
   let currentUid = "";
   let page = 1;
@@ -44,20 +47,46 @@ window.addEventListener("DOMContentLoaded", () => {
     hiddenSet = getStoredSet(HKEY, currentUid);
     isAdmin = user.email === ADMIN_EMAIL;
     clearBtn.style.display = "inline-block"; // 삭제(모두)는 누구나 가능(비관리자는 본인만 숨김)
-    if (!subscribed) {
-      subscribed = true;
-      onSnapshot(
-        query(collection(db, "alerts"), orderBy("createdAt", "desc"), limit(100)),
-        (snap) => { alerts = snap.docs.map((d) => ({ id: d.id, ...d.data() })); render(); },
-        (err) => { noteEl.textContent = "알림을 불러오지 못했습니다: " + err.message; }
-      );
-    }
+    stopGlobal?.();
+    stopSubmission?.();
+    stopGlobal = onSnapshot(
+      query(collection(db, "alerts"), orderBy("createdAt", "desc"), limit(100)),
+      (snap) => {
+        globalAlerts = snap.docs.map((d) => ({ id: d.id, ...d.data(), storageId: d.id, sourceCollection: "alerts" }));
+        mergeAlerts();
+      },
+      (err) => { noteEl.textContent = "알림을 불러오지 못했습니다: " + err.message; },
+    );
+    stopSubmission = onSnapshot(
+      query(collection(db, "submissionAlerts"), where("recipientEmail", "==", user.email)),
+      (snap) => {
+        submissionAlerts = snap.docs.map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            ...data,
+            storageId: `submission:${d.id}:${data.deliveryId || "1"}`,
+            sourceCollection: "submissionAlerts",
+          };
+        });
+        mergeAlerts();
+      },
+      (err) => { noteEl.textContent = "제출 알림을 불러오지 못했습니다: " + err.message; },
+    );
   });
+
+  function mergeAlerts() {
+    alerts = [...globalAlerts, ...submissionAlerts]
+      .sort((a, b) => timestampMillis(b.createdAt) - timestampMillis(a.createdAt));
+    render();
+  }
 
   function dedupe(list) {
     const seen = new Set(); const out = [];
     for (const a of list) {
-      const key = a.type === "calendar"
+      const key = a.type === "submission"
+        ? `s:${a.checklistId || a.id}`
+        : a.type === "calendar"
         ? `c:${a.calendarEventKey || `${a.date}:${a.text || a.title}`}`
         : `n:${a.noticeId || a.title}`;
       if (seen.has(key)) continue;
@@ -104,46 +133,48 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function render() {
-    const all = dedupe(alerts).filter((a) => !hiddenSet.has(a.id));
+    const all = dedupe(alerts).filter((a) => !hiddenSet.has(a.storageId || a.id));
     if (!all.length) { listEl.innerHTML = ""; noteEl.textContent = "받은 알림이 없습니다."; pagerEl.innerHTML = ""; return; }
     noteEl.textContent = "";
     const totalPages = Math.ceil(all.length / PER_PAGE);
     if (page > totalPages) page = totalPages;
     const shown = all.slice((page - 1) * PER_PAGE, page * PER_PAGE);
     listEl.innerHTML = shown.map((a) => {
-      const read = readSet.has(a.id);
+      const storageId = a.storageId || a.id;
+      const read = a.read === true || readSet.has(storageId);
       /* 저장된 세부내용이 있거나, 원본에서 가져올 수 있으면 펼치기 가능 */
       const expandable = !!(a.detail && a.detail.trim()) || (a.type === "notice" ? !!a.noticeId : !!a.date);
-      const src = a.type === "calendar" ? "학사일정" : "공지사항";
+      const src = a.type === "submission" ? "제출 안내" : (a.type === "calendar" ? "학사일정" : "공지사항");
+      const icon = a.type === "submission" ? "📋" : (a.type === "calendar" ? "📅" : "📢");
       return `
-        <div class="alert-card ${read ? "read" : ""} ${expandable ? "has-detail" : ""}" data-id="${a.id}" data-loaded="0">
+        <div class="alert-card ${read ? "read" : ""} ${expandable ? "has-detail" : ""}" data-id="${a.id}" data-storage-id="${storageId}" data-source="${a.sourceCollection || "alerts"}" data-loaded="0">
           <div class="alert-head">
-            <span class="alert-ic ${a.type === "calendar" ? "cal" : "notice"}">${a.type === "calendar" ? "📅" : "📢"}</span>
+            <span class="alert-ic ${a.type === "calendar" ? "cal" : (a.type === "submission" ? "submission" : "notice")}">${icon}</span>
             <div class="alert-txt">
               <strong>${esc(a.title)}</strong>
               <small>${src} · ${fmt(a.createdAt)}</small>
             </div>
             ${expandable ? `<span class="alert-chev">▾</span>` : `<span class="alert-dot"></span>`}
-            <button class="alert-del ${isAdmin ? "alert-del-global" : ""}" data-id="${a.id}" title="${isAdmin ? "모두에게서 삭제" : "내 목록에서 삭제"}" style="border:0;background:none;cursor:pointer;font-size:12px;font-weight:700;opacity:.72;white-space:nowrap;">${isAdmin ? "모두에게서 삭제" : "삭제"}</button>
+            <button class="alert-del ${isAdmin ? "alert-del-global" : ""}" data-id="${a.id}" data-storage-id="${storageId}" data-source="${a.sourceCollection || "alerts"}" title="${isAdmin ? "모두에게서 삭제" : "내 목록에서 삭제"}" style="border:0;background:none;cursor:pointer;font-size:12px;font-weight:700;opacity:.72;white-space:nowrap;">${isAdmin ? "모두에게서 삭제" : "삭제"}</button>
           </div>
           ${expandable ? `<div class="alert-body">불러오는 중…</div>` : ""}
         </div>`;
     }).join("");
 
-    const byId = Object.fromEntries(shown.map((a) => [a.id, a]));
+    const byId = Object.fromEntries(shown.map((a) => [a.storageId || a.id, a]));
 
     listEl.querySelectorAll(".alert-card").forEach((card) => {
       card.querySelector(".alert-head").addEventListener("click", async (e) => {
         if (e.target.closest(".alert-del")) return;
-        const id = card.dataset.id;
-        if (!readSet.has(id)) { readSet.add(id); saveRead(); card.classList.add("read"); }
+        const storageId = card.dataset.storageId || card.dataset.id;
+        if (!readSet.has(storageId)) { readSet.add(storageId); saveRead(); card.classList.add("read"); }
         if (!card.classList.contains("has-detail")) return;
         const willOpen = !card.classList.contains("open");
         if (willOpen) {
           /* 펼칠 때마다 원본에서 최신 내용을 다시 가져옴(내용 변경 반영) */
           const bodyEl = card.querySelector(".alert-body");
           bodyEl.textContent = "불러오는 중…";
-          const d = await fetchDetail(byId[id]);
+          const d = await fetchDetail(byId[storageId]);
           bodyEl.innerHTML = d && d.trim() ? esc(d).replace(/\n/g, "<br>") : "세부 내용이 없습니다.";
         }
         card.classList.toggle("open");
@@ -155,13 +186,15 @@ window.addEventListener("DOMContentLoaded", () => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
         const id = b.dataset.id;
+        const storageId = b.dataset.storageId || id;
+        const sourceCollection = b.dataset.source || "alerts";
         if (isAdmin) {
           if (!confirm("이 알림을 모든 사람의 알림 목록에서 삭제할까요?")) return;
-          try { await deleteDoc(doc(db, "alerts", id)); }
+          try { await deleteDoc(doc(db, sourceCollection, id)); }
           catch (err) { alert("삭제에 실패했습니다: " + err.message); }
         } else {
           if (!confirm("내 알림 목록에서만 삭제할까요?")) return;
-          hiddenSet.add(id); saveHidden(); render();
+          hiddenSet.add(storageId); saveHidden(); render();
         }
       });
     });
@@ -174,11 +207,15 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!confirm("모든 알림을 삭제할까요? (모든 사람의 알림이 사라집니다)")) return;
       try {
         const snap = await getDocs(collection(db, "alerts"));
-        await Promise.all(snap.docs.map((d) => deleteDoc(doc(db, "alerts", d.id))));
+        const submissionSnap = await getDocs(collection(db, "submissionAlerts"));
+        await Promise.all([
+          ...snap.docs.map((d) => deleteDoc(doc(db, "alerts", d.id))),
+          ...submissionSnap.docs.map((d) => deleteDoc(doc(db, "submissionAlerts", d.id))),
+        ]);
       } catch (e) { alert("삭제 실패: " + e.message); }
     } else {
       if (!confirm("내 화면에서 모든 알림을 지울까요? (다른 사람에겐 그대로 남아요)")) return;
-      dedupe(alerts).forEach((a) => hiddenSet.add(a.id));
+      dedupe(alerts).forEach((a) => hiddenSet.add(a.storageId || a.id));
       saveHidden();
       render();
     }
@@ -186,5 +223,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function esc(s) {
     return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  }
+
+  function timestampMillis(value) {
+    if (value?.toMillis) return value.toMillis();
+    if (value?.seconds) return Number(value.seconds) * 1000;
+    return 0;
   }
 });

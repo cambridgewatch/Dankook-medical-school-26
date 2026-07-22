@@ -5,7 +5,7 @@
 import { db, auth, isConfigured } from "./firebase-init.js?v=12";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  collection, query, orderBy, limit, onSnapshot,
+  collection, query, orderBy, limit, onSnapshot, where,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const RKEY = "alertsRead";
@@ -34,14 +34,18 @@ window.addEventListener("DOMContentLoaded", () => {
   const badge = li.querySelector("#bellBadge");
   bellBtn.addEventListener("click", () => { location.href = "notify.html"; });
 
-  let alerts = [];
-  let subscribed = false;
+  let globalAlerts = [];
+  let submissionAlerts = [];
+  let stopGlobal = null;
+  let stopSubmission = null;
   let currentUid = "";
 
   function dedupe(list) {
     const seen = new Set(); const out = [];
     for (const a of list) {
-      const key = a.type === "calendar"
+      const key = a.type === "submission"
+        ? `s:${a.checklistId || a.id}`
+        : a.type === "calendar"
         ? `c:${a.calendarEventKey || `${a.date}:${a.text || a.title}`}`
         : `n:${a.noticeId || a.title}`;
       if (seen.has(key)) continue;
@@ -52,23 +56,53 @@ window.addEventListener("DOMContentLoaded", () => {
   function updateBadge() {
     const read = getStoredSet(RKEY, currentUid);
     const hidden = getStoredSet("alertsHidden", currentUid);
-    const unread = dedupe(alerts).filter((a) => !read.has(a.id) && !hidden.has(a.id)).length;
+    const alerts = [...globalAlerts, ...submissionAlerts]
+      .sort((a, b) => timestampMillis(b.createdAt) - timestampMillis(a.createdAt));
+    const unread = dedupe(alerts).filter((a) => a.read !== true && !read.has(a.storageId || a.id) && !hidden.has(a.storageId || a.id)).length;
     if (unread > 0) { badge.textContent = unread > 99 ? "99+" : unread; badge.style.display = "grid"; }
     else badge.style.display = "none";
   }
 
   onAuthStateChanged(auth, (user) => {
+    stopGlobal?.();
+    stopSubmission?.();
+    stopGlobal = null;
+    stopSubmission = null;
+    globalAlerts = [];
+    submissionAlerts = [];
     if (!user) { currentUid = ""; li.style.display = "none"; return; }
     currentUid = user.uid;
     li.style.display = "";
     updateBadge();
-    if (!subscribed) {
-      subscribed = true;
-      onSnapshot(
-        query(collection(db, "alerts"), orderBy("createdAt", "desc"), limit(100)),
-        (snap) => { alerts = snap.docs.map((d) => ({ id: d.id, ...d.data() })); updateBadge(); },
-        () => {}
-      );
-    }
+    stopGlobal = onSnapshot(
+      query(collection(db, "alerts"), orderBy("createdAt", "desc"), limit(100)),
+      (snap) => {
+        globalAlerts = snap.docs.map((d) => ({ id: d.id, ...d.data(), storageId: d.id, sourceCollection: "alerts" }));
+        updateBadge();
+      },
+      () => {},
+    );
+    stopSubmission = onSnapshot(
+      query(collection(db, "submissionAlerts"), where("recipientEmail", "==", user.email)),
+      (snap) => {
+        submissionAlerts = snap.docs.map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            ...data,
+            storageId: `submission:${d.id}:${data.deliveryId || "1"}`,
+            sourceCollection: "submissionAlerts",
+          };
+        });
+        updateBadge();
+      },
+      () => {},
+    );
   });
+
+  function timestampMillis(value) {
+    if (value?.toMillis) return value.toMillis();
+    if (value?.seconds) return Number(value.seconds) * 1000;
+    return 0;
+  }
 });

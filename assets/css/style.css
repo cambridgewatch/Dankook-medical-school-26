@@ -1587,6 +1587,10 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .submission-checklist-body { padding: 4px 18px 18px; border-top: 1px solid #edf1f5; }
 .submission-checklist-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; }
 .submission-checklist-toolbar span { color: var(--gray); font-size: 12px; }
+.submission-checklist-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.submission-notify { padding: 7px 10px; border: 1px solid #bfd3e7; border-radius: 9px; background: #eef6fd; color: var(--navy); font: inherit; font-size: 12px; font-weight: 850; cursor: pointer; }
+.submission-notify:hover:not(:disabled) { border-color: var(--blue); background: #e4f1fc; }
+.submission-notify:disabled { opacity: .48; cursor: default; }
 .submission-delete { border: 0; background: transparent; color: #b52f38; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
 .submission-students { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .submission-student { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 11px 12px; border: 1px solid var(--line); border-radius: 11px; background: #fafbfd; cursor: pointer; transition: .15s; }
@@ -1604,6 +1608,8 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .home-submission-create > div { grid-template-columns: 1fr; }
   .home-submission-create .btn { width: 100%; }
   .submission-students { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .submission-checklist-toolbar { align-items: stretch; flex-direction: column; }
+  .submission-checklist-actions { justify-content: space-between; }
 }
 @media (max-width: 430px) {
   .home-submission-private { display: none; }
@@ -1638,6 +1644,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   display: grid; place-items: center; font-size: 18px; background: var(--blue-light);
 }
 .alert-ic.cal { background: #e0f5ea; }
+.alert-ic.submission { background: #fff3d9; }
 .alert-txt { flex: 1; min-width: 0; }
 .alert-txt strong { display: block; color: var(--ink); font-size: 16px; font-weight: 700; }
 .alert-card.read .alert-txt strong { font-weight: 500; }

@@ -1,9 +1,9 @@
 /* 관리자 홈: 학생별 제출 체크리스트 */
-import { auth, db, ADMIN_EMAIL } from "./firebase-init.js?v=12";
+import { auth, db, ADMIN_EMAIL, nameToEmail } from "./firebase-init.js?v=12";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query,
-  serverTimestamp, updateDoc,
+  addDoc, collection, doc, getDocs, onSnapshot, orderBy, query,
+  serverTimestamp, updateDoc, where, writeBatch,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (char) => ({
@@ -123,7 +123,12 @@ window.addEventListener("DOMContentLoaded", () => {
           <div class="submission-checklist-body">
             <div class="submission-checklist-toolbar">
               <span>체크하면 제출, 해제하면 미제출로 저장됩니다.</span>
-              <button class="submission-delete" type="button" data-delete-id="${escapeHtml(checklist.id)}">항목 삭제</button>
+              <div class="submission-checklist-actions">
+                <button class="submission-notify" type="button" data-notify-id="${escapeHtml(checklist.id)}"${submittedCount >= members.length ? " disabled" : ""}>
+                  🔔 미제출 ${Math.max(0, members.length - submittedCount)}명에게 알림
+                </button>
+                <button class="submission-delete" type="button" data-delete-id="${escapeHtml(checklist.id)}">항목 삭제</button>
+              </div>
             </div>
             <div class="submission-students">${studentRows || "<p>등록된 학생이 없습니다.</p>"}</div>
           </div>
@@ -135,6 +140,9 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     list.querySelectorAll("button[data-delete-id]").forEach((button) => {
       button.addEventListener("click", () => removeChecklist(button.dataset.deleteId));
+    });
+    list.querySelectorAll("button[data-notify-id]").forEach((button) => {
+      button.addEventListener("click", () => notifyPendingMembers(button));
     });
   }
 
@@ -148,6 +156,14 @@ window.addEventListener("DOMContentLoaded", () => {
         [`submitted.${memberId}`]: checkbox.checked,
         updatedAt: serverTimestamp(),
       });
+      if (checkbox.checked) {
+        await updateDoc(doc(db, "submissionAlerts", alertDocumentId(checklistId, memberId)), {
+          read: true,
+          readAt: serverTimestamp(),
+        }).catch((error) => {
+          if (error?.code !== "not-found") console.warn("제출 알림 자동 확인 처리 실패", error);
+        });
+      }
       label?.classList.toggle("is-submitted", checkbox.checked);
       if (stateText) stateText.textContent = checkbox.checked ? "제출" : "미제출";
     } catch (error) {
@@ -162,10 +178,63 @@ window.addEventListener("DOMContentLoaded", () => {
     const checklist = checklists.find((item) => item.id === checklistId);
     if (!confirm(`“${checklist?.title || "이 체크리스트"}” 항목을 삭제할까요?`)) return;
     try {
-      await deleteDoc(doc(db, "submissionChecklists", checklistId));
+      const relatedAlerts = await getDocs(query(
+        collection(db, "submissionAlerts"),
+        where("checklistId", "==", checklistId),
+      ));
+      const batch = writeBatch(db);
+      batch.delete(doc(db, "submissionChecklists", checklistId));
+      relatedAlerts.docs.forEach((item) => batch.delete(item.ref));
+      await batch.commit();
     } catch (error) {
       showError(`체크리스트를 삭제하지 못했습니다: ${error.message}`);
     }
+  }
+
+  async function notifyPendingMembers(button) {
+    const checklistId = button.dataset.notifyId;
+    const checklist = checklists.find((item) => item.id === checklistId);
+    if (!checklist) return;
+    const submitted = checklist.submitted && typeof checklist.submitted === "object"
+      ? checklist.submitted : {};
+    const pending = members.filter((member) => submitted[member.id] !== true);
+    if (!pending.length) return alert("현재 미제출로 표시된 학생이 없습니다.");
+    if (!confirm(`미제출 ${pending.length}명에게 “${checklist.title || "제출 안내"}” 알림을 보낼까요?`)) return;
+
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = "알림 보내는 중…";
+    try {
+      const batch = writeBatch(db);
+      pending.forEach((member) => {
+        const alertRef = doc(db, "submissionAlerts", alertDocumentId(checklistId, member.id));
+        batch.set(alertRef, {
+          type: "submission",
+          checklistId,
+          recipientMemberId: member.id,
+          recipientEmail: nameToEmail(member.name.normalize("NFC")),
+          title: `미제출 안내 · ${checklist.title || "제출 항목"}`,
+          detail: `“${checklist.title || "제출 항목"}”이 아직 미제출로 표시되어 있습니다. 이미 제출했다면 관리자에게 확인해 주세요.`,
+          deliveryId: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          read: false,
+          readAt: null,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
+      });
+      await batch.commit();
+      status.classList.remove("error");
+      status.textContent = `미제출 ${pending.length}명에게 알림을 보냈습니다.`;
+    } catch (error) {
+      showError(`알림을 보내지 못했습니다: ${error.message}`);
+    } finally {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+
+  function alertDocumentId(checklistId, memberId) {
+    return `${checklistId}_${memberId}`;
   }
 
   function showError(message) {

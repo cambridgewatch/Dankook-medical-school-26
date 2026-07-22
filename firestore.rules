@@ -48,6 +48,13 @@ service cloud.firestore {
       allow read, create, update, delete: if isAdmin();
     }
 
+    match /submissionAlerts/{alertId} {
+      allow read: if isAdmin()
+        || (isApproved()
+          && request.auth.token.email == resource.data.recipientEmail);
+      allow create, update, delete: if isAdmin();
+    }
+
     match /notices/{noticeId} {
       allow read: if canUseSite();
       allow create, update, delete: if isAdmin();
