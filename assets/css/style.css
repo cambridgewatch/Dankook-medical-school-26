@@ -1468,6 +1468,43 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .wheel-result { min-height: 30px; margin: 12px 0 8px; font-size: 20px; color: var(--navy); }
 .wheel-result strong { color: var(--gold); font-size: 24px; }
 
+/* 미니게임 공통 동기 선택기 */
+.member-picker {
+  max-width: 620px; margin: 12px auto 18px; overflow: hidden;
+  border: 1px solid #dce6f1; border-radius: 14px; background: #f8fbff; text-align: left;
+}
+.member-picker > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 48px; padding: 11px 14px; color: var(--navy); cursor: pointer; list-style: none;
+}
+.member-picker > summary::-webkit-details-marker { display: none; }
+.member-picker > summary::after { content: "+"; color: var(--blue); font-size: 20px; font-weight: 500; }
+.member-picker[open] > summary::after { content: "−"; }
+.member-picker > summary span { font-size: 13px; font-weight: 850; }
+.member-picker > summary small { margin-left: auto; color: var(--gray); font-size: 10px; font-weight: 600; }
+.member-picker-mount { padding: 0 13px 13px; border-top: 1px solid #e5ecf4; }
+.member-picker-toolbar { display: flex; align-items: center; gap: 8px; padding-top: 12px; }
+.member-picker-toolbar label { flex: 1; }
+.member-picker-toolbar input {
+  width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px;
+  background: #fff; color: var(--ink); font: inherit; font-size: 12px; outline: none;
+}
+.member-picker-toolbar input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
+.member-picker-clear {
+  flex: 0 0 auto; padding: 9px 10px; border: 1px solid #d5e0eb; border-radius: 10px;
+  background: #fff; color: #64758a; font: inherit; font-size: 11px; font-weight: 750; cursor: pointer;
+}
+.member-picker-guide { margin: 9px 1px 8px; color: var(--gray); font-size: 10px; }
+.member-picker-list { display: flex; flex-wrap: wrap; gap: 6px; max-height: 174px; overflow-y: auto; padding: 2px 1px; }
+.member-picker-person { display: inline-flex; align-items: stretch; border: 1px solid #d8e2ed; border-radius: 999px; overflow: hidden; background: #fff; }
+.member-picker-person.selected { border-color: #83aeda; background: #eaf4ff; }
+.member-picker-person button { border: 0; background: transparent; color: #425268; font: inherit; cursor: pointer; }
+.member-picker-name { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 6px 10px; font-size: 12px; font-weight: 750; }
+.member-picker-name span { color: var(--blue); font-size: 10px; font-weight: 900; }
+.member-picker-minus { width: 29px; border-right: 1px solid #cbdbea !important; color: #55708d !important; font-size: 16px !important; }
+.member-picker-status, .member-picker-state { margin: 9px 1px 0; color: var(--gray); font-size: 10px; }
+.member-picker-empty { width: 100%; padding: 10px; color: var(--gray); font-size: 11px; text-align: center; }
+
 /* 사다리타기 */
 .ladder-game { max-width: 900px; }
 .ladder-controls {
@@ -1545,6 +1582,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 }
 .team-config input:focus, .team-name-inputs input:focus, .team-separate-box textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-light); }
 .team-name-section { margin-top: 20px; padding: 18px; border: 1px solid #e1e8f0; border-radius: 16px; background: #f9fbfd; }
+.team-name-section .member-picker { margin-top: 0; }
 .team-section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .team-section-head strong { color: var(--navy); font-size: 14px; }
 .team-section-head small { color: var(--gray); font-size: 11px; }
@@ -1624,6 +1662,11 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .poll-people strong { color: var(--ink); }
 .poll-people p + p { margin-top: 6px; }
 @media (max-width: 620px) {
+  .member-picker > summary { align-items: flex-start; flex-wrap: wrap; }
+  .member-picker > summary small { width: 100%; margin: -6px 24px 0 0; }
+  .member-picker-toolbar { align-items: stretch; flex-direction: column; }
+  .member-picker-clear { width: 100%; }
+  .member-picker-list { max-height: 210px; }
   .ladder-game { padding-left: 18px; padding-right: 18px; }
   .ladder-scroll-hint { display: block; }
   .ladder-play { align-items: stretch; flex-direction: column; }
