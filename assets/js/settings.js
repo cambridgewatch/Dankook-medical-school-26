@@ -210,7 +210,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (!name) return showResetMessage("비밀번호를 재설정할 회원 이름을 입력해 주세요.");
     if (nameToEmail(name) === ADMIN_EMAIL) return showResetMessage("관리자 계정은 위의 본인 비밀번호 변경 기능을 이용해 주세요.");
-    if (temporary.length < 7) return showResetMessage("임시 비밀번호는 7자 이상이어야 합니다.");
+    if (temporary.length < 8) return showResetMessage("임시 비밀번호는 8자 이상이어야 합니다.");
     if (temporary !== confirmTemporary) return showResetMessage("임시 비밀번호가 서로 일치하지 않습니다.");
     if (!adminPassword) return showResetMessage("관리자 본인 확인을 위해 현재 비밀번호를 입력해 주세요.");
     if (!confirm(`${name} 회원의 비밀번호를 재설정할까요? 기존 비밀번호로는 더 이상 로그인할 수 없습니다.`)) return;
@@ -285,7 +285,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const next = $("#newPassword").value.normalize("NFC");
     const confirmNext = $("#newPasswordConfirm").value.normalize("NFC");
     if (!current) return showMessage("현재 비밀번호를 입력해 주세요.");
-    if (next.length < 7) return showMessage("새 비밀번호는 7자 이상이어야 합니다.");
+    if (next.length < 8) return showMessage("새 비밀번호는 8자 이상이어야 합니다.");
     if (next === "dku1842") return showMessage("공용 초기 비밀번호는 새 비밀번호로 다시 사용할 수 없습니다.");
     if (next !== confirmNext) return showMessage("새 비밀번호가 일치하지 않습니다.");
 
