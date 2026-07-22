@@ -103,7 +103,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const calendarSearchResults = document.querySelector("#calendarSearchResults");
   const categoryRange = document.querySelector("#calCategoryRange");
 
-  const today = new Date();
+  const koreaDateParts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
+    }).formatToParts(new Date()).filter((part) => part.type !== "literal").map((part) => [part.type, part.value])
+  );
+  const today = new Date(
+    Number(koreaDateParts.year),
+    Number(koreaDateParts.month) - 1,
+    Number(koreaDateParts.day)
+  );
   const todayKey = key(today.getFullYear(), today.getMonth(), today.getDate());
   let view = new Date(today.getFullYear(), today.getMonth(), 1);
   let custom = {};        // Firestore 일정 { "YYYY-MM-DD": [{id,text,type}] }

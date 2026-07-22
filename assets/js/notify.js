@@ -144,7 +144,7 @@ window.addEventListener("DOMContentLoaded", () => {
       const read = a.read === true || readSet.has(storageId);
       /* 저장된 세부내용이 있거나, 원본에서 가져올 수 있으면 펼치기 가능 */
       const expandable = !!(a.detail && a.detail.trim()) || (a.type === "notice" ? !!a.noticeId : !!a.date);
-      const src = a.type === "submission" ? "제출 안내" : (a.type === "calendar" ? "학사일정" : "공지사항");
+      const src = a.type === "submission" ? "제출 안내" : (a.type === "calendar" ? "캘린더" : "공지사항");
       const icon = a.type === "submission" ? "📋" : (a.type === "calendar" ? "📅" : "📢");
       return `
         <div class="alert-card ${read ? "read" : ""} ${expandable ? "has-detail" : ""}" data-id="${a.id}" data-storage-id="${storageId}" data-source="${a.sourceCollection || "alerts"}" data-loaded="0">
