@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="assets/img/logo.png" />
   <title>설정 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=1"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=77" />
+<link rel="stylesheet" href="assets/css/style.css?v=78" />
 </head>
 <body class="locked">
   <header class="site-header">
@@ -295,6 +295,17 @@
         <div class="settings-card-head">
           <div><span class="settings-icon">🔑</span><h2>비밀번호 변경</h2></div>
         </div>
+        <div class="initial-password-form-notice" id="initialPasswordFormNotice" hidden>
+          <div class="initial-password-form-copy">
+            <strong>먼저 Google Form을 작성해 주세요</strong>
+            <p>26학번 자료실에 사용할 Google 계정 이메일을 제출한 뒤 비밀번호를 변경할 수 있습니다.</p>
+          </div>
+          <a href="https://forms.gle/fdeYEGvLf576DXLS8" target="_blank" rel="noopener noreferrer">Google Form 작성하기 ↗</a>
+          <label class="initial-password-form-check">
+            <input type="checkbox" id="initialFormCompleted" />
+            <span>Google Form 제출을 완료했습니다.</span>
+          </label>
+        </div>
         <div class="settings-form">
           <label for="currentPassword">현재 비밀번호</label>
           <input type="password" id="currentPassword" autocomplete="current-password" placeholder="현재 비밀번호" />
@@ -376,7 +387,7 @@
 
 <script src="assets/js/main.js?v=58"></script>
   <script src="assets/js/password-visibility.js?v=1"></script>
-  <script type="module" src="assets/js/settings.js?v=14"></script>
+  <script type="module" src="assets/js/settings.js?v=15"></script>
   <script type="module" src="assets/js/alerts.js?v=31"></script>
   <script type="module" src="assets/js/gate.js?v=21"></script>
 </body>

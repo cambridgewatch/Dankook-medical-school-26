@@ -31,6 +31,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const passwordHistoryNote = $("#passwordHistoryNote");
   const memberPasswordResetPanel = $("#memberPasswordResetPanel");
   const passwordChangeCard = $("#passwordChangeCard");
+  const initialPasswordFormNotice = $("#initialPasswordFormNotice");
+  const initialFormCompleted = $("#initialFormCompleted");
+  const changePasswordButton = $("#changePasswordBtn");
+  let initialPasswordFlow = false;
   let user = null;
   let passwordHistorySubscribed = false;
 
@@ -110,10 +114,18 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   if (new URLSearchParams(location.search).get("security") === "change-password") {
+    initialPasswordFlow = true;
     passwordChangeCard?.classList.add("initial-password-required");
+    initialPasswordFormNotice.hidden = false;
+    changePasswordButton.disabled = true;
     showMessage("공용 초기 비밀번호는 외부인이 추측하기 쉽습니다. 아래에서 본인만 아는 비밀번호로 변경해 주세요.");
     document.querySelector("#currentPassword")?.focus();
   }
+
+  initialFormCompleted?.addEventListener("change", () => {
+    if (!initialPasswordFlow) return;
+    changePasswordButton.disabled = !initialFormCompleted.checked;
+  });
 
   const updateAutoStatus = (enabled) => {
     status.textContent = enabled
@@ -238,6 +250,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   $("#changePasswordBtn").addEventListener("click", async () => {
     if (!user) return showMessage("로그인 후 이용해 주세요.");
+    if (initialPasswordFlow && !initialFormCompleted?.checked) {
+      return showMessage("Google Form을 제출한 뒤 완료 확인에 체크해 주세요.");
+    }
     const current = $("#currentPassword").value.normalize("NFC");
     const next = $("#newPassword").value.normalize("NFC");
     const confirmNext = $("#newPasswordConfirm").value.normalize("NFC");
@@ -269,6 +284,9 @@ window.addEventListener("DOMContentLoaded", () => {
       $("#toggleNewPasswordBtn").textContent = "비밀번호 표시";
       $("#toggleNewPasswordBtn").setAttribute("aria-pressed", "false");
       passwordChangeCard?.classList.remove("initial-password-required");
+      initialPasswordFlow = false;
+      initialPasswordFormNotice.hidden = true;
+      initialFormCompleted.checked = false;
       if (new URLSearchParams(location.search).get("security") === "change-password") {
         history.replaceState(null, "", "settings.html");
       }

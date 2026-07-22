@@ -1605,6 +1605,57 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   border-color: #df3f4b;
   box-shadow: 0 0 0 7px rgba(223, 63, 75, .11), 0 14px 34px rgba(142, 30, 40, .14);
 }
+.initial-password-form-notice[hidden] { display: none !important; }
+.initial-password-form-notice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px 18px;
+  align-items: center;
+  margin: 18px 0 20px;
+  padding: 17px 18px;
+  border: 1px solid #e26770;
+  border-radius: 14px;
+  background: #fff4f5;
+}
+.initial-password-form-copy strong { display: block; color: #a82430; font-size: 15px; }
+.settings-card .initial-password-form-copy p { margin: 4px 0 0; color: #765057; font-size: 13px; line-height: 1.55; }
+.initial-password-form-notice > a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: #c93440;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.initial-password-form-notice > a:hover { background: #a82430; }
+.initial-password-form-check {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-top: 13px;
+  border-top: 1px solid #efc4c8;
+  color: #762b32;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.initial-password-form-check input { width: 18px; height: 18px; accent-color: #c93440; cursor: pointer; }
+.settings-card.initial-password-required #changePasswordBtn:disabled {
+  background: #b7bcc5;
+  border-color: #b7bcc5;
+  color: #fff;
+  cursor: not-allowed;
+  opacity: .72;
+}
+@media (max-width: 600px) {
+  .initial-password-form-notice { grid-template-columns: 1fr; padding: 16px; }
+  .initial-password-form-notice > a { width: 100%; box-sizing: border-box; }
+}
 .settings-card-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
 .settings-card-head > div { display: flex; align-items: center; gap: 10px; }
 .settings-card h2 { color: var(--navy); font-size: 19px; margin: 0; }
