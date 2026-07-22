@@ -123,7 +123,109 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* 상단 헤더의 단웅이 3D 걷기 애니메이션 */
   if (savedMascotDisplay) mountHeaderMascots();
+
+  /* 모바일: 화면 최상단에서 아래로 당겨 새로고침 */
+  installPullToRefresh();
 });
+
+function installPullToRefresh() {
+  const isTouchDevice = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+  if (!isTouchDevice || !document.body) return;
+
+  const indicator = document.createElement("div");
+  indicator.className = "pull-refresh-indicator";
+  indicator.setAttribute("role", "status");
+  indicator.setAttribute("aria-live", "polite");
+  indicator.innerHTML = `
+    <span class="pull-refresh-icon" aria-hidden="true">↓</span>
+    <span class="pull-refresh-text">당겨서 새로고침</span>`;
+  document.body.appendChild(indicator);
+  document.documentElement.classList.add("pull-refresh-enabled");
+
+  const text = indicator.querySelector(".pull-refresh-text");
+  const threshold = 110;
+  let startX = 0;
+  let startY = 0;
+  let tracking = false;
+  let pulling = false;
+  let ready = false;
+  let refreshing = false;
+
+  const setPull = (rawDistance) => {
+    const progress = Math.min(1, rawDistance / threshold);
+    const visualDistance = Math.min(84, rawDistance * .48);
+    indicator.style.setProperty("--pull-distance", `${visualDistance}px`);
+    indicator.style.setProperty("--pull-progress", String(progress));
+    indicator.classList.add("active");
+    const nextReady = rawDistance >= threshold;
+    if (nextReady !== ready) {
+      ready = nextReady;
+      indicator.classList.toggle("ready", ready);
+      text.textContent = ready ? "놓아서 새로고침" : "당겨서 새로고침";
+      if (ready && navigator.vibrate) navigator.vibrate(12);
+    }
+  };
+
+  const reset = () => {
+    tracking = false;
+    pulling = false;
+    ready = false;
+    indicator.classList.remove("active", "ready");
+    indicator.style.setProperty("--pull-distance", "0px");
+    indicator.style.setProperty("--pull-progress", "0");
+    text.textContent = "당겨서 새로고침";
+  };
+
+  document.addEventListener("touchstart", (event) => {
+    if (refreshing || event.touches.length !== 1 || window.scrollY > 0) return;
+    const touch = event.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+    tracking = true;
+    pulling = false;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", (event) => {
+    if (!tracking || refreshing || event.touches.length !== 1) return;
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - startX;
+    const deltaY = touch.clientY - startY;
+
+    if (deltaY <= 0 || Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (pulling) reset();
+      return;
+    }
+    if (window.scrollY > 0) {
+      reset();
+      return;
+    }
+    if (deltaY < 7) return;
+
+    event.preventDefault();
+    pulling = true;
+    setPull(deltaY);
+  }, { passive: false });
+
+  const finish = () => {
+    if (!tracking || refreshing) return;
+    if (!pulling || !ready) {
+      reset();
+      return;
+    }
+    refreshing = true;
+    tracking = false;
+    indicator.classList.add("loading");
+    indicator.style.setProperty("--pull-distance", "62px");
+    text.textContent = "새로고침 중…";
+    if (navigator.vibrate) navigator.vibrate(20);
+    window.setTimeout(() => window.location.reload(), 280);
+  };
+
+  document.addEventListener("touchend", finish, { passive: true });
+  document.addEventListener("touchcancel", () => {
+    if (!refreshing) reset();
+  }, { passive: true });
+}
 
 /* 설치형 웹앱(PWA) 등록 */
 if ("serviceWorker" in navigator && location.protocol !== "file:") {

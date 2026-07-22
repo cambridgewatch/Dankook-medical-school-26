@@ -11,7 +11,7 @@
   <title>단국대학교 의과대학 26학번</title>
   <meta name="description" content="단국대학교 의과대학 26학번 공식 홈페이지" />
   <script src="assets/js/session-hint.js?v=1"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=76" />
+<link rel="stylesheet" href="assets/css/style.css?v=80" />
 </head>
 <body class="locked">
 
@@ -78,6 +78,32 @@
         </div>
         <div class="home-schedule-list" id="homeAssignmentDdays"><p>과제를 불러오는 중…</p></div>
       </article>
+    </div>
+  </section>
+
+  <section class="home-submission-section" id="homeSubmissionSection" aria-label="제출 체크리스트" hidden>
+    <div class="container">
+      <div class="home-submission-panel">
+        <div class="home-submission-heading">
+          <div>
+            <small>ADMIN ONLY</small>
+            <h2>제출 체크리스트</h2>
+            <p>과제나 설문 항목을 만들고 학생별 제출 여부를 관리하세요.</p>
+          </div>
+          <span class="home-submission-private">관리자 전용</span>
+        </div>
+
+        <form class="home-submission-create" id="submissionChecklistForm">
+          <label for="submissionChecklistTitle">새 체크리스트</label>
+          <div>
+            <input id="submissionChecklistTitle" type="text" maxlength="80" placeholder="예: 해부학 과제 1차 제출" autocomplete="off" required />
+            <button class="btn btn-primary" type="submit">항목 만들기</button>
+          </div>
+        </form>
+
+        <p class="home-submission-status" id="submissionChecklistStatus" role="status">체크리스트를 불러오는 중…</p>
+        <div class="home-submission-list" id="submissionChecklistList"></div>
+      </div>
     </div>
   </section>
 
@@ -154,10 +180,11 @@
     </div>
   </footer>
 
-<script src="assets/js/main.js?v=58"></script>
+<script src="assets/js/main.js?v=59"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
   <script type="module" src="assets/js/home-polls.js?v=1"></script>
   <script type="module" src="assets/js/home-dday.js?v=1"></script>
+  <script type="module" src="assets/js/home-submissions.js?v=1"></script>
   <script type="module" src="assets/js/alerts.js?v=31"></script>
   <script type="module" src="assets/js/gate.js?v=21"></script>
 </body>

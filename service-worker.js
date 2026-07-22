@@ -1,4 +1,4 @@
-const CACHE_NAME = "dku-med26-app-v21";
+const CACHE_NAME = "dku-med26-app-v22";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -21,7 +21,8 @@ const APP_SHELL = [
   "./assets/js/firebase-init.js",
   "./assets/js/attachments.js",
   "./assets/js/teams.js",
-  "./assets/js/home-polls.js"
+  "./assets/js/home-polls.js",
+  "./assets/js/home-submissions.js"
 ];
 
 self.addEventListener("install", (event) => {

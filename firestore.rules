@@ -44,6 +44,10 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    match /submissionChecklists/{checklistId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
     match /notices/{noticeId} {
       allow read: if canUseSite();
       allow create, update, delete: if isAdmin();
