@@ -164,6 +164,12 @@ function installPullToRefresh() {
     const visualDistance = Math.min(88, rawDistance * .68);
     indicator.style.setProperty("--pull-distance", `${visualDistance}px`);
     indicator.style.setProperty("--pull-progress", String(progress));
+    indicator.style.setProperty("--pull-angle", `${progress * 180}deg`);
+    indicator.style.setProperty("--pull-ring", `${progress * 360}deg`);
+    indicator.style.setProperty("--pull-border-alpha", String(progress * .24));
+    indicator.style.setProperty("--pull-handle-scale", String(.72 + progress * .28));
+    indicator.style.setProperty("--pull-scale", String(.94 + progress * .06));
+    indicator.style.setProperty("--pull-opacity", String(Math.min(1, progress * 1.7)));
     indicator.classList.add("active");
     const nextReady = rawDistance >= threshold;
     if (!nextReady && !ready) hint.textContent = "조금 더 아래로 당겨주세요";
@@ -183,6 +189,12 @@ function installPullToRefresh() {
     indicator.classList.remove("active", "ready");
     indicator.style.setProperty("--pull-distance", "0px");
     indicator.style.setProperty("--pull-progress", "0");
+    indicator.style.setProperty("--pull-angle", "0deg");
+    indicator.style.setProperty("--pull-ring", "0deg");
+    indicator.style.setProperty("--pull-border-alpha", "0");
+    indicator.style.setProperty("--pull-handle-scale", ".72");
+    indicator.style.setProperty("--pull-scale", ".94");
+    indicator.style.setProperty("--pull-opacity", "0");
     text.textContent = "당겨서 새로고침";
     hint.textContent = "최신 내용을 확인해 보세요";
   };
@@ -227,6 +239,8 @@ function installPullToRefresh() {
     tracking = false;
     indicator.classList.add("loading");
     indicator.style.setProperty("--pull-distance", "76px");
+    indicator.style.setProperty("--pull-scale", "1");
+    indicator.style.setProperty("--pull-opacity", "1");
     text.textContent = "새로고침 중…";
     hint.textContent = "최신 내용을 불러오고 있어요";
     if (navigator.vibrate) navigator.vibrate(20);
