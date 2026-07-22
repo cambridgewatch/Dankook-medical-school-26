@@ -101,6 +101,8 @@ window.addEventListener("DOMContentLoaded", () => {
       const submitted = checklist.submitted && typeof checklist.submitted === "object"
         ? checklist.submitted : {};
       const submittedCount = members.filter((member) => submitted[member.id] === true).length;
+      const pendingMembers = members.filter((member) => submitted[member.id] !== true);
+      const mentionText = pendingMembers.map((member) => `@${member.name}`).join(" ");
       const studentRows = members.map((member) => {
         const checked = submitted[member.id] === true;
         return `
@@ -124,11 +126,18 @@ window.addEventListener("DOMContentLoaded", () => {
             <div class="submission-checklist-toolbar">
               <span>체크하면 제출, 해제하면 미제출로 저장됩니다.</span>
               <div class="submission-checklist-actions">
+                <button class="submission-mentions" type="button" data-mentions-id="${escapeHtml(checklist.id)}"${pendingMembers.length ? "" : " disabled"}>
+                  @ 미제출자 명단
+                </button>
                 <button class="submission-notify" type="button" data-notify-id="${escapeHtml(checklist.id)}"${submittedCount >= members.length ? " disabled" : ""}>
                   🔔 미제출 ${Math.max(0, members.length - submittedCount)}명에게 알림
                 </button>
                 <button class="submission-delete" type="button" data-delete-id="${escapeHtml(checklist.id)}">항목 삭제</button>
               </div>
+            </div>
+            <div class="submission-mention-box" data-mention-box="${escapeHtml(checklist.id)}" hidden>
+              <p>${escapeHtml(mentionText || "미제출자가 없습니다.")}</p>
+              <button type="button" data-copy-mentions="${escapeHtml(checklist.id)}" data-mention-text="${escapeHtml(mentionText)}"${mentionText ? "" : " disabled"}>복사</button>
             </div>
             <div class="submission-students">${studentRows || "<p>등록된 학생이 없습니다.</p>"}</div>
           </div>
@@ -143,6 +152,12 @@ window.addEventListener("DOMContentLoaded", () => {
     });
     list.querySelectorAll("button[data-notify-id]").forEach((button) => {
       button.addEventListener("click", () => notifyPendingMembers(button));
+    });
+    list.querySelectorAll("button[data-mentions-id]").forEach((button) => {
+      button.addEventListener("click", () => toggleMentions(button));
+    });
+    list.querySelectorAll("button[data-copy-mentions]").forEach((button) => {
+      button.addEventListener("click", () => copyMentions(button));
     });
   }
 
@@ -231,6 +246,42 @@ window.addEventListener("DOMContentLoaded", () => {
       button.disabled = false;
       button.textContent = originalText;
     }
+  }
+
+  function toggleMentions(button) {
+    const box = list.querySelector(`[data-mention-box="${cssEscape(button.dataset.mentionsId)}"]`);
+    if (!box) return;
+    box.hidden = !box.hidden;
+    button.classList.toggle("active", !box.hidden);
+  }
+
+  async function copyMentions(button) {
+    const mentionText = button.dataset.mentionText || "";
+    if (!mentionText) return;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(mentionText);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = mentionText;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+      }
+      const original = button.textContent;
+      button.textContent = "복사됨 ✓";
+      window.setTimeout(() => { button.textContent = original; }, 1300);
+    } catch (error) {
+      showError(`명단을 복사하지 못했습니다: ${error.message}`);
+    }
+  }
+
+  function cssEscape(value) {
+    if (window.CSS?.escape) return window.CSS.escape(value);
+    return String(value).replace(/[^a-zA-Z0-9_-]/g, "\\$&");
   }
 
   function alertDocumentId(checklistId, memberId) {

@@ -1672,10 +1672,19 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .submission-checklist-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; }
 .submission-checklist-toolbar span { color: var(--gray); font-size: 12px; }
 .submission-checklist-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.submission-mentions { padding: 7px 10px; border: 1px solid #d8c9ea; border-radius: 9px; background: #f8f3fc; color: #65358a; font: inherit; font-size: 12px; font-weight: 850; cursor: pointer; }
+.submission-mentions:hover:not(:disabled), .submission-mentions.active { border-color: #9d74bd; background: #f0e6f8; }
+.submission-mentions:disabled { opacity: .45; cursor: default; }
 .submission-notify { padding: 7px 10px; border: 1px solid #bfd3e7; border-radius: 9px; background: #eef6fd; color: var(--navy); font: inherit; font-size: 12px; font-weight: 850; cursor: pointer; }
 .submission-notify:hover:not(:disabled) { border-color: var(--blue); background: #e4f1fc; }
 .submission-notify:disabled { opacity: .48; cursor: default; }
 .submission-delete { border: 0; background: transparent; color: #b52f38; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.submission-mention-box { display: flex; align-items: center; gap: 12px; margin: 0 0 13px; padding: 12px 13px; border: 1px solid #ded2ea; border-radius: 12px; background: linear-gradient(135deg, #faf6fd, #f6f2fb); }
+.submission-mention-box[hidden] { display: none !important; }
+.submission-mention-box p { flex: 1; min-width: 0; color: #4d315f; font-size: 13px; font-weight: 750; line-height: 1.7; overflow-wrap: anywhere; }
+.submission-mention-box button { flex: 0 0 auto; padding: 7px 11px; border: 0; border-radius: 9px; background: #6e438c; color: #fff; font: inherit; font-size: 12px; font-weight: 850; cursor: pointer; }
+.submission-mention-box button:hover { background: #56336f; }
+.submission-mention-box button:disabled { opacity: .45; cursor: default; }
 .submission-students { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .submission-student { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 11px 12px; border: 1px solid var(--line); border-radius: 11px; background: #fafbfd; cursor: pointer; transition: .15s; }
 .submission-student:hover { border-color: #b9cde2; background: #f4f8fc; }
@@ -1694,6 +1703,10 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .submission-students { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .submission-checklist-toolbar { align-items: stretch; flex-direction: column; }
   .submission-checklist-actions { justify-content: space-between; }
+  .submission-checklist-actions { flex-wrap: wrap; }
+  .submission-mentions, .submission-notify { flex: 1 1 auto; }
+  .submission-mention-box { align-items: stretch; flex-direction: column; }
+  .submission-mention-box button { width: 100%; }
 }
 @media (max-width: 430px) {
   .home-submission-private { display: none; }
