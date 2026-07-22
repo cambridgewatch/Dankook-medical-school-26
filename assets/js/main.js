@@ -137,12 +137,20 @@ function installPullToRefresh() {
   indicator.setAttribute("role", "status");
   indicator.setAttribute("aria-live", "polite");
   indicator.innerHTML = `
-    <span class="pull-refresh-icon" aria-hidden="true">↓</span>
-    <span class="pull-refresh-text">당겨서 새로고침</span>`;
+    <span class="pull-refresh-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M12 4v13m0 0 5-5m-5 5-5-5" />
+      </svg>
+    </span>
+    <span class="pull-refresh-copy">
+      <strong class="pull-refresh-text">당겨서 새로고침</strong>
+      <small class="pull-refresh-hint">최신 내용을 확인해 보세요</small>
+    </span>`;
   document.body.appendChild(indicator);
   document.documentElement.classList.add("pull-refresh-enabled");
 
   const text = indicator.querySelector(".pull-refresh-text");
+  const hint = indicator.querySelector(".pull-refresh-hint");
   const threshold = 110;
   let startX = 0;
   let startY = 0;
@@ -153,15 +161,17 @@ function installPullToRefresh() {
 
   const setPull = (rawDistance) => {
     const progress = Math.min(1, rawDistance / threshold);
-    const visualDistance = Math.min(84, rawDistance * .48);
+    const visualDistance = Math.min(88, rawDistance * .68);
     indicator.style.setProperty("--pull-distance", `${visualDistance}px`);
     indicator.style.setProperty("--pull-progress", String(progress));
     indicator.classList.add("active");
     const nextReady = rawDistance >= threshold;
+    if (!nextReady && !ready) hint.textContent = "조금 더 아래로 당겨주세요";
     if (nextReady !== ready) {
       ready = nextReady;
       indicator.classList.toggle("ready", ready);
       text.textContent = ready ? "놓아서 새로고침" : "당겨서 새로고침";
+      hint.textContent = ready ? "손을 놓으면 바로 갱신돼요" : "조금 더 아래로 당겨주세요";
       if (ready && navigator.vibrate) navigator.vibrate(12);
     }
   };
@@ -174,6 +184,7 @@ function installPullToRefresh() {
     indicator.style.setProperty("--pull-distance", "0px");
     indicator.style.setProperty("--pull-progress", "0");
     text.textContent = "당겨서 새로고침";
+    hint.textContent = "최신 내용을 확인해 보세요";
   };
 
   document.addEventListener("touchstart", (event) => {
@@ -215,8 +226,9 @@ function installPullToRefresh() {
     refreshing = true;
     tracking = false;
     indicator.classList.add("loading");
-    indicator.style.setProperty("--pull-distance", "62px");
+    indicator.style.setProperty("--pull-distance", "76px");
     text.textContent = "새로고침 중…";
+    hint.textContent = "최신 내용을 불러오고 있어요";
     if (navigator.vibrate) navigator.vibrate(20);
     window.setTimeout(() => window.location.reload(), 280);
   };
