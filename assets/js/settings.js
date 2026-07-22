@@ -32,7 +32,11 @@ window.addEventListener("DOMContentLoaded", () => {
   const memberPasswordResetPanel = $("#memberPasswordResetPanel");
   const passwordChangeCard = $("#passwordChangeCard");
   const initialPasswordFormNotice = $("#initialPasswordFormNotice");
+  const initialPasswordFormCheck = $("#initialPasswordFormCheck");
   const initialFormCompleted = $("#initialFormCompleted");
+  const resourceFormTitle = $("#resourceFormTitle");
+  const resourceFormDescription = $("#resourceFormDescription");
+  const resourceFormLink = $("#resourceFormLink");
   const changePasswordButton = $("#changePasswordBtn");
   let initialPasswordFlow = false;
   let user = null;
@@ -116,7 +120,11 @@ window.addEventListener("DOMContentLoaded", () => {
   if (new URLSearchParams(location.search).get("security") === "change-password") {
     initialPasswordFlow = true;
     passwordChangeCard?.classList.add("initial-password-required");
-    initialPasswordFormNotice.hidden = false;
+    initialPasswordFormNotice.classList.add("is-required");
+    initialPasswordFormCheck.hidden = false;
+    resourceFormTitle.textContent = "먼저 Google Form을 작성해 주세요";
+    resourceFormDescription.textContent = "26학번 자료실에 사용할 Google 계정 이메일을 제출한 뒤 비밀번호를 변경할 수 있습니다.";
+    resourceFormLink.textContent = "Google Form 작성하기 ↗";
     changePasswordButton.disabled = true;
     showMessage("공용 초기 비밀번호는 외부인이 추측하기 쉽습니다. 아래에서 본인만 아는 비밀번호로 변경해 주세요.");
     document.querySelector("#currentPassword")?.focus();
@@ -285,8 +293,12 @@ window.addEventListener("DOMContentLoaded", () => {
       $("#toggleNewPasswordBtn").setAttribute("aria-pressed", "false");
       passwordChangeCard?.classList.remove("initial-password-required");
       initialPasswordFlow = false;
-      initialPasswordFormNotice.hidden = true;
+      initialPasswordFormNotice.classList.remove("is-required");
+      initialPasswordFormCheck.hidden = true;
       initialFormCompleted.checked = false;
+      resourceFormTitle.textContent = "자료실에 추가할 이메일이 있나요?";
+      resourceFormDescription.textContent = "Google Form을 이미 작성했다면, 자료실에 추가할 이메일이 있는 경우에만 다시 제출해 주세요.";
+      resourceFormLink.textContent = "추가 이메일 제출하기 ↗";
       if (new URLSearchParams(location.search).get("security") === "change-password") {
         history.replaceState(null, "", "settings.html");
       }
