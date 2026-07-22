@@ -247,13 +247,20 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     shell.querySelector(".poll-close")?.addEventListener("click", async () => {
-      if (!confirm("투표를 종료할까요? 종료 후에는 모두에게 결과가 공개됩니다.")) return;
+      if (!(await window.dkuConfirm("투표를 종료할까요? 종료 후에는 모두에게 결과가 공개됩니다.", {
+        title: "투표 종료",
+        confirmText: "종료",
+      }))) return;
       try { await updateDoc(doc(db, "polls", poll.id), { closed: true, closedAt: serverTimestamp() }); }
       catch (err) { alert("종료 실패: " + err.message); }
     });
     shell.querySelector(".poll-edit")?.addEventListener("click", () => openEditor(poll));
     shell.querySelector(".poll-delete")?.addEventListener("click", async () => {
-      if (!confirm("이 투표와 모든 투표 기록을 삭제할까요?")) return;
+      if (!(await window.dkuConfirm("이 투표와 모든 투표 기록을 삭제할까요?", {
+        title: "투표 삭제",
+        confirmText: "삭제",
+        danger: true,
+      }))) return;
       try {
         const [voteSnap, voterSnap] = await Promise.all([
           getDocs(collection(db, "polls", poll.id, "votes")),

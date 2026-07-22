@@ -61,7 +61,11 @@ window.addEventListener("DOMContentLoaded", () => {
       </div>`).join("");
     grid.querySelectorAll(".mem-del").forEach((b) => {
       b.addEventListener("click", async () => {
-        if (!confirm("이 이름을 명단에서 삭제할까요?")) return;
+        if (!(await window.dkuConfirm("이 이름을 명단에서 삭제할까요?", {
+          title: "명단에서 삭제",
+          confirmText: "삭제",
+          danger: true,
+        }))) return;
         try { await deleteDoc(doc(db, "members", b.dataset.id)); }
         catch (err) { alert("삭제 실패: " + err.message); }
       });

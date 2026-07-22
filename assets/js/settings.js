@@ -31,6 +31,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const passwordHistoryList = $("#passwordHistoryList");
   const passwordHistoryNote = $("#passwordHistoryNote");
   const memberPasswordResetPanel = $("#memberPasswordResetPanel");
+  const adminSettingsGroup = $("#adminSettingsGroup");
   const passwordChangeCard = $("#passwordChangeCard");
   const initialPasswordFormNotice = $("#initialPasswordFormNotice");
   const initialPasswordFormCheck = $("#initialPasswordFormCheck");
@@ -170,6 +171,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     if (setupRequired) activateInitialPasswordFlow();
     if (user?.email === ADMIN_EMAIL && !passwordHistorySubscribed) {
+      adminSettingsGroup.hidden = false;
       memberPasswordResetPanel.hidden = false;
       passwordHistoryPanel.hidden = false;
       passwordHistorySubscribed = true;
@@ -213,7 +215,11 @@ window.addEventListener("DOMContentLoaded", () => {
     if (temporary.length < 8) return showResetMessage("임시 비밀번호는 8자 이상이어야 합니다.");
     if (temporary !== confirmTemporary) return showResetMessage("임시 비밀번호가 서로 일치하지 않습니다.");
     if (!adminPassword) return showResetMessage("관리자 본인 확인을 위해 현재 비밀번호를 입력해 주세요.");
-    if (!confirm(`${name} 회원의 비밀번호를 재설정할까요? 기존 비밀번호로는 더 이상 로그인할 수 없습니다.`)) return;
+    if (!(await window.dkuConfirm(`${name} 회원의 비밀번호를 재설정할까요? 기존 비밀번호로는 더 이상 로그인할 수 없습니다.`, {
+      title: "회원 비밀번호 재설정",
+      confirmText: "재설정",
+      danger: true,
+    }))) return;
 
     button.disabled = true;
     try {
@@ -356,7 +362,10 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   $("#settingsLogoutBtn").addEventListener("click", async () => {
-    if (!confirm("이 기기에서 로그아웃할까요?")) return;
+    if (!(await window.dkuConfirm("이 기기에서 로그아웃할까요?", {
+      title: "로그아웃",
+      confirmText: "로그아웃",
+    }))) return;
     safeRemove(sessionStorage, "dkuSessionKnown");
     safeRemove(localStorage, "dkuSessionKnown");
     safeRemove(sessionStorage, INITIAL_SETUP_KEY);

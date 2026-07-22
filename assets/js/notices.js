@@ -180,7 +180,10 @@ window.addEventListener("DOMContentLoaded", () => {
     list.querySelectorAll(".notice-alert").forEach((b) => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
-        if (!confirm("이 공지를 알림으로 보낼까요?")) return;
+        if (!(await window.dkuConfirm("이 공지를 알림으로 보낼까요?", {
+          title: "공지 알림 보내기",
+          confirmText: "보내기",
+        }))) return;
         try {
           await deleteAlertsByNotice(b.dataset.id); // 같은 공지의 기존 알림 정리(중복/누적 방지)
           await addDoc(collection(db, "alerts"), { type: "notice", title: b.dataset.title, detail: b.dataset.detail || "", noticeId: b.dataset.id, createdAt: serverTimestamp() });
@@ -192,7 +195,11 @@ window.addEventListener("DOMContentLoaded", () => {
     list.querySelectorAll(".notice-del").forEach((b) => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
-        if (!confirm("이 공지를 삭제할까요?")) return;
+        if (!(await window.dkuConfirm("이 공지를 삭제할까요?", {
+          title: "공지 삭제",
+          confirmText: "삭제",
+          danger: true,
+        }))) return;
         try {
           const notice = notices.find((item) => item.id === b.dataset.id);
           await deleteDoc(doc(db, "notices", b.dataset.id));

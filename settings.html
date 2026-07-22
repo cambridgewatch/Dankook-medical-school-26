@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>설정 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=93" />
+<link rel="stylesheet" href="assets/css/style.css?v=95" />
 </head>
 <body class="locked">
   <header class="site-header">
@@ -45,6 +45,8 @@
 
   <section class="section">
     <div class="container settings-wrap">
+      <section class="settings-group screen" aria-labelledby="screenSettingsTitle">
+        <div class="settings-group-title"><span>🎨</span><div><h2 id="screenSettingsTitle">화면</h2><p>색상과 상단 캐릭터 표시를 설정합니다.</p></div></div>
       <div class="settings-card">
         <div class="settings-card-head">
           <div><span class="settings-icon">🎨</span><h2>배너 색상</h2></div>
@@ -68,7 +70,10 @@
         <p>사이트 위쪽에서 걸어다니는 단웅이와 단비를 표시합니다. 이 설정은 현재 기기에 저장됩니다.</p>
         <div class="settings-status on" id="mascotDisplayStatus"></div>
       </div>
+      </section>
 
+      <section class="settings-group guide" aria-labelledby="guideSettingsTitle">
+        <div class="settings-group-title"><span>📖</span><div><h2 id="guideSettingsTitle">사용 안내</h2><p>홈페이지의 기능과 이용 방법을 확인합니다.</p></div></div>
       <details class="settings-card settings-guide">
         <summary>
           <span class="settings-icon">?</span>
@@ -302,7 +307,10 @@
           </div>
         </div>
       </details>
+      </section>
 
+      <section class="settings-group account" aria-labelledby="accountSettingsTitle">
+        <div class="settings-group-title"><span>👤</span><div><h2 id="accountSettingsTitle">계정</h2><p>로그인 유지, 비밀번호와 로그아웃을 관리합니다.</p></div></div>
       <div class="settings-card">
         <div class="settings-card-head">
           <div><span class="settings-icon">✓</span><h2>로그인 유지</h2></div>
@@ -345,6 +353,17 @@
         </div>
       </div>
 
+      <div class="settings-card danger-zone">
+        <div>
+          <h2>로그아웃</h2>
+          <p>현재 기기에서 계정 연결을 종료합니다.</p>
+        </div>
+        <button class="btn settings-logout" id="settingsLogoutBtn">로그아웃</button>
+      </div>
+      </section>
+
+      <section class="settings-group admin" id="adminSettingsGroup" aria-labelledby="adminSettingsTitle" hidden>
+        <div class="settings-group-title"><span>🛡️</span><div><h2 id="adminSettingsTitle">관리자 기능</h2><p>회원 관리와 홈페이지 데이터를 관리합니다.</p></div></div>
       <details class="settings-card settings-guide" id="memberPasswordResetPanel" hidden>
         <summary>
           <span class="settings-icon">🛟</span>
@@ -415,14 +434,7 @@
           <p class="admin-backup-status" id="adminBackupStatus" role="status" aria-live="polite"></p>
         </div>
       </details>
-
-      <div class="settings-card danger-zone">
-        <div>
-          <h2>로그아웃</h2>
-          <p>현재 기기에서 계정 연결을 종료합니다.</p>
-        </div>
-        <button class="btn settings-logout" id="settingsLogoutBtn">로그아웃</button>
-      </div>
+      </section>
     </div>
   </section>
 
@@ -438,10 +450,10 @@
     </div>
   </footer>
 
-<script src="assets/js/main.js?v=63"></script>
+<script src="assets/js/main.js?v=64"></script>
   <script src="assets/js/password-visibility.js?v=1"></script>
-  <script type="module" src="assets/js/settings.js?v=17"></script>
-  <script type="module" src="assets/js/admin-backup.js?v=1"></script>
+  <script type="module" src="assets/js/settings.js?v=18"></script>
+  <script type="module" src="assets/js/admin-backup.js?v=2"></script>
   <script type="module" src="assets/js/alerts.js?v=32"></script>
   <script type="module" src="assets/js/gate.js?v=22"></script>
 </body>

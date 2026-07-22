@@ -189,7 +189,11 @@ window.addEventListener("DOMContentLoaded", () => {
       block.innerHTML = `<strong>${escapeHtml(entry.subject)}</strong><small>${timeText(entry.startSlot)}–${timeText(entry.endSlot)}</small>${canDelete ? '<button type="button" aria-label="수업 삭제">×</button>' : ""}`;
       block.querySelector("button")?.addEventListener("click", async (event) => {
         event.stopPropagation();
-        if (!confirm(`${entry.subject} 수업을 삭제할까요?`)) return;
+        if (!(await window.dkuConfirm(`${entry.subject} 수업을 삭제할까요?`, {
+          title: "수업 삭제",
+          confirmText: "삭제",
+          danger: true,
+        }))) return;
         try {
           const ref = entry.scope === "global"
             ? doc(db, "timetableGlobal", entry.id)

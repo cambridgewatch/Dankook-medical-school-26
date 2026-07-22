@@ -1,5 +1,114 @@
 /* 단국대 의대 26학번 — 공통 스크립트 */
 
+function ensureFeedbackRoot() {
+  let root = document.querySelector("#dkuToastRoot");
+  if (!root) {
+    root = document.createElement("div");
+    root.id = "dkuToastRoot";
+    root.className = "dku-toast-root";
+    root.setAttribute("aria-live", "polite");
+    root.setAttribute("aria-atomic", "false");
+    document.body.appendChild(root);
+  }
+  return root;
+}
+
+function feedbackType(message) {
+  const text = String(message || "");
+  if (/실패|오류|못했|할 수 없|않습니다|없습니다|필요합니다|빠를 수|선택해 주세요|입력해 주세요|설정되지/.test(text)) return "error";
+  if (/완료|성공|보냈|올렸|저장했|삭제했|투표했|수정했|변경되|등록했|추가했/.test(text)) return "success";
+  return "info";
+}
+
+window.dkuToast = function dkuToast(message, options = {}) {
+  const type = options.type || feedbackType(message);
+  const toast = document.createElement("div");
+  toast.className = `dku-toast ${type}`;
+  toast.setAttribute("role", type === "error" ? "alert" : "status");
+  const icon = type === "success" ? "✓" : (type === "error" ? "!" : "i");
+  toast.innerHTML = `<span class="dku-toast-icon" aria-hidden="true">${icon}</span><p></p><div class="dku-toast-actions"></div>`;
+  toast.querySelector("p").textContent = String(message || "");
+  const actions = toast.querySelector(".dku-toast-actions");
+  let dismissed = false;
+  const dismiss = () => {
+    if (dismissed) return;
+    dismissed = true;
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 180);
+  };
+
+  if (type === "error" && options.retry !== false) {
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.textContent = options.retryLabel || "다시 시도";
+    retry.addEventListener("click", () => {
+      dismiss();
+      if (typeof options.onRetry === "function") options.onRetry();
+      else location.reload();
+    });
+    actions.appendChild(retry);
+  }
+
+  const close = document.createElement("button");
+  close.type = "button";
+  close.className = "dku-toast-close";
+  close.setAttribute("aria-label", "알림 닫기");
+  close.textContent = "×";
+  close.addEventListener("click", dismiss);
+  actions.appendChild(close);
+  ensureFeedbackRoot().appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("show"));
+  const duration = options.duration ?? (type === "error" ? 7000 : 3600);
+  if (duration > 0) setTimeout(dismiss, duration);
+  return toast;
+};
+
+let dkuConfirmSequence = 0;
+
+window.dkuConfirm = function dkuConfirm(message, options = {}) {
+  return new Promise((resolve) => {
+    const previousFocus = document.activeElement;
+    const overlay = document.createElement("div");
+    const titleId = `dkuConfirmTitle${++dkuConfirmSequence}`;
+    overlay.className = "dku-confirm-overlay";
+    overlay.innerHTML = `<div class="dku-confirm" role="dialog" aria-modal="true" aria-labelledby="${titleId}">
+      <span class="dku-confirm-icon" aria-hidden="true">${options.danger ? "!" : "?"}</span>
+      <div><h2 id="${titleId}"></h2><p></p></div>
+      <div class="dku-confirm-actions"><button type="button" class="cancel">${options.cancelText || "취소"}</button><button type="button" class="confirm">${options.confirmText || "확인"}</button></div>
+    </div>`;
+    overlay.querySelector("h2").textContent = options.title || (options.danger ? "삭제 확인" : "확인");
+    overlay.querySelector("p").textContent = String(message || "");
+    const confirmButton = overlay.querySelector(".confirm");
+    if (options.danger) confirmButton.classList.add("danger");
+
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      document.removeEventListener("keydown", onKeydown);
+      overlay.classList.remove("show");
+      setTimeout(() => overlay.remove(), 160);
+      previousFocus?.focus?.();
+      resolve(value);
+    };
+    const onKeydown = (event) => {
+      if (event.key === "Escape") finish(false);
+      if (event.key === "Enter" && document.activeElement === confirmButton) finish(true);
+    };
+    overlay.querySelector(".cancel").addEventListener("click", () => finish(false));
+    confirmButton.addEventListener("click", () => finish(true));
+    overlay.addEventListener("click", (event) => { if (event.target === overlay) finish(false); });
+    document.addEventListener("keydown", onKeydown);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("show"));
+    confirmButton.focus();
+  });
+};
+
+window.alert = function styledAlert(message) {
+  window.dkuToast(message);
+};
+
 const BANNER_COLOR_KEY = "dkuBannerColor";
 const DEFAULT_BANNER_COLOR = "#6fa8d6";
 const storageGet = (key) => { try { return localStorage.getItem(key); } catch { return null; } };

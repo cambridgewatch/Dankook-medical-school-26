@@ -592,7 +592,11 @@ document.addEventListener("DOMContentLoaded", () => {
     cmList.querySelectorAll(".ev-del").forEach((b) => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
-        if (!confirm("이 일정을 삭제할까요?")) return;
+        if (!(await window.dkuConfirm("이 일정을 삭제할까요?", {
+          title: "일정 삭제",
+          confirmText: "삭제",
+          danger: true,
+        }))) return;
         try {
           const event = eventsOf(activeKey).find((item) => item.eventKey === b.dataset.key);
           if (!event) return;
@@ -625,7 +629,10 @@ document.addEventListener("DOMContentLoaded", () => {
     cmList.querySelectorAll(".ev-alert").forEach((b) => {
       b.addEventListener("click", async (e) => {
         e.stopPropagation();
-        if (!confirm("이 일정을 알림으로 보낼까요?")) return;
+        if (!(await window.dkuConfirm("이 일정을 알림으로 보낼까요?", {
+          title: "일정 알림 보내기",
+          confirmText: "보내기",
+        }))) return;
         try {
           await deleteCalAlerts(activeKey, b.dataset.text, b.dataset.key); // 같은 일정의 기존 알림 정리
           await addDoc(collection(db, "alerts"), {

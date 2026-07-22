@@ -105,7 +105,11 @@ window.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", async (e) => {
         e.stopPropagation();
         const fig = btn.closest("figure");
-        if (!confirm("이 사진을 삭제할까요?")) return;
+        if (!(await window.dkuConfirm("이 사진을 삭제할까요?", {
+          title: "사진 삭제",
+          confirmText: "삭제",
+          danger: true,
+        }))) return;
         try {
           await deleteDoc(doc(db, "photos", fig.dataset.id));
         } catch (err) {

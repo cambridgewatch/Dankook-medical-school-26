@@ -171,7 +171,11 @@ fileInput?.addEventListener("change", async () => {
 restoreButton?.addEventListener("click", async () => {
   if (!selectedBackup) return;
   const total = validateBackup(selectedBackup);
-  if (!confirm(`${total}개 문서를 복원할까요?\n\n같은 문서가 있으면 백업 내용으로 병합되며, 현재 자료는 일괄 삭제되지 않습니다.`)) return;
+  if (!(await window.dkuConfirm(`${total}개 문서를 복원할까요?\n\n같은 문서가 있으면 백업 내용으로 병합되며, 현재 자료는 일괄 삭제되지 않습니다.`, {
+    title: "백업 복원",
+    confirmText: "복원",
+    danger: true,
+  }))) return;
   restoreButton.disabled = true;
   chooseButton.disabled = true;
   showStatus("데이터를 복원하는 중입니다. 이 화면을 닫지 마세요.");

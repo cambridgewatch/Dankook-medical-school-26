@@ -189,11 +189,19 @@ window.addEventListener("DOMContentLoaded", () => {
         const storageId = b.dataset.storageId || id;
         const sourceCollection = b.dataset.source || "alerts";
         if (isAdmin) {
-          if (!confirm("이 알림을 모든 사람의 알림 목록에서 삭제할까요?")) return;
+          if (!(await window.dkuConfirm("이 알림을 모든 사람의 알림 목록에서 삭제할까요?", {
+            title: "모두에게서 삭제",
+            confirmText: "삭제",
+            danger: true,
+          }))) return;
           try { await deleteDoc(doc(db, sourceCollection, id)); }
           catch (err) { alert("삭제에 실패했습니다: " + err.message); }
         } else {
-          if (!confirm("내 알림 목록에서만 삭제할까요?")) return;
+          if (!(await window.dkuConfirm("내 알림 목록에서만 삭제할까요?", {
+            title: "내 알림 삭제",
+            confirmText: "삭제",
+            danger: true,
+          }))) return;
           hiddenSet.add(storageId); saveHidden(); render();
         }
       });
@@ -204,7 +212,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   clearBtn.addEventListener("click", async () => {
     if (isAdmin) {
-      if (!confirm("모든 알림을 삭제할까요? (모든 사람의 알림이 사라집니다)")) return;
+      if (!(await window.dkuConfirm("모든 알림을 삭제할까요? 모든 사람의 알림 목록에서 사라집니다.", {
+        title: "모든 알림 삭제",
+        confirmText: "모두 삭제",
+        danger: true,
+      }))) return;
       try {
         const snap = await getDocs(collection(db, "alerts"));
         const submissionSnap = await getDocs(collection(db, "submissionAlerts"));
@@ -214,7 +226,11 @@ window.addEventListener("DOMContentLoaded", () => {
         ]);
       } catch (e) { alert("삭제 실패: " + e.message); }
     } else {
-      if (!confirm("내 화면에서 모든 알림을 지울까요? (다른 사람에겐 그대로 남아요)")) return;
+      if (!(await window.dkuConfirm("내 화면에서 모든 알림을 지울까요? 다른 사람의 알림에는 영향을 주지 않습니다.", {
+        title: "내 알림 모두 삭제",
+        confirmText: "모두 삭제",
+        danger: true,
+      }))) return;
       dedupe(alerts).forEach((a) => hiddenSet.add(a.storageId || a.id));
       saveHidden();
       render();

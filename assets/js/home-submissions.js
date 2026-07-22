@@ -191,7 +191,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   async function removeChecklist(checklistId) {
     const checklist = checklists.find((item) => item.id === checklistId);
-    if (!confirm(`“${checklist?.title || "이 체크리스트"}” 항목을 삭제할까요?`)) return;
+    if (!(await window.dkuConfirm(`“${checklist?.title || "이 체크리스트"}” 항목을 삭제할까요?`, {
+      title: "체크리스트 삭제",
+      confirmText: "삭제",
+      danger: true,
+    }))) return;
     try {
       const relatedAlerts = await getDocs(query(
         collection(db, "submissionAlerts"),
@@ -214,7 +218,10 @@ window.addEventListener("DOMContentLoaded", () => {
       ? checklist.submitted : {};
     const pending = members.filter((member) => submitted[member.id] !== true);
     if (!pending.length) return alert("현재 미제출로 표시된 학생이 없습니다.");
-    if (!confirm(`미제출 ${pending.length}명에게 “${checklist.title || "제출 안내"}” 알림을 보낼까요?`)) return;
+    if (!(await window.dkuConfirm(`미제출 ${pending.length}명에게 “${checklist.title || "제출 안내"}” 알림을 보낼까요?`, {
+      title: "미제출 알림 보내기",
+      confirmText: "보내기",
+    }))) return;
 
     button.disabled = true;
     const originalText = button.textContent;
