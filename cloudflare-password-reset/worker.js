@@ -150,8 +150,8 @@ export default {
       if (typeof idToken !== "string" || idToken.length < 100) throw new Error("관리자 로그인이 필요합니다.");
       if (!/^[a-z0-9]+@dkumed26\.com$/.test(String(targetEmail || ""))) throw new Error("회원 계정 형식이 올바르지 않습니다.");
       if (targetEmail === env.ADMIN_EMAIL) throw new Error("관리자 계정은 이 기능으로 재설정할 수 없습니다.");
-      if (typeof newPassword !== "string" || newPassword.length < 8 || newPassword.length > 128) {
-        throw new Error("임시 비밀번호는 8자 이상 128자 이하여야 합니다.");
+      if (typeof newPassword !== "string" || newPassword.length < 7 || newPassword.length > 128) {
+        throw new Error("임시 비밀번호는 7자 이상 128자 이하여야 합니다.");
       }
       if (!env.FIREBASE_SERVICE_ACCOUNT || !env.FIREBASE_WEB_API_KEY || !env.ADMIN_EMAIL) {
         throw new Error("비밀번호 재설정 서버 설정이 완료되지 않았습니다.");
