@@ -35,7 +35,7 @@ window.addEventListener("DOMContentLoaded", () => {
   head.innerHTML = `<span>시간</span>${DAYS.map((day) => `<span>${day}</span>`).join("")}`;
   let cells = "";
   for (let slot = 0; slot < SLOT_COUNT; slot++) {
-    cells += `<span class="tt-time" style="grid-row:${slot + 1}" aria-label="${slot + 1}교시 ${timeText(slot)}"><b>${slot + 1}</b><small>${timeText(slot)}</small></span>`;
+    cells += `<span class="tt-time" style="grid-row:${slot + 1}" aria-label="${slot + 1}교시 ${timeText(slot)}"><b>${slot + 1}</b><small>${slot % 2 === 0 ? timeText(slot) : ""}</small></span>`;
     for (let day = 0; day < DAYS.length; day++) {
       cells += `<div class="tt-cell ${slot % 2 === 0 ? "hour" : ""}" data-day="${day}" data-slot="${slot}" style="grid-column:${day + 2};grid-row:${slot + 1}"></div>`;
     }
