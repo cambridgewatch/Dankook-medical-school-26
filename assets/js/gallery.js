@@ -28,12 +28,12 @@ const safePhotoUrl = (value = "") => /^https:\/\//i.test(String(value)) ? String
 
 window.addEventListener("DOMContentLoaded", () => {
   const grid = $("#galleryGrid");
-  const authBar = $("#galleryAuthBar");
   const uploadBox = $("#uploadBox");
+  let photos = [];
 
   if (!isConfigured) {
-    authBar.innerHTML =
-      '⚠️ 사진 공유 기능을 쓰려면 Firebase 설정이 필요합니다. (firebase-설정안내.md 참고)';
+    uploadBox.style.display = "none";
+    window.dkuToast("사진 공유 기능을 불러오지 못했습니다.", { type: "error" });
     renderGrid();
     return;
   }
@@ -43,26 +43,20 @@ window.addEventListener("DOMContentLoaded", () => {
     currentUser = user;
     currentName = user ? (user.displayName || emailToName(user.email) || "동기") : "";
     if (user) {
-      authBar.innerHTML =
-        `👤 <strong>${escapeHtml(currentName)}</strong> 님으로 로그인됨 ` +
-        `<a href="settings.html" class="btn-mini">계정 설정</a>`;
       uploadBox.style.display = "block";
     } else {
-      authBar.innerHTML =
-        '사진을 올리려면 <a href="login.html"><strong>로그인</strong></a>이 필요합니다.';
       uploadBox.style.display = "none";
     }
     renderGrid();
   });
 
   /* 실시간 사진 목록 */
-  let photos = [];
   const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
   onSnapshot(q, (snap) => {
     photos = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((photo) => safePhotoUrl(photo.url));
     renderGrid();
   }, (err) => {
-    authBar.innerHTML = "사진 목록을 불러오지 못했습니다: " + err.message;
+    window.dkuToast("사진 목록을 불러오지 못했습니다: " + err.message, { type: "error" });
   });
 
   function renderGrid() {
