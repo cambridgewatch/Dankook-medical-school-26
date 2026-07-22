@@ -135,20 +135,14 @@ function installPullToRefresh() {
   const indicator = document.createElement("div");
   indicator.className = "pull-refresh-indicator";
   indicator.setAttribute("role", "status");
-  indicator.setAttribute("aria-live", "polite");
+  indicator.setAttribute("aria-label", "Refresh");
   indicator.innerHTML = `
     <span class="pull-refresh-icon" aria-hidden="true">
       <span class="pull-refresh-paw"></span>
-    </span>
-    <span class="pull-refresh-copy">
-      <strong class="pull-refresh-text">당겨서 새로고침</strong>
-      <small class="pull-refresh-hint">발바닥이 차오를 때까지 당겨주세요</small>
     </span>`;
   document.body.appendChild(indicator);
   document.documentElement.classList.add("pull-refresh-enabled");
 
-  const text = indicator.querySelector(".pull-refresh-text");
-  const hint = indicator.querySelector(".pull-refresh-hint");
   const threshold = 110;
   let startX = 0;
   let startY = 0;
@@ -162,21 +156,15 @@ function installPullToRefresh() {
     const visualDistance = Math.min(88, rawDistance * .68);
     indicator.style.setProperty("--pull-distance", `${visualDistance}px`);
     indicator.style.setProperty("--pull-progress", String(progress));
-    indicator.style.setProperty("--pull-angle", `${progress * 180}deg`);
-    indicator.style.setProperty("--pull-ring", `${progress * 360}deg`);
     indicator.style.setProperty("--pull-border-alpha", String(progress * .24));
-    indicator.style.setProperty("--pull-handle-scale", String(.72 + progress * .28));
     indicator.style.setProperty("--pull-fill-inset", `${100 - progress * 100}%`);
     indicator.style.setProperty("--pull-scale", String(.94 + progress * .06));
     indicator.style.setProperty("--pull-opacity", String(Math.min(1, progress * 1.7)));
     indicator.classList.add("active");
     const nextReady = rawDistance >= threshold;
-    if (!nextReady && !ready) hint.textContent = "곰발바닥이 차오르는 중이에요";
     if (nextReady !== ready) {
       ready = nextReady;
       indicator.classList.toggle("ready", ready);
-      text.textContent = ready ? "놓아서 새로고침" : "당겨서 새로고침";
-      hint.textContent = ready ? "발바닥이 가득 찼어요" : "곰발바닥이 차오르는 중이에요";
       if (ready && navigator.vibrate) navigator.vibrate(12);
     }
   };
@@ -188,15 +176,10 @@ function installPullToRefresh() {
     indicator.classList.remove("active", "ready");
     indicator.style.setProperty("--pull-distance", "0px");
     indicator.style.setProperty("--pull-progress", "0");
-    indicator.style.setProperty("--pull-angle", "0deg");
-    indicator.style.setProperty("--pull-ring", "0deg");
     indicator.style.setProperty("--pull-border-alpha", "0");
-    indicator.style.setProperty("--pull-handle-scale", ".72");
     indicator.style.setProperty("--pull-fill-inset", "100%");
     indicator.style.setProperty("--pull-scale", ".94");
     indicator.style.setProperty("--pull-opacity", "0");
-    text.textContent = "당겨서 새로고침";
-    hint.textContent = "발바닥이 차오를 때까지 당겨주세요";
   };
 
   document.addEventListener("touchstart", (event) => {
@@ -242,8 +225,6 @@ function installPullToRefresh() {
     indicator.style.setProperty("--pull-scale", "1");
     indicator.style.setProperty("--pull-opacity", "1");
     indicator.style.setProperty("--pull-fill-inset", "0%");
-    text.textContent = "새로고침 중…";
-    hint.textContent = "최신 내용을 불러오고 있어요";
     if (navigator.vibrate) navigator.vibrate(20);
     window.setTimeout(() => window.location.reload(), 280);
   };
