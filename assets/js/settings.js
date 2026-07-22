@@ -30,6 +30,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const passwordHistoryList = $("#passwordHistoryList");
   const passwordHistoryNote = $("#passwordHistoryNote");
   const memberPasswordResetPanel = $("#memberPasswordResetPanel");
+  const passwordChangeCard = $("#passwordChangeCard");
   let user = null;
   let passwordHistorySubscribed = false;
 
@@ -109,6 +110,7 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   if (new URLSearchParams(location.search).get("security") === "change-password") {
+    passwordChangeCard?.classList.add("initial-password-required");
     showMessage("공용 초기 비밀번호는 외부인이 추측하기 쉽습니다. 아래에서 본인만 아는 비밀번호로 변경해 주세요.");
     document.querySelector("#currentPassword")?.focus();
   }
@@ -266,6 +268,10 @@ window.addEventListener("DOMContentLoaded", () => {
       $("#newPassword").type = "password";
       $("#toggleNewPasswordBtn").textContent = "비밀번호 표시";
       $("#toggleNewPasswordBtn").setAttribute("aria-pressed", "false");
+      passwordChangeCard?.classList.remove("initial-password-required");
+      if (new URLSearchParams(location.search).get("security") === "change-password") {
+        history.replaceState(null, "", "settings.html");
+      }
       showMessage("비밀번호가 변경되었습니다.", true);
     } catch (err) {
       if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password")

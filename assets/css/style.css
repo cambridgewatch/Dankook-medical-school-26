@@ -1599,6 +1599,12 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   background: #fff; border: 1px solid var(--line); border-radius: 20px;
   padding: 24px; box-shadow: var(--shadow-sm);
 }
+.settings-card.initial-password-required {
+  outline: 3px solid #df3f4b;
+  outline-offset: 3px;
+  border-color: #df3f4b;
+  box-shadow: 0 0 0 7px rgba(223, 63, 75, .11), 0 14px 34px rgba(142, 30, 40, .14);
+}
 .settings-card-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
 .settings-card-head > div { display: flex; align-items: center; gap: 10px; }
 .settings-card h2 { color: var(--navy); font-size: 19px; margin: 0; }
