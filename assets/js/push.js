@@ -81,7 +81,7 @@ window.addEventListener("DOMContentLoaded", () => {
       messaging = prepared.messaging;
       onMessage(messaging, (payload) => {
         const title = payload.data?.title || "의과대학 26학번";
-        const options = { body: payload.data?.body || "새 알림이 도착했습니다.", icon: "assets/img/logo.png" };
+        const options = { body: payload.data?.body || "새 알림이 도착했습니다.", icon: "assets/img/icon-192.png" };
         if (Notification.permission === "granted") new Notification(title, options);
       });
     }

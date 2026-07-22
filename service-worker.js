@@ -1,4 +1,4 @@
-const CACHE_NAME = "dku-med26-app-v35";
+const CACHE_NAME = "dku-med26-app-v36";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -14,7 +14,11 @@ const APP_SHELL = [
   "./manifest.webmanifest",
   "./assets/css/style.css",
   "./assets/css/resource-room.css",
-  "./assets/img/logo.png",
+  "./assets/img/logo-26.png",
+  "./assets/img/icon-180.png",
+  "./assets/img/icon-192.png",
+  "./assets/img/icon-512.png",
+  "./assets/img/icon-maskable-512.png",
   "./assets/js/main.js",
   "./assets/js/session-hint.js",
   "./assets/js/password-visibility.js",
