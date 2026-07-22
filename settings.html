@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>설정 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=85" />
+<link rel="stylesheet" href="assets/css/style.css?v=89" />
 </head>
 <body class="locked">
   <header class="site-header">
@@ -378,6 +378,37 @@
         </div>
       </details>
 
+      <details class="settings-card settings-guide admin-backup-panel" id="adminBackupPanel" hidden>
+        <summary>
+          <span class="settings-icon">💾</span>
+          <span><strong>데이터 백업·복구</strong><small>홈페이지 운영 자료를 파일로 보관하고 복원</small></span>
+          <span class="settings-guide-arrow">⌄</span>
+        </summary>
+        <div class="settings-guide-body admin-backup-body">
+          <p class="settings-guide-intro">공지, 전체 일정, 알림, 투표, 제출 체크리스트와 공통 시간표를 JSON 파일로 백업합니다.</p>
+          <div class="admin-backup-notice">
+            <strong>백업에서 제외되는 내용</strong>
+            <span>로그인 계정, 비밀번호, 동기 명단, 개인 일정, 개인 시간표, 사진 원본과 투표 참여 기록은 포함되지 않습니다.</span>
+          </div>
+          <div class="admin-backup-actions">
+            <button class="btn btn-solid" id="downloadAdminBackupBtn" type="button">백업 파일 다운로드</button>
+          </div>
+          <div class="admin-restore-box">
+            <div>
+              <strong>백업 파일 복원</strong>
+              <p>기존 자료를 모두 지우지 않고, 같은 문서에는 백업 내용을 병합합니다.</p>
+            </div>
+            <input type="file" id="adminBackupFile" accept="application/json,.json" hidden />
+            <div class="admin-backup-file-row">
+              <button class="btn btn-ghost-dark" id="chooseAdminBackupBtn" type="button">파일 선택</button>
+              <span id="adminBackupFileName">선택된 파일 없음</span>
+            </div>
+            <button class="btn btn-solid" id="restoreAdminBackupBtn" type="button" disabled>선택한 파일 복원</button>
+          </div>
+          <p class="admin-backup-status" id="adminBackupStatus" role="status" aria-live="polite"></p>
+        </div>
+      </details>
+
       <div class="settings-card danger-zone">
         <div>
           <h2>로그아웃</h2>
@@ -403,6 +434,7 @@
 <script src="assets/js/main.js?v=63"></script>
   <script src="assets/js/password-visibility.js?v=1"></script>
   <script type="module" src="assets/js/settings.js?v=17"></script>
+  <script type="module" src="assets/js/admin-backup.js?v=1"></script>
   <script type="module" src="assets/js/alerts.js?v=32"></script>
   <script type="module" src="assets/js/gate.js?v=22"></script>
 </body>

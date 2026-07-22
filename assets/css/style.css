@@ -1832,6 +1832,18 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .password-history-item strong, .password-history-item small { display: block; }
 .password-history-item strong { color: var(--ink); font-size: 14px; }
 .password-history-item small { margin-top: 3px; color: var(--gray); font-size: 12px; }
+.admin-backup-body { display: grid; gap: 14px; }
+.admin-backup-notice, .admin-restore-box {
+  display: grid; gap: 8px; padding: 14px; border: 1px solid #dfe6ee; border-radius: 14px; background: #f8fafc;
+}
+.admin-backup-notice strong, .admin-restore-box strong { color: var(--navy); font-size: 14px; }
+.admin-backup-notice span, .admin-restore-box p { color: var(--gray); font-size: 12px; line-height: 1.55; }
+.admin-backup-actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.admin-backup-file-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.admin-backup-file-row span { min-width: 0; overflow: hidden; color: var(--gray); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.admin-restore-box > .btn { justify-self: start; }
+.admin-backup-status { min-height: 20px; color: #b23b3b !important; font-size: 12px !important; }
+.admin-backup-status.success { color: #287548 !important; }
 
 /* ---------- 푸터 ---------- */
 .site-footer {

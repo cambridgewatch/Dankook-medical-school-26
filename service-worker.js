@@ -1,4 +1,4 @@
-const CACHE_NAME = "dku-med26-app-v39";
+const CACHE_NAME = "dku-med26-app-v40";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -27,7 +27,8 @@ const APP_SHELL = [
   "./assets/js/teams.js",
   "./assets/js/game-member-picker.js",
   "./assets/js/home-polls.js",
-  "./assets/js/home-submissions.js"
+  "./assets/js/home-submissions.js",
+  "./assets/js/admin-backup.js"
 ];
 
 self.addEventListener("install", (event) => {
