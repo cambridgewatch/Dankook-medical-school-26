@@ -265,6 +265,9 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     button.addEventListener("pointerup", stop);
     button.addEventListener("pointercancel", stop);
     button.addEventListener("lostpointercapture", stop);
+    button.addEventListener("contextmenu", (event) => event.preventDefault());
+    button.addEventListener("selectstart", (event) => event.preventDefault());
+    button.addEventListener("dragstart", (event) => event.preventDefault());
   });
 
   window.addEventListener("keydown", (event) => {
