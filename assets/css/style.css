@@ -711,14 +711,15 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-run-scene.is-fullscreen-fallback .cheonho-character-canvas {
   left: 11%;
   bottom: 2%;
-  width: 4.67%;
-  height: 22.67%;
+  width: 7%;
+  height: 34%;
 }
 .cheonho-run-scene[data-character="turtle"]:fullscreen .cheonho-character-canvas,
 .cheonho-run-scene[data-character="turtle"]:-webkit-full-screen .cheonho-character-canvas,
 .cheonho-run-scene[data-character="turtle"].is-fullscreen-fallback .cheonho-character-canvas {
   left: 11%;
   width: 9.67%;
+  height: 22.67%;
 }
 .cheonho-run-scene.is-fullscreen-fallback {
   position: fixed;
