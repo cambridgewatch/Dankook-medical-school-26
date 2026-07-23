@@ -1,4 +1,4 @@
-const CACHE_NAME = "dku-med26-app-v80";
+const CACHE_NAME = "dku-med26-app-v81";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -51,6 +51,7 @@ const APP_SHELL = [
   "./assets/js/home-submissions.js",
   "./assets/js/admin-backup.js",
   "./assets/js/cheonhoji-animals.js",
+  "./assets/js/cheonhoji-animals-v3-curved.js",
   "./assets/js/cheonhoji-game.js"
 ];
 

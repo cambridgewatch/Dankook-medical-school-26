@@ -1,5 +1,9 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
-import { createOtter, createTurtle, disposeAnimal } from "./cheonhoji-animals.js?v=1";
+import {
+  createOtterV3 as createOtter,
+  createTurtleV3 as createTurtle,
+  disposeAnimalV3 as disposeAnimal,
+} from "./cheonhoji-animals-v3-curved.js?rev=game-v3";
 
 const sceneElement = document.querySelector("#cheonhoRunScene");
 const canvas = document.querySelector("#cheonhoCharacterCanvas");
@@ -78,6 +82,8 @@ if (sceneElement && canvas && playButton) {
     animal.rotation.y = selectedCharacter === "turtle" ? -0.34 : 0.50;
     animal.scale.setScalar(selectedCharacter === "turtle" ? 0.82 : 0.88);
     animal.position.set(selectedCharacter === "turtle" ? -0.05 : 0, selectedCharacter === "turtle" ? 0.05 : 0.02, 0);
+    const parts = animal.userData.parts || {};
+    animal.userData.restHeadX = parts.head?.position.x ?? 0;
     stage.add(animal);
   }
 
@@ -179,9 +185,8 @@ if (sceneElement && canvas && playButton) {
       animal.rotation.z = Math.sin(phase) * 0.018 * strength;
       ["FrontNear", "BackFar"].forEach((name) => { if (parts[name]) parts[name].rotation.z = Math.sin(phase) * 0.42 * strength; });
       ["FrontFar", "BackNear"].forEach((name) => { if (parts[name]) parts[name].rotation.z = -Math.sin(phase) * 0.42 * strength; });
-      if (parts.head) parts.head.position.x = 1.27 + Math.sin(phase * 0.5) * 0.035 * strength;
+      if (parts.head) parts.head.position.x = (animal.userData.restHeadX ?? -1.38) + Math.sin(phase * 0.5) * 0.035 * strength;
       if (parts.tail) parts.tail.rotation.y = Math.sin(phase * 0.65) * 0.14 * strength;
-      if (parts.shell) parts.shell.rotation.z = Math.sin(phase) * 0.018 * strength;
     }
   }
 
