@@ -47,12 +47,12 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   let lastObstacleType = "";
   let unsubscribeRanking = null;
   let gameOverAt = 0;
-  let obstacleBag = [];
   let regularObstacleBag = [];
   let doubleObstacleBag = [];
   let obstacleCategoryBag = [];
   let consecutiveDoubleJumps = 0;
   let obstacleTier = -1;
+  let obstacleRateTier = -1;
 
   function animationDurationSeconds() {
     const raw = getComputedStyle(track).animationDuration.split(",")[0].trim();
@@ -117,59 +117,57 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const tier = laps < 0.25 ? 0 : laps < 0.65 ? 1 : laps < 1 ? 2 : 3;
     if (tier !== obstacleTier) {
       obstacleTier = tier;
-      obstacleBag = [];
       regularObstacleBag = [];
-      doubleObstacleBag = [];
+    }
+
+    const rateTier = laps < 1 ? 0 : 1;
+    if (rateTier !== obstacleRateTier) {
+      obstacleRateTier = rateTier;
       obstacleCategoryBag = [];
       consecutiveDoubleJumps = 0;
     }
 
-    if (tier === 3) {
-      if (obstacleCategoryBag.length === 0) {
-        obstacleCategoryBag = shuffled([
+    if (obstacleCategoryBag.length === 0) {
+      obstacleCategoryBag = rateTier === 0
+        ? shuffled([
+          "double", "double", "double",
+          "regular", "regular", "regular", "regular", "regular",
+          "regular", "regular", "regular", "regular",
+        ])
+        : shuffled([
           "double", "double", "double", "double",
           "regular", "regular", "regular", "regular",
           "regular", "regular", "regular", "regular",
         ]);
-      }
+    }
 
-      if (consecutiveDoubleJumps >= 3 && obstacleCategoryBag[0] === "double") {
-        const regularIndex = obstacleCategoryBag.indexOf("regular");
-        if (regularIndex >= 0) {
-          [obstacleCategoryBag[0], obstacleCategoryBag[regularIndex]] = [
-            obstacleCategoryBag[regularIndex],
-            obstacleCategoryBag[0],
-          ];
-        }
+    if (consecutiveDoubleJumps >= 3 && obstacleCategoryBag[0] === "double") {
+      const regularIndex = obstacleCategoryBag.indexOf("regular");
+      if (regularIndex >= 0) {
+        [obstacleCategoryBag[0], obstacleCategoryBag[regularIndex]] = [
+          obstacleCategoryBag[regularIndex],
+          obstacleCategoryBag[0],
+        ];
       }
+    }
 
-      const category = obstacleCategoryBag.shift() || "regular";
-      if (category === "double") {
-        if (doubleObstacleBag.length === 0) doubleObstacleBag = shuffled(OBSTACLE_TIERS[3]);
-        const type = doubleObstacleBag.shift() || "barrier";
-        consecutiveDoubleJumps += 1;
-        lastObstacleType = type;
-        return type;
-      }
-
-      const regularChoices = OBSTACLE_TIERS.slice(0, 3).flat();
-      if (regularObstacleBag.length === 0) regularObstacleBag = shuffled(regularChoices);
-      const type = regularObstacleBag.shift() || "puddle";
-      consecutiveDoubleJumps = 0;
+    const category = obstacleCategoryBag.shift() || "regular";
+    if (category === "double") {
+      if (doubleObstacleBag.length === 0) doubleObstacleBag = shuffled(OBSTACLE_TIERS[3]);
+      const type = doubleObstacleBag.shift() || "barrier";
+      consecutiveDoubleJumps += 1;
       lastObstacleType = type;
       return type;
     }
 
-    const choices = OBSTACLE_TIERS.slice(0, tier + 1).flat();
-
-    if (obstacleBag.length === 0) obstacleBag = shuffled(choices);
-
-    let type = obstacleBag.shift() || "puddle";
+    const regularChoices = OBSTACLE_TIERS.slice(0, Math.min(tier, 2) + 1).flat();
+    if (regularObstacleBag.length === 0) regularObstacleBag = shuffled(regularChoices);
+    let type = regularObstacleBag.shift() || "puddle";
     const tallTypes = new Set(["bin", "sign", "lantern", "hydrant", "tripod", ...DOUBLE_JUMP_TYPES]);
     if (tallTypes.has(type) && tallTypes.has(lastObstacleType)) {
-      const replacementIndex = obstacleBag.findIndex((candidate) => !tallTypes.has(candidate));
+      const replacementIndex = regularObstacleBag.findIndex((candidate) => !tallTypes.has(candidate));
       if (replacementIndex >= 0) {
-        [type, obstacleBag[replacementIndex]] = [obstacleBag[replacementIndex], type];
+        [type, regularObstacleBag[replacementIndex]] = [regularObstacleBag[replacementIndex], type];
       }
     }
     consecutiveDoubleJumps = 0;
@@ -517,12 +515,12 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     distanceLaps = 0;
     nextSpawnIn = 3.4;
     lastObstacleType = "";
-    obstacleBag = [];
     regularObstacleBag = [];
     doubleObstacleBag = [];
     obstacleCategoryBag = [];
     consecutiveDoubleJumps = 0;
     obstacleTier = -1;
+    obstacleRateTier = -1;
     gameOver = false;
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-jumped", "is-jumping");
@@ -636,12 +634,17 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   scene.addEventListener("dragstart", (event) => event.preventDefault());
 
   window.addEventListener("keydown", (event) => {
-    if (!running || event.target.closest("input, textarea, select, button")) return;
-    if (event.code === "ArrowLeft" || event.code === "KeyA") {
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
+    const isLeft = event.code === "ArrowLeft" || event.code === "KeyA";
+    const isRight = event.code === "ArrowRight" || event.code === "KeyD";
+    if ((!isLeft && !isRight) || gameOver) return;
+    if (!running) scene.dispatchEvent(new CustomEvent("cheonho:setrunning", { detail: { running: true } }));
+    if (isLeft) {
       movement.left = true;
       event.preventDefault();
     }
-    if (event.code === "ArrowRight" || event.code === "KeyD") {
+    if (isRight) {
       movement.right = true;
       event.preventDefault();
     }
@@ -665,12 +668,12 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     distanceLaps = 0;
     nextSpawnIn = 3.4;
     lastObstacleType = "";
-    obstacleBag = [];
     regularObstacleBag = [];
     doubleObstacleBag = [];
     obstacleCategoryBag = [];
     consecutiveDoubleJumps = 0;
     obstacleTier = -1;
+    obstacleRateTier = -1;
     gameOver = false;
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-collision", "has-jumped", "is-jumping");

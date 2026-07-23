@@ -335,7 +335,7 @@ if (sceneElement && canvas) {
     const currentJumpOffset = updateJump(time);
     canvas.style.setProperty(
       "--cheonho-jump-y",
-      `${currentJumpOffset * sceneElement.clientHeight * 0.10}px`
+      `${currentJumpOffset * canvas.clientHeight * 0.32}px`
     );
     const parts = animal.userData.parts || {};
 
