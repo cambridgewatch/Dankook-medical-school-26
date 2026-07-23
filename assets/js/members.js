@@ -1,6 +1,6 @@
 /* 동기 명단 (members.html 전용)
-   - 이름은 공개 코드에 없고, 로그인한 사람만 볼 수 있는 Firestore "members"에만 저장됨.
-   - 추가/삭제는 관리자(정지훈)만 가능. */
+   - 이름은 공개 코드에 없고 관리자만 Firestore "members"를 읽을 수 있음.
+   - 페이지 접근과 추가/삭제도 관리자만 가능. */
 
 import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -27,7 +27,11 @@ window.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, (user) => {
     isAdmin = !!user && user.email === ADMIN_EMAIL;
     adminBar.style.display = isAdmin ? "block" : "none";
-    if (user && !subscribed) {
+    if (user && !isAdmin) {
+      location.replace("index.html");
+      return;
+    }
+    if (isAdmin && !subscribed) {
       subscribed = true;
       onSnapshot(collection(db, "members"), (snap) => {
         members = snap.docs

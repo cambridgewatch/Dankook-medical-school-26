@@ -2,7 +2,7 @@
    - 헤더에 🔔 벨 + 안 읽은 개수 배지. 클릭하면 알림 페이지(notify.html)로 이동.
    - 목록/세부내용/읽음 처리는 notify.html(notify.js)에서. */
 
-import { db, auth, isConfigured } from "./firebase-init.js?v=12";
+import { db, auth, isConfigured, ADMIN_EMAIL } from "./firebase-init.js?v=12";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   collection, query, orderBy, limit, onSnapshot, where,
@@ -64,6 +64,9 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   onAuthStateChanged(auth, (user) => {
+    document.querySelectorAll(".admin-nav-only").forEach((item) => {
+      item.hidden = !user || user.email !== ADMIN_EMAIL;
+    });
     stopGlobal?.();
     stopSubmission?.();
     stopGlobal = null;
