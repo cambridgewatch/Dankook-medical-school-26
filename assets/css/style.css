@@ -448,22 +448,47 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   inset: 0 auto 0 0;
   z-index: 0;
   display: flex;
-  width: 400%;
+  width: 1200%;
   height: 100%;
   will-change: transform;
-  animation: cheonho-background-scroll 42s linear infinite;
+  animation: cheonho-background-scroll 132s linear infinite;
 }
 .cheonho-background-track > span {
-  flex: 0 0 25%;
-  width: 25%;
+  position: relative;
+  flex: 0 0 8.333333%;
+  width: 8.333333%;
   height: 100%;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
 }
-.cheonho-background-track .scene-lake { background-image: url("../img/cheonhoji-run-background-v1.png"); }
-.cheonho-background-track .scene-bus-stop { background-image: url("../img/cheonhoji-bus-stop-v1.png"); }
-.cheonho-background-track .scene-bridge { background-image: url("../img/cheonhoji-bridge-v1.png"); }
+.cheonho-background-track .scene-lake { background-image: url("../img/cheonhoji-course-lake-v1.jpg"); }
+.cheonho-background-track .scene-bus-stop { background-image: url("../img/cheonhoji-course-bus-stop-v1.jpg"); }
+.cheonho-background-track .scene-bridge { background-image: url("../img/cheonhoji-course-bridge-v1.jpg"); }
+.cheonho-background-track .scene-reference-01 { background-image: url("../img/cheonhoji-scene-01-medical-campus-v1.jpg"); }
+.cheonho-background-track .scene-reference-02 { background-image: url("../img/cheonhoji-scene-02-redbrick-campus-v1.jpg"); }
+.cheonho-background-track .scene-reference-03 { background-image: url("../img/cheonhoji-scene-03-stadium-v1.jpg"); }
+.cheonho-background-track .scene-reference-04 { background-image: url("../img/cheonhoji-scene-04-gymnasium-v1.jpg"); }
+.cheonho-background-track .scene-reference-05 { background-image: url("../img/cheonhoji-scene-05-lakeside-building-v1.jpg"); }
+.cheonho-background-track .scene-reference-06 { background-image: url("../img/cheonhoji-scene-06-rice-fields-v1.jpg"); }
+.cheonho-background-track .scene-reference-07 { background-image: url("../img/cheonhoji-scene-07-opposite-lakeside-v1.jpg"); }
+.cheonho-background-track .scene-reference-08 { background-image: url("../img/cheonhoji-scene-08-sports-park-v1.jpg"); }
+.cheonho-background-track .numbered-scene::after {
+  content: "SCENE " attr(data-scene-number);
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 999px;
+  background: rgba(8, 44, 67, .62);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 1px;
+  box-shadow: 0 3px 12px rgba(5, 31, 48, .18);
+  backdrop-filter: blur(5px);
+}
 .cheonho-fixed-walkway {
   position: absolute;
   inset: auto 0 0;
@@ -574,7 +599,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 @keyframes cheonho-route-flow { to { stroke-dashoffset: -38; } }
 @keyframes cheonho-background-scroll {
   0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-75%, 0, 0); }
+  100% { transform: translate3d(-91.666667%, 0, 0); }
 }
 
 @media (max-width: 640px) {
@@ -589,7 +614,8 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .cheonho-run-head p { font-size: 13px; line-height: 1.55; }
   .cheonho-run-head > span { display: none; }
   .cheonho-run-scene { aspect-ratio: 16 / 10; min-height: 0; }
-  .cheonho-background-track { animation-duration: 34s; }
+  .cheonho-background-track { animation-duration: 110s; }
+  .cheonho-background-track .numbered-scene::after { top: 9px; left: 10px; padding: 4px 7px; font-size: 8px; }
   .cheonho-fixed-walkway { height: 26%; border-top-width: 5px; }
   .cheonho-fixed-walkway::before { top: -25px; height: 25px; background: linear-gradient(180deg, #754326 0 5px, transparent 5px 19px, #754326 19px 24px), repeating-linear-gradient(90deg, #6b3b22 0 5px, transparent 5px 53px); }
   .cheonho-route-glow { stroke-width: 25; }

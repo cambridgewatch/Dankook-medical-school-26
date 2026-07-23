@@ -1,4 +1,4 @@
-const CACHE_NAME = "dku-med26-app-v74";
+const CACHE_NAME = "dku-med26-app-v75";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -20,9 +20,9 @@ const APP_SHELL = [
   "./assets/img/icon-192.png",
   "./assets/img/icon-512.png",
   "./assets/img/icon-maskable-512.png",
-  "./assets/img/cheonhoji-run-background-v1.png",
-  "./assets/img/cheonhoji-bus-stop-v1.png",
-  "./assets/img/cheonhoji-bridge-v1.png",
+  "./assets/img/cheonhoji-course-lake-v1.jpg",
+  "./assets/img/cheonhoji-course-bus-stop-v1.jpg",
+  "./assets/img/cheonhoji-course-bridge-v1.jpg",
   "./assets/js/main.js",
   "./assets/js/session-hint.js",
   "./assets/js/password-visibility.js",
