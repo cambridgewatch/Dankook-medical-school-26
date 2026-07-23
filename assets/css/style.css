@@ -383,6 +383,99 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   mask: var(--mini-game-paw) center / 48px 48px no-repeat;
 }
 
+.cheonho-game-controls {
+  display: grid;
+  grid-template-columns: auto minmax(280px, 1fr) auto;
+  align-items: end;
+  gap: 18px;
+  padding: 0 28px 22px;
+}
+.cheonho-choice-block { display: grid; gap: 8px; }
+.cheonho-choice-block > span {
+  color: #6c7a88;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+.cheonho-segmented,
+.cheonho-character-options {
+  display: flex;
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid #d8e3eb;
+  border-radius: 14px;
+  background: #f4f7fa;
+}
+.cheonho-segmented button,
+.cheonho-character-options button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #657484;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background .18s ease, box-shadow .18s ease, color .18s ease, transform .18s ease;
+}
+.cheonho-segmented button { min-width: 74px; padding: 0 17px; }
+.cheonho-segmented button i { margin-right: 6px; font-style: normal; }
+.cheonho-character-options button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  gap: 9px;
+  padding: 0 18px;
+}
+.cheonho-segmented button:hover,
+.cheonho-character-options button:hover { color: var(--navy); transform: translateY(-1px); }
+.cheonho-segmented button.is-active,
+.cheonho-character-options button.is-active {
+  background: #fff;
+  color: var(--navy);
+  box-shadow: 0 4px 13px rgba(28, 61, 87, .13);
+}
+.otter-mark,
+.turtle-mark { position: relative; display: inline-block; width: 28px; height: 23px; flex: 0 0 28px; }
+.otter-mark::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 19px;
+  height: 15px;
+  border-radius: 50% 50% 46% 46%;
+  background: #80533a;
+  box-shadow: -4px -3px 0 -1px #5a392a, 4px -3px 0 -1px #5a392a;
+}
+.otter-mark::after { content: ""; position: absolute; left: 10px; top: 11px; width: 8px; height: 6px; border-radius: 50%; background: #ead2ad; }
+.turtle-mark::before { content: ""; position: absolute; left: 2px; top: 5px; width: 22px; height: 15px; border-radius: 50% 50% 44% 44%; background: #607447; box-shadow: inset 0 0 0 3px #81905c; }
+.turtle-mark::after { content: ""; position: absolute; right: -1px; top: 9px; width: 8px; height: 8px; border-radius: 50%; background: #7fa079; box-shadow: -20px 9px 0 -2px #7fa079, -7px 9px 0 -2px #7fa079; }
+.cheonho-play-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 148px;
+  height: 54px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--primary);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 850;
+  box-shadow: 0 9px 20px rgba(62, 132, 181, .25);
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.cheonho-play-button:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(62, 132, 181, .30); }
+.cheonho-play-button i { font-style: normal; font-size: 12px; }
+.cheonho-play-button.is-running { background: #405d76; }
+
 .cheonho-run-card {
   overflow: hidden;
   border: 1px solid #d9e4ec;
@@ -462,42 +555,37 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   background-size: cover;
   background-repeat: no-repeat;
 }
-.cheonho-background-track .scene-lake { background-image: url("../img/cheonhoji-course-lake-v1.jpg"); }
-.cheonho-background-track .scene-bus-stop { background-image: url("../img/cheonhoji-course-bus-stop-v1.jpg"); }
-.cheonho-background-track .scene-bridge { background-image: url("../img/cheonhoji-course-bridge-v1.jpg"); }
-.cheonho-background-track .scene-reference-01 { background-image: url("../img/cheonhoji-scene-01-medical-campus-v1.jpg"); }
-.cheonho-background-track .scene-reference-02 { background-image: url("../img/cheonhoji-scene-02-redbrick-campus-v1.jpg"); }
-.cheonho-background-track .scene-reference-03 { background-image: url("../img/cheonhoji-scene-03-stadium-v1.jpg"); }
-.cheonho-background-track .scene-reference-04 { background-image: url("../img/cheonhoji-scene-04-gymnasium-v1.jpg"); }
-.cheonho-background-track .scene-reference-05 { background-image: url("../img/cheonhoji-scene-05-lakeside-building-v1.jpg"); }
-.cheonho-background-track .scene-reference-06 { background-image: url("../img/cheonhoji-scene-06-rice-fields-v1.jpg"); }
-.cheonho-background-track .scene-reference-07 { background-image: url("../img/cheonhoji-scene-07-opposite-lakeside-v1.jpg"); }
-.cheonho-background-track .scene-reference-08 { background-image: url("../img/cheonhoji-scene-08-sports-park-v1.jpg"); }
-.cheonho-background-track .scene-bus-stop { --next-scene: url("../img/cheonhoji-scene-06-rice-fields-v1.jpg"); }
-.cheonho-background-track .scene-reference-06 { --next-scene: url("../img/cheonhoji-scene-07-opposite-lakeside-v1.jpg"); }
-.cheonho-background-track .scene-reference-07 { --next-scene: url("../img/cheonhoji-course-bridge-v1.jpg"); }
-.cheonho-background-track .scene-bridge { --next-scene: url("../img/cheonhoji-scene-08-sports-park-v1.jpg"); }
-.cheonho-background-track .scene-reference-08 { --next-scene: url("../img/cheonhoji-scene-01-medical-campus-v1.jpg"); }
-.cheonho-background-track .scene-reference-01 { --next-scene: url("../img/cheonhoji-scene-02-redbrick-campus-v1.jpg"); }
-.cheonho-background-track .scene-reference-02 { --next-scene: url("../img/cheonhoji-scene-03-stadium-v1.jpg"); }
-.cheonho-background-track .scene-reference-03 { --next-scene: url("../img/cheonhoji-scene-04-gymnasium-v1.jpg"); }
-.cheonho-background-track .scene-reference-04 { --next-scene: url("../img/cheonhoji-scene-05-lakeside-building-v1.jpg"); }
-.cheonho-background-track .scene-reference-05 { --next-scene: url("../img/cheonhoji-course-bus-stop-v1.jpg"); }
-.cheonho-background-track > span::after {
-  content: "";
+.cheonho-run-scene[data-time="day"] .scene-01 { background-image: url("../img/cheonhoji-day-01-bus-stop-v2.jpg"); }
+.cheonho-run-scene[data-time="day"] .scene-02 { background-image: url("../img/cheonhoji-day-02-rice-fields-v2.jpg"); }
+.cheonho-run-scene[data-time="day"] .scene-03 { background-image: url("../img/cheonhoji-day-03-opposite-lakeside-v2.jpg"); }
+.cheonho-run-scene[data-time="day"] .scene-04 { background-image: url("../img/cheonhoji-day-04-bridge-v2.jpg"); }
+.cheonho-run-scene[data-time="day"] .scene-05 { background-image: url("../img/cheonhoji-day-05-sports-park-v2.jpg"); }
+.cheonho-run-scene[data-time="day"] .scene-06 { background-image: url("../img/cheonhoji-day-06-medical-campus-v2.jpg"); }
+.cheonho-run-scene[data-time="day"] .scene-07 { background-image: url("../img/cheonhoji-day-07-redbrick-campus-v2.jpg"); }
+.cheonho-run-scene[data-time="day"] .scene-08 { background-image: url("../img/cheonhoji-day-08-stadium-v2.jpg"); }
+.cheonho-run-scene[data-time="day"] .scene-09 { background-image: url("../img/cheonhoji-day-09-gymnasium-v2.jpg"); }
+.cheonho-run-scene[data-time="day"] .scene-10 { background-image: url("../img/cheonhoji-day-10-lakeside-building-v2.jpg"); }
+.cheonho-run-scene[data-time="night"] .scene-01 { background-image: url("../img/cheonhoji-night-01-bus-stop-v2.jpg"); }
+.cheonho-run-scene[data-time="night"] .scene-02 { background-image: url("../img/cheonhoji-night-02-rice-fields-v2.jpg"); }
+.cheonho-run-scene[data-time="night"] .scene-03 { background-image: url("../img/cheonhoji-night-03-opposite-lakeside-v2.jpg"); }
+.cheonho-run-scene[data-time="night"] .scene-04 { background-image: url("../img/cheonhoji-night-04-bridge-v2.jpg"); }
+.cheonho-run-scene[data-time="night"] .scene-05 { background-image: url("../img/cheonhoji-night-05-sports-park-v2.jpg"); }
+.cheonho-run-scene[data-time="night"] .scene-06 { background-image: url("../img/cheonhoji-night-06-medical-campus-v2.jpg"); }
+.cheonho-run-scene[data-time="night"] .scene-07 { background-image: url("../img/cheonhoji-night-07-redbrick-campus-v2.jpg"); }
+.cheonho-run-scene[data-time="night"] .scene-08 { background-image: url("../img/cheonhoji-night-08-stadium-v2.jpg"); }
+.cheonho-run-scene[data-time="night"] .scene-09 { background-image: url("../img/cheonhoji-night-09-gymnasium-v2.jpg"); }
+.cheonho-run-scene[data-time="night"] .scene-10 { background-image: url("../img/cheonhoji-night-10-lakeside-building-v2.jpg"); }
+.cheonho-run-scene.is-paused .cheonho-background-track { animation-play-state: paused; }
+.cheonho-run-scene.is-running .cheonho-background-track { animation-play-state: running; }
+.cheonho-character-canvas {
   position: absolute;
-  top: 0;
-  right: -1px;
-  bottom: 0;
-  z-index: 2;
-  width: 18%;
+  left: clamp(18px, 8vw, 120px);
+  bottom: 7.2%;
+  z-index: 6;
+  width: clamp(150px, 17vw, 245px);
+  height: 76%;
   pointer-events: none;
-  background-image: var(--next-scene);
-  background-position: left center;
-  background-size: 555.556% 100%;
-  background-repeat: no-repeat;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.12) 18%, #000 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.12) 18%, #000 100%);
+  filter: drop-shadow(0 8px 8px rgba(20, 34, 39, .25));
 }
 .cheonho-fixed-walkway {
   position: absolute;
@@ -529,63 +617,19 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   background: repeating-linear-gradient(8deg, transparent 0 33px, rgba(76, 35, 18, 0.20) 34px 36px);
   pointer-events: none;
 }
-.cheonho-route-overlay { position: absolute; inset: 0; z-index: 5; width: 100%; height: 100%; }
-.cheonho-route-glow,
-.cheonho-route-line { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.cheonho-route-glow {
-  stroke: rgba(255, 255, 255, 0.82);
-  stroke-width: 17;
-  filter: drop-shadow(0 3px 5px rgba(9, 38, 59, 0.45));
+.cheonho-run-card.is-night .cheonho-fixed-walkway {
+  border-top-color: #172938;
+  background:
+    linear-gradient(180deg, rgba(122, 158, 183, .12), rgba(3, 10, 18, .34)),
+    repeating-linear-gradient(90deg, #253746 0 72px, #172733 73px 76px, #314858 77px 148px);
+  box-shadow: 0 -7px 24px rgba(1, 6, 14, .52), inset 0 3px rgba(150, 191, 221, .10);
 }
-.cheonho-route-line {
-  stroke: #1d587c;
-  stroke-width: 5;
-  stroke-dasharray: 20 18;
-  animation: cheonho-route-flow 2.2s linear infinite;
+.cheonho-run-card.is-night .cheonho-fixed-walkway::before {
+  background:
+    radial-gradient(circle at 13px 13px, #ffd47c 0 2px, rgba(255, 204, 105, .30) 3px 7px, transparent 8px) 0 0 / 78px 100% repeat-x,
+    linear-gradient(180deg, #1b2e3b 0 7px, transparent 7px 27px, #1b2e3b 27px 34px),
+    repeating-linear-gradient(90deg, #152631 0 7px, transparent 7px 78px);
 }
-.cheonho-route-marker {
-  position: absolute;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  color: #fff;
-  font-size: 9px;
-  letter-spacing: 1.2px;
-  text-shadow: 0 1px 3px rgba(5, 33, 51, 0.65);
-}
-.cheonho-route-marker.start { left: 1.4%; bottom: 6.2%; }
-.cheonho-route-marker.goal { right: 1.2%; bottom: 6.2%; }
-.cheonho-route-marker i {
-  width: 21px;
-  height: 21px;
-  border: 5px solid #fff;
-  border-radius: 50%;
-  background: #1d587c;
-  box-shadow: 0 3px 10px rgba(5, 32, 49, 0.42);
-}
-.cheonho-route-marker.goal i { border-radius: 6px 6px 6px 1px; transform: rotate(45deg); background: #e45950; }
-.cheonho-route-marker b {
-  padding: 4px 7px;
-  border-radius: 999px;
-  background: rgba(8, 43, 66, 0.84);
-  backdrop-filter: blur(5px);
-}
-.cheonho-route-arrow {
-  position: absolute;
-  z-index: 5;
-  bottom: 7.5%;
-  color: #fff;
-  font-size: 30px;
-  font-weight: 900;
-  line-height: 1;
-  transform: rotate(-2deg);
-  text-shadow: 0 2px 5px rgba(6, 37, 56, 0.72);
-}
-.cheonho-route-arrow.arrow-one { left: 26%; }
-.cheonho-route-arrow.arrow-two { left: 50%; bottom: 7.5%; }
-.cheonho-route-arrow.arrow-three { left: 75%; bottom: 7.5%; }
 .cheonho-run-foot {
   display: flex;
   align-items: center;
@@ -606,7 +650,6 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   box-shadow: 0 0 0 4px #e5f0f6;
 }
 
-@keyframes cheonho-route-flow { to { stroke-dashoffset: -38; } }
 @keyframes cheonho-background-scroll {
   0% { transform: translate3d(0, 0, 0); }
   100% { transform: translate3d(-90.909091%, 0, 0); }
@@ -623,28 +666,27 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .cheonho-run-head h2 { font-size: 22px; }
   .cheonho-run-head p { font-size: 13px; line-height: 1.55; }
   .cheonho-run-head > span { display: none; }
+  .cheonho-game-controls { grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 17px; }
+  .cheonho-choice-block > span { font-size: 10px; }
+  .cheonho-segmented,
+  .cheonho-character-options { padding: 4px; border-radius: 12px; }
+  .cheonho-segmented button,
+  .cheonho-character-options button { min-height: 40px; padding: 0 10px; font-size: 12px; }
+  .cheonho-segmented button { min-width: 0; flex: 1; }
+  .cheonho-character-options button { gap: 5px; }
+  .otter-mark,
+  .turtle-mark { transform: scale(.84); }
+  .cheonho-play-button { grid-column: 1 / -1; width: 100%; height: 48px; min-width: 0; border-radius: 12px; }
   .cheonho-run-scene { aspect-ratio: 16 / 10; min-height: 0; }
   .cheonho-background-track { animation-duration: 100s; }
-  .cheonho-background-track > span::after {
-    width: 20%;
-    background-size: 833.334% 100%;
-    background-position: 22.4% center;
-  }
   .cheonho-fixed-walkway { height: 26%; border-top-width: 5px; }
   .cheonho-fixed-walkway::before { top: -25px; height: 25px; background: linear-gradient(180deg, #754326 0 5px, transparent 5px 19px, #754326 19px 24px), repeating-linear-gradient(90deg, #6b3b22 0 5px, transparent 5px 53px); }
-  .cheonho-route-glow { stroke-width: 25; }
-  .cheonho-route-line { stroke-width: 8; stroke-dasharray: 26 22; }
-  .cheonho-route-marker.start { left: 1%; bottom: 5%; }
-  .cheonho-route-marker.goal { right: 1%; bottom: 5%; }
-  .cheonho-route-marker b { padding: 3px 6px; font-size: 8px; }
-  .cheonho-route-arrow { bottom: 6.5%; font-size: 23px; }
-  .cheonho-route-arrow.arrow-two,
-  .cheonho-route-arrow.arrow-three { bottom: 6.5%; }
+  .cheonho-run-card.is-night .cheonho-fixed-walkway::before { background: radial-gradient(circle at 9px 10px, #ffd47c 0 2px, rgba(255, 204, 105, .28) 3px 6px, transparent 7px) 0 0 / 53px 100% repeat-x, linear-gradient(180deg, #1b2e3b 0 5px, transparent 5px 19px, #1b2e3b 19px 24px), repeating-linear-gradient(90deg, #152631 0 5px, transparent 5px 53px); }
+  .cheonho-character-canvas { left: 4px; bottom: 8%; width: 145px; height: 70%; }
   .cheonho-run-foot { align-items: flex-start; flex-direction: column; gap: 5px; padding: 12px 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cheonho-route-line,
   .cheonho-background-track { animation: none; }
 }
 

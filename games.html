@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=102" />
+  <link rel="stylesheet" href="assets/css/style.css?v=103" />
 </head>
 <body class="locked">
 
@@ -41,7 +41,7 @@
     <div class="container">
       <span class="eyebrow">MINI GAMES</span>
       <h1>미니게임</h1>
-      <p>단웅이와 단비가 등장하는 짧은 게임을 즐겨보세요.</p>
+      <p>단웅이와 단비가 등장하는 작은 게임을 즐겨 보세요.</p>
     </div>
   </section>
 
@@ -52,40 +52,50 @@
           <div>
             <small>COURSE 01</small>
             <h2>천호지 한 바퀴</h2>
-            <p>연꽃이 펼쳐진 천호지 산책로를 따라 달리는 코스입니다.</p>
+            <p>낮과 밤, 캐릭터를 고른 뒤 천호지 순환 코스를 달려 보세요.</p>
           </div>
-          <span>ROUTE PREVIEW</span>
+          <span>CHEONHOJI RUN</span>
         </header>
 
-        <div class="cheonho-run-scene" role="img" aria-label="버스 승차장부터 천호지 주변 명소가 자연스럽게 이어지고 직선 나무 산책로가 고정된 게임 경로">
+        <div class="cheonho-game-controls" aria-label="천호지 게임 설정">
+          <div class="cheonho-choice-block">
+            <span>시간대</span>
+            <div class="cheonho-segmented" role="group" aria-label="시간대 선택">
+              <button type="button" data-cheonho-time="day" aria-pressed="true"><i>☀</i>낮</button>
+              <button type="button" data-cheonho-time="night" aria-pressed="false"><i>☾</i>밤</button>
+            </div>
+          </div>
+          <div class="cheonho-choice-block">
+            <span>캐릭터</span>
+            <div class="cheonho-character-options" role="group" aria-label="캐릭터 선택">
+              <button type="button" data-cheonho-character="otter" aria-pressed="true"><i class="otter-mark"></i><b>수달</b></button>
+              <button type="button" data-cheonho-character="turtle" aria-pressed="false"><i class="turtle-mark"></i><b>거북이</b></button>
+            </div>
+          </div>
+          <button type="button" class="cheonho-play-button" id="cheonhoPlayButton" aria-pressed="false"><i>▶</i><span>달리기 시작</span></button>
+        </div>
+
+        <div class="cheonho-run-scene is-paused" id="cheonhoRunScene" data-time="day" role="img" aria-label="버스 승차장부터 천호지 주변 명소가 낮과 밤 배경으로 자연스럽게 이어지는 순환 달리기 코스">
           <div class="cheonho-background-track" aria-hidden="true">
-            <span class="scene-bus-stop"></span>
-            <span class="scene-reference-06"></span>
-            <span class="scene-reference-07"></span>
-            <span class="scene-bridge"></span>
-            <span class="scene-reference-08"></span>
-            <span class="scene-reference-01"></span>
-            <span class="scene-reference-02"></span>
-            <span class="scene-reference-03"></span>
-            <span class="scene-reference-04"></span>
-            <span class="scene-reference-05"></span>
-            <span class="scene-bus-stop"></span>
+            <span class="scene-01"></span>
+            <span class="scene-02"></span>
+            <span class="scene-03"></span>
+            <span class="scene-04"></span>
+            <span class="scene-05"></span>
+            <span class="scene-06"></span>
+            <span class="scene-07"></span>
+            <span class="scene-08"></span>
+            <span class="scene-09"></span>
+            <span class="scene-10"></span>
+            <span class="scene-01"></span>
           </div>
           <div class="cheonho-fixed-walkway" aria-hidden="true"></div>
-          <svg class="cheonho-route-overlay" viewBox="0 0 1600 600" preserveAspectRatio="none" aria-hidden="true">
-            <path class="cheonho-route-glow" d="M42 522 L1558 522" />
-            <path class="cheonho-route-line" d="M42 522 L1558 522" />
-          </svg>
-          <span class="cheonho-route-marker start"><i></i><b>START</b></span>
-          <span class="cheonho-route-arrow arrow-one">›</span>
-          <span class="cheonho-route-arrow arrow-two">›</span>
-          <span class="cheonho-route-arrow arrow-three">›</span>
-          <span class="cheonho-route-marker goal"><i></i><b>GOAL</b></span>
+          <canvas class="cheonho-character-canvas" id="cheonhoCharacterCanvas" aria-hidden="true"></canvas>
         </div>
 
         <footer class="cheonho-run-foot">
           <span><i class="route-dot"></i>천호지 순환 코스</span>
-          <span>캐릭터와 장애물은 다음 단계에서 추가됩니다.</span>
+          <span>10개 장면이 끊김 없이 순환하며 선택 내용은 이 기기에 저장됩니다.</span>
         </footer>
       </article>
     </div>
@@ -99,12 +109,7 @@
           <p>Dankook University College of Medicine, Class of 2026.</p>
         </div>
         <div class="footer-links">
-          <div>
-            <h5>단국대 링크</h5>
-            <a href="https://med.dankook.ac.kr/home" target="_blank" rel="noopener">의과대학 홈페이지 ↗</a>
-            <a href="https://portal.dankook.ac.kr/login.jsp" target="_blank" rel="noopener">단국대 포털 ↗</a>
-            <a href="https://nlms.dankook.ac.kr/" target="_blank" rel="noopener">이러닝 캠퍼스 ↗</a>
-          </div>
+          <div><h5>단국대 링크</h5><a href="https://med.dankook.ac.kr/home" target="_blank" rel="noopener">의과대학 홈페이지 ↗</a><a href="https://portal.dankook.ac.kr/login.jsp" target="_blank" rel="noopener">단국대 포털 ↗</a><a href="https://nlms.dankook.ac.kr/" target="_blank" rel="noopener">이러닝 캠퍼스 ↗</a></div>
         </div>
       </div>
       <div class="footer-bottom">
@@ -115,8 +120,9 @@
   </footer>
 
   <script src="assets/js/main.js?v=83"></script>
-  <script src="assets/js/effects3d.js?v=11"></script>
+  <script src="assets/js/effects3d.js?v=17"></script>
   <script type="module" src="assets/js/alerts.js?v=33"></script>
   <script type="module" src="assets/js/gate.js?v=23"></script>
+  <script type="module" src="assets/js/cheonhoji-game.js?v=1"></script>
 </body>
 </html>

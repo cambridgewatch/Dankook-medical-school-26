@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>천호지 캐릭터 3D 모델</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;padding:24px;background:#edf3f7;color:#133250;font-family:Pretendard,"Noto Sans KR",sans-serif}header{max-width:1100px;margin:0 auto 18px}h1{margin:0 0 7px;font-size:clamp(25px,4vw,38px)}p{margin:0;color:#64778a}main{max-width:1100px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:18px}article{overflow:hidden;border:1px solid #d7e2ea;border-radius:22px;background:#fff;box-shadow:0 16px 42px #193b5517}.title{display:flex;align-items:center;justify-content:space-between;padding:16px 18px}.title strong{font-size:18px}.title span{color:#718498;font-size:12px}canvas{display:block;width:100%;height:min(68vh,620px);touch-action:none;cursor:grab;background:radial-gradient(circle at 50% 35%,#fff 0,#f5f9fc 52%,#e4edf4 100%)}canvas:active{cursor:grabbing}@media(max-width:720px){body{padding:14px}main{grid-template-columns:1fr}canvas{height:470px}}
+  </style>
+</head>
+<body>
+  <header><h1>천호지 3D 캐릭터</h1><p>마우스나 손가락으로 돌려서 수달과 거북이 모델을 확인할 수 있습니다.</p></header>
+  <main>
+    <article><div class="title"><strong>수달</strong><span>달리기용 분리 관절</span></div><canvas id="otter"></canvas></article>
+    <article><div class="title"><strong>거북이</strong><span>등껍질·네 다리 분리</span></div><canvas id="turtle"></canvas></article>
+  </main>
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
+    import { createOtter, createTurtle } from "../js/cheonhoji-animals.js?v=1";
+    function mount(canvas, create, isTurtle){
+      const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.shadowMap.enabled=true;
+      const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(31,1,.1,40);camera.position.set(0,2.1,7.4);camera.lookAt(0,1.35,0);scene.add(new THREE.HemisphereLight(0xffffff,0x8093a2,2.5));const key=new THREE.DirectionalLight(0xffffff,3.4);key.position.set(-4,7,6);key.castShadow=true;scene.add(key);const rim=new THREE.DirectionalLight(0x8bc8f2,1.5);rim.position.set(4,4,-4);scene.add(rim);
+      const model=create();model.rotation.y=isTurtle?-.45:.35;model.position.y=.04;scene.add(model);const floor=new THREE.Mesh(new THREE.CircleGeometry(1.7,48),new THREE.ShadowMaterial({color:0x193046,opacity:.18}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+      let drag=false,last=0,auto=true;canvas.addEventListener("pointerdown",e=>{drag=true;auto=false;last=e.clientX;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointermove",e=>{if(!drag)return;model.rotation.y+=(e.clientX-last)*.012;last=e.clientX});canvas.addEventListener("pointerup",()=>drag=false);canvas.addEventListener("pointercancel",()=>drag=false);
+      function frame(){const w=canvas.clientWidth,h=canvas.clientHeight;if(canvas.width!==Math.floor(w*renderer.getPixelRatio())||canvas.height!==Math.floor(h*renderer.getPixelRatio())){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}if(auto)model.rotation.y+=.003;renderer.render(scene,camera);requestAnimationFrame(frame)}frame();
+    }
+    mount(document.querySelector("#otter"),createOtter,false);mount(document.querySelector("#turtle"),createTurtle,true);
+  </script>
+</body>
+</html>

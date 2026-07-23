@@ -1,4 +1,4 @@
-const CACHE_NAME = "dku-med26-app-v77";
+const CACHE_NAME = "dku-med26-app-v78";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -20,9 +20,26 @@ const APP_SHELL = [
   "./assets/img/icon-192.png",
   "./assets/img/icon-512.png",
   "./assets/img/icon-maskable-512.png",
-  "./assets/img/cheonhoji-course-lake-v1.jpg",
-  "./assets/img/cheonhoji-course-bus-stop-v1.jpg",
-  "./assets/img/cheonhoji-course-bridge-v1.jpg",
+  "./assets/img/cheonhoji-day-01-bus-stop-v2.jpg",
+  "./assets/img/cheonhoji-day-02-rice-fields-v2.jpg",
+  "./assets/img/cheonhoji-day-03-opposite-lakeside-v2.jpg",
+  "./assets/img/cheonhoji-day-04-bridge-v2.jpg",
+  "./assets/img/cheonhoji-day-05-sports-park-v2.jpg",
+  "./assets/img/cheonhoji-day-06-medical-campus-v2.jpg",
+  "./assets/img/cheonhoji-day-07-redbrick-campus-v2.jpg",
+  "./assets/img/cheonhoji-day-08-stadium-v2.jpg",
+  "./assets/img/cheonhoji-day-09-gymnasium-v2.jpg",
+  "./assets/img/cheonhoji-day-10-lakeside-building-v2.jpg",
+  "./assets/img/cheonhoji-night-01-bus-stop-v2.jpg",
+  "./assets/img/cheonhoji-night-02-rice-fields-v2.jpg",
+  "./assets/img/cheonhoji-night-03-opposite-lakeside-v2.jpg",
+  "./assets/img/cheonhoji-night-04-bridge-v2.jpg",
+  "./assets/img/cheonhoji-night-05-sports-park-v2.jpg",
+  "./assets/img/cheonhoji-night-06-medical-campus-v2.jpg",
+  "./assets/img/cheonhoji-night-07-redbrick-campus-v2.jpg",
+  "./assets/img/cheonhoji-night-08-stadium-v2.jpg",
+  "./assets/img/cheonhoji-night-09-gymnasium-v2.jpg",
+  "./assets/img/cheonhoji-night-10-lakeside-building-v2.jpg",
   "./assets/js/main.js",
   "./assets/js/session-hint.js",
   "./assets/js/password-visibility.js",
@@ -32,7 +49,9 @@ const APP_SHELL = [
   "./assets/js/game-member-picker.js",
   "./assets/js/home-polls.js",
   "./assets/js/home-submissions.js",
-  "./assets/js/admin-backup.js"
+  "./assets/js/admin-backup.js",
+  "./assets/js/cheonhoji-animals.js",
+  "./assets/js/cheonhoji-game.js"
 ];
 
 self.addEventListener("install", (event) => {
