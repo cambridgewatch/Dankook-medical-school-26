@@ -92,7 +92,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
   const brownDark = material(0x251711, 0.88);
   const ivory = material(0xf4f0e6, 0.82);
   const silver = material(0xf4f5f2, 0.34, 0.16);
-  const bodyWidth = variant === "blue" ? 1.40 : 1.27;
+  const bodyWidth = variant === "blue" ? 1.51 : 1.38;
   const bodyHeight = variant === "blue" ? 1.31 : 1.29;
   const bodyDepth = variant === "blue" ? 1.68 : 1.58;
   const bodyCenterY = 2.12;
