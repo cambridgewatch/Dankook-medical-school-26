@@ -282,10 +282,21 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     button.addEventListener("pointerup", stop);
     button.addEventListener("pointercancel", stop);
     button.addEventListener("lostpointercapture", stop);
+    button.addEventListener("touchstart", (event) => {
+      event.preventDefault();
+      setMovement(direction, true, button);
+    }, { passive: false });
+    button.addEventListener("touchend", (event) => {
+      event.preventDefault();
+      stop();
+    }, { passive: false });
+    button.addEventListener("touchcancel", stop, { passive: false });
     button.addEventListener("contextmenu", (event) => event.preventDefault());
     button.addEventListener("selectstart", (event) => event.preventDefault());
     button.addEventListener("dragstart", (event) => event.preventDefault());
   });
+  scene.addEventListener("selectstart", (event) => event.preventDefault());
+  scene.addEventListener("dragstart", (event) => event.preventDefault());
 
   window.addEventListener("keydown", (event) => {
     if (!running || event.target.closest("input, textarea, select, button")) return;
