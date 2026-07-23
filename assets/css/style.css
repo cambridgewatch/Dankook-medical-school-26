@@ -692,6 +692,14 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   border: 0;
   border-radius: 0;
 }
+@media (pointer: coarse) {
+  .cheonho-run-scene:fullscreen,
+  .cheonho-run-scene:-webkit-full-screen,
+  .cheonho-run-scene.is-fullscreen-fallback {
+    touch-action: none;
+    overscroll-behavior: none;
+  }
+}
 .cheonho-run-scene:fullscreen .cheonho-fullscreen-exit,
 .cheonho-run-scene:-webkit-full-screen .cheonho-fullscreen-exit,
 .cheonho-run-scene.is-fullscreen-fallback .cheonho-fullscreen-exit { display: grid; }

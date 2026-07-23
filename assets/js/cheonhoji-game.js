@@ -199,6 +199,17 @@ if (sceneElement && canvas && playButton) {
   document.addEventListener("fullscreenchange", syncFullscreenState);
   document.addEventListener("webkitfullscreenchange", syncFullscreenState);
 
+  let lastFullscreenTouchEnd = 0;
+  sceneElement.addEventListener("touchend", (event) => {
+    if (!fullscreenActive() || !window.matchMedia("(pointer: coarse)").matches) return;
+    const now = Date.now();
+    if (now - lastFullscreenTouchEnd < 360) event.preventDefault();
+    lastFullscreenTouchEnd = now;
+  }, { passive: false });
+  sceneElement.addEventListener("dblclick", (event) => {
+    if (fullscreenActive() && window.matchMedia("(pointer: coarse)").matches) event.preventDefault();
+  });
+
   function resize() {
     const width = Math.max(1, canvas.clientWidth);
     const height = Math.max(1, canvas.clientHeight);
