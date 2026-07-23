@@ -48,6 +48,10 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   let unsubscribeRanking = null;
   let gameOverAt = 0;
   let obstacleBag = [];
+  let regularObstacleBag = [];
+  let doubleObstacleBag = [];
+  let obstacleCategoryBag = [];
+  let consecutiveDoubleJumps = 0;
   let obstacleTier = -1;
 
   function animationDurationSeconds() {
@@ -100,21 +104,65 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     obstacles.splice(0).forEach((obstacle) => obstacle.element.remove());
   }
 
+  function shuffled(items) {
+    const result = [...items];
+    for (let index = result.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+    }
+    return result;
+  }
+
   function obstacleTypeForProgress(laps) {
     const tier = laps < 0.25 ? 0 : laps < 0.65 ? 1 : laps < 1 ? 2 : 3;
-    const unlocked = OBSTACLE_TIERS.slice(0, tier + 1).flat();
-    const choices = tier === 3
-      ? [...unlocked, ...OBSTACLE_TIERS[3]]
-      : unlocked;
-
-    if (tier !== obstacleTier || obstacleBag.length === 0) {
+    if (tier !== obstacleTier) {
       obstacleTier = tier;
-      obstacleBag = [...choices];
-      for (let index = obstacleBag.length - 1; index > 0; index -= 1) {
-        const swapIndex = Math.floor(Math.random() * (index + 1));
-        [obstacleBag[index], obstacleBag[swapIndex]] = [obstacleBag[swapIndex], obstacleBag[index]];
-      }
+      obstacleBag = [];
+      regularObstacleBag = [];
+      doubleObstacleBag = [];
+      obstacleCategoryBag = [];
+      consecutiveDoubleJumps = 0;
     }
+
+    if (tier === 3) {
+      if (obstacleCategoryBag.length === 0) {
+        obstacleCategoryBag = shuffled([
+          "double", "double", "double", "double",
+          "regular", "regular", "regular", "regular",
+          "regular", "regular", "regular", "regular",
+        ]);
+      }
+
+      if (consecutiveDoubleJumps >= 3 && obstacleCategoryBag[0] === "double") {
+        const regularIndex = obstacleCategoryBag.indexOf("regular");
+        if (regularIndex >= 0) {
+          [obstacleCategoryBag[0], obstacleCategoryBag[regularIndex]] = [
+            obstacleCategoryBag[regularIndex],
+            obstacleCategoryBag[0],
+          ];
+        }
+      }
+
+      const category = obstacleCategoryBag.shift() || "regular";
+      if (category === "double") {
+        if (doubleObstacleBag.length === 0) doubleObstacleBag = shuffled(OBSTACLE_TIERS[3]);
+        const type = doubleObstacleBag.shift() || "barrier";
+        consecutiveDoubleJumps += 1;
+        lastObstacleType = type;
+        return type;
+      }
+
+      const regularChoices = OBSTACLE_TIERS.slice(0, 3).flat();
+      if (regularObstacleBag.length === 0) regularObstacleBag = shuffled(regularChoices);
+      const type = regularObstacleBag.shift() || "puddle";
+      consecutiveDoubleJumps = 0;
+      lastObstacleType = type;
+      return type;
+    }
+
+    const choices = OBSTACLE_TIERS.slice(0, tier + 1).flat();
+
+    if (obstacleBag.length === 0) obstacleBag = shuffled(choices);
 
     let type = obstacleBag.shift() || "puddle";
     const tallTypes = new Set(["bin", "sign", "lantern", "hydrant", "tripod", ...DOUBLE_JUMP_TYPES]);
@@ -124,6 +172,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
         [type, obstacleBag[replacementIndex]] = [obstacleBag[replacementIndex], type];
       }
     }
+    consecutiveDoubleJumps = 0;
     lastObstacleType = type;
     return type;
   }
@@ -469,6 +518,10 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     nextSpawnIn = 3.4;
     lastObstacleType = "";
     obstacleBag = [];
+    regularObstacleBag = [];
+    doubleObstacleBag = [];
+    obstacleCategoryBag = [];
+    consecutiveDoubleJumps = 0;
     obstacleTier = -1;
     gameOver = false;
     scene.dataset.gameOver = "false";
@@ -611,7 +664,12 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     elapsedSeconds = 0;
     distanceLaps = 0;
     nextSpawnIn = 3.4;
+    lastObstacleType = "";
     obstacleBag = [];
+    regularObstacleBag = [];
+    doubleObstacleBag = [];
+    obstacleCategoryBag = [];
+    consecutiveDoubleJumps = 0;
     obstacleTier = -1;
     gameOver = false;
     scene.dataset.gameOver = "false";
