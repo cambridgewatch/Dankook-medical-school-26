@@ -552,7 +552,8 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   width: 9.090909%;
   height: 100%;
   background-position: center;
-  background-size: cover;
+  /* PC에서도 모바일과 같은 중앙 약 60% 구간만 보이도록 좌우를 잘라낸다. */
+  background-size: auto 166.667%;
   background-repeat: no-repeat;
 }
 .cheonho-run-scene[data-time="day"] .scene-01 { background-image: url("../img/cheonhoji-day-01-bus-stop-v2.jpg"); }
@@ -678,6 +679,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .turtle-mark { transform: scale(.84); }
   .cheonho-play-button { grid-column: 1 / -1; width: 100%; height: 48px; min-width: 0; border-radius: 12px; }
   .cheonho-run-scene { aspect-ratio: 16 / 10; min-height: 0; }
+  .cheonho-background-track > span { background-size: cover; }
   .cheonho-background-track { animation-duration: 100s; }
   .cheonho-fixed-walkway { height: 26%; border-top-width: 5px; }
   .cheonho-fixed-walkway::before { top: -25px; height: 25px; background: linear-gradient(180deg, #754326 0 5px, transparent 5px 19px, #754326 19px 24px), repeating-linear-gradient(90deg, #6b3b22 0 5px, transparent 5px 53px); }
