@@ -87,23 +87,48 @@ function jacketBackPanel(bodyWidth, mat) {
   return back;
 }
 
+function jacketTorsoBand(variant, mat) {
+  const isBlue = variant === "blue";
+  const centerY = isBlue ? 2.25 : 2.22;
+  const scaleY = isBlue ? 2.065 : 2.035;
+  const topY = 3.10;
+  const bottomY = 1.02;
+  const thetaStart = Math.acos((topY - centerY) / scaleY);
+  const thetaEnd = Math.acos((bottomY - centerY) / scaleY);
+  const geometry = new THREE.SphereGeometry(
+    1,
+    56,
+    36,
+    0,
+    Math.PI * 2,
+    thetaStart,
+    thetaEnd - thetaStart
+  );
+  return mesh(
+    geometry,
+    mat,
+    "Jacket_Body",
+    [0, centerY, 0],
+    [isBlue ? 1.405 : 1.275, scaleY, isBlue ? 1.045 : 0.945]
+  );
+}
+
 function addVarsityJacket(root, leftArm, rightArm, variant) {
   const brown = material(0x35231c, 0.84);
   const brownDark = material(0x251711, 0.88);
   const ivory = material(0xf4f0e6, 0.82);
   const silver = material(0xf4f5f2, 0.34, 0.16);
   const bodyWidth = variant === "blue" ? 1.40 : 1.27;
-  const bodyHeight = variant === "blue" ? 1.31 : 1.29;
-  const bodyDepth = variant === "blue" ? 1.10 : 1.00;
-  const bodyCenterY = 2.12;
-  const bodyCenterZ = 0.08;
+  const bodyHeight = variant === "blue" ? 2.065 : 2.035;
+  const bodyDepth = variant === "blue" ? 1.045 : 0.945;
+  const bodyCenterY = variant === "blue" ? 2.25 : 2.22;
+  const bodyCenterZ = 0;
   const surfaceZ = (y, lift = 0.06) => {
     const normalizedY = Math.max(-0.995, Math.min(0.995, (y - bodyCenterY) / bodyHeight));
     return bodyCenterZ + bodyDepth * Math.sqrt(1 - normalizedY * normalizedY) + lift;
   };
 
-  root.add(sphere(brown, "Jacket_Body", [0, bodyCenterY, bodyCenterZ], [bodyWidth, bodyHeight, bodyDepth], 48));
-  root.add(jacketBackPanel(bodyWidth + 0.12, brown));
+  root.add(jacketTorsoBand(variant, brown));
   [-1, 1].forEach((side) => {
     const shoulderPoints = [
       new THREE.Vector3(side * 0.24, 2.83, surfaceZ(2.83, 0.025)),
