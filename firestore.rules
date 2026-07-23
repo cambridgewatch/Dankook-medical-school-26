@@ -166,6 +166,61 @@ service cloud.firestore {
       }
     }
 
+    // 천호지 달리기: 실명 기록은 본인과 관리자만, 점수판은 승인된 사용자만 읽습니다.
+    match /gameScores/{uid} {
+      allow read: if isAdmin()
+        || (canUseSite() && request.auth.uid == uid);
+      allow create: if canUseSite()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly([
+          'uid', 'email', 'name', 'bestLaps', 'updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'uid', 'email', 'name', 'bestLaps', 'updatedAt'
+        ])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 20
+        && request.resource.data.bestLaps is number
+        && request.resource.data.bestLaps >= 0
+        && request.resource.data.bestLaps <= 10000
+        && request.resource.data.updatedAt == request.time;
+      allow update: if canUseSite()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly([
+          'uid', 'email', 'name', 'bestLaps', 'updatedAt'
+        ])
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.name == resource.data.name
+        && request.resource.data.bestLaps is number
+        && request.resource.data.bestLaps >= resource.data.bestLaps
+        && request.resource.data.bestLaps <= 10000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isAdmin();
+    }
+
+    match /gameLeaderboard/{uid} {
+      allow read: if canUseSite();
+      allow create: if canUseSite()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['bestLaps', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['bestLaps', 'updatedAt'])
+        && request.resource.data.bestLaps is number
+        && request.resource.data.bestLaps >= 0
+        && request.resource.data.bestLaps <= 10000
+        && request.resource.data.updatedAt == request.time;
+      allow update: if canUseSite()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['bestLaps', 'updatedAt'])
+        && request.resource.data.bestLaps is number
+        && request.resource.data.bestLaps >= resource.data.bestLaps
+        && request.resource.data.bestLaps <= 10000
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

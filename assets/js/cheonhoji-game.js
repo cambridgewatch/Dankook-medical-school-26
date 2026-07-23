@@ -23,6 +23,7 @@ if (sceneElement && canvas && playButton) {
   let jumpHeld = false;
   let jumpOffset = 0;
   let jumpVelocity = 0;
+  let jumpCount = 0;
   let jumpHoldUntil = 0;
   let previousFrameTime = 0;
 
@@ -136,17 +137,18 @@ if (sceneElement && canvas && playButton) {
     jumpHeld = false;
     jumpOffset = 0;
     jumpVelocity = 0;
+    jumpCount = 0;
     jumpHoldUntil = 0;
     canvas.style.setProperty("--cheonho-jump-y", "0px");
     sceneElement.classList.remove("is-jumping");
   }
 
   function startJump() {
-    if (!running || jumping) return false;
+    if (!running || jumpCount >= 2) return false;
     jumping = true;
     jumpHeld = true;
-    jumpOffset = 0;
-    jumpVelocity = 4.3;
+    jumpVelocity = jumpCount === 0 ? 4.3 : 4.55;
+    jumpCount += 1;
     jumpHoldUntil = performance.now() + 320;
     sceneElement.classList.add("is-jumping", "has-jumped");
     return true;
@@ -185,11 +187,23 @@ if (sceneElement && canvas && playButton) {
     playButton.setAttribute("aria-pressed", running ? "true" : "false");
     playButton.querySelector("span").textContent = running ? "잠시 멈추기" : "달리기 시작";
     playButton.querySelector("i").textContent = running ? "Ⅱ" : "▶";
+    sceneElement.dispatchEvent(new CustomEvent("cheonho:runningchange", {
+      detail: { running },
+    }));
   }
 
   lightToggleButtons.forEach((button) => button.addEventListener("click", () => applyTime(selectedTime === "day" ? "night" : "day")));
   characterButtons.forEach((button) => button.addEventListener("click", () => applyCharacter(button.dataset.cheonhoCharacter)));
-  playButton.addEventListener("click", () => setRunning(!running));
+  playButton.addEventListener("click", () => {
+    if (sceneElement.dataset.gameOver === "true") {
+      sceneElement.dispatchEvent(new CustomEvent("cheonho:restart"));
+      return;
+    }
+    setRunning(!running);
+  });
+  sceneElement.addEventListener("cheonho:setrunning", (event) => {
+    setRunning(Boolean(event.detail?.running));
+  });
 
   function fullscreenActive() {
     return document.fullscreenElement === sceneElement ||
@@ -209,7 +223,11 @@ if (sceneElement && canvas && playButton) {
   }
 
   async function enterFullscreen() {
-    setRunning(true);
+    if (sceneElement.dataset.gameOver === "true") {
+      sceneElement.dispatchEvent(new CustomEvent("cheonho:restart"));
+    } else {
+      setRunning(true);
+    }
     try {
       if (sceneElement.requestFullscreen) {
         await sceneElement.requestFullscreen();

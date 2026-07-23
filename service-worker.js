@@ -1,4 +1,4 @@
-const CACHE_NAME = "dku-med26-app-v100";
+const CACHE_NAME = "dku-med26-app-v101";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -52,7 +52,8 @@ const APP_SHELL = [
   "./assets/js/admin-backup.js",
   "./assets/js/cheonhoji-animals.js",
   "./assets/js/cheonhoji-animals-v3-curved.js",
-  "./assets/js/cheonhoji-game.js"
+  "./assets/js/cheonhoji-game.js",
+  "./assets/js/cheonhoji-runner.js"
 ];
 
 self.addEventListener("install", (event) => {
