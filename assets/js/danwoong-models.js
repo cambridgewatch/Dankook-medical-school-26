@@ -84,13 +84,15 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
 
   root.add(sphere(brown, "Jacket_Body", [0, bodyCenterY, bodyCenterZ], [bodyWidth, bodyHeight, bodyDepth], 48));
   [-1, 1].forEach((side) => {
-    root.add(sphere(
+    const shoulder = sphere(
       brown,
       `Jacket_Shoulder_${side < 0 ? "L" : "R"}`,
-      [side * bodyWidth * 0.64, 2.96, 1.08],
-      [bodyWidth * 0.40, 0.18, variant === "blue" ? 0.29 : 0.27],
+      [side * 0.78, 2.92, 1.08],
+      [0.42, 0.16, variant === "blue" ? 0.29 : 0.27],
       40
-    ));
+    );
+    shoulder.rotation.z = side * -0.20;
+    root.add(shoulder);
   });
 
   const seamPoints = [1.15, 1.52, 1.90, 2.28, 2.66, 2.91]
