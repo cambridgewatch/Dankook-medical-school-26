@@ -39,11 +39,11 @@ function curve(parent, material, name, points, radius = 0.012) {
   return addMesh(parent, new THREE.TubeGeometry(path, 24, radius, 8, false), material, name, [0, 0, 0]);
 }
 
-function softEye(parent, x, y, z, scale = 1) {
+function softEye(parent, x, y, z, scale = 1, side = 1) {
   const iris = mat(0x241c18, 0.58);
   const shine = mat(0xfffbf4, 0.52);
   blob(parent, iris, "Eye", [x, y, z], [0.125 * scale, 0.155 * scale, 0.070 * scale], 36);
-  blob(parent, shine, "EyeShine", [x - 0.032 * scale, y + 0.047 * scale, z + 0.061 * scale], [0.031 * scale, 0.039 * scale, 0.014 * scale], 18);
+  blob(parent, shine, "EyeShine", [x - 0.032 * scale, y + 0.047 * scale, z + side * 0.061 * scale], [0.031 * scale, 0.039 * scale, 0.014 * scale], 18);
 }
 
 export function createOtterV3() {
@@ -60,8 +60,8 @@ export function createOtterV3() {
   const body = blob(root, fur, "Body", [0, 1.23, 0], [0.78, 1.05, 0.64], 56);
   blob(root, cream, "Belly", [0, 1.27, 0.603], [0.48, 0.66, 0.050], 44);
 
-  blob(root, furDark, "EarLeft", [-0.61, 2.55, 0.02], [0.22, 0.24, 0.16], 36);
-  blob(root, furDark, "EarRight", [0.61, 2.55, 0.02], [0.22, 0.24, 0.16], 36);
+  blob(root, furDark, "EarLeft", [-0.66, 2.62, 0.01], [0.24, 0.27, 0.18], 36);
+  blob(root, furDark, "EarRight", [0.66, 2.62, 0.01], [0.24, 0.27, 0.18], 36);
   const head = blob(root, fur, "Head", [0, 2.33, 0.06], [0.89, 0.72, 0.68], 64);
 
   // Broad cream muzzle prevents the eyes and mouth from reading like a human face.
@@ -214,18 +214,28 @@ export function createTurtleV3() {
   });
 
   capsule(root, skin, "Neck", [-1.02, 0.86, 0], 0.25, 0.34, [0, 0, Math.PI / 2], [1, 1, 0.92]);
-  const head = blob(root, skin, "Head", [-1.38, 1.00, 0.03], [0.49, 0.44, 0.41], 52);
-  blob(root, skinLight, "Muzzle", [-1.70, 0.91, 0.09], [0.23, 0.19, 0.27], 36);
+  const head = blob(root, skin, "Head", [-1.38, 1.00, 0], [0.49, 0.44, 0.41], 52);
+  blob(root, skinLight, "Muzzle", [-1.70, 0.91, 0], [0.23, 0.19, 0.27], 36);
   softEye(root, -1.54, 1.14, 0.397, 0.84);
+  softEye(root, -1.54, 1.14, -0.397, 0.84, -1);
   blob(root, face, "Nostril", [-1.84, 0.98, 0.245], [0.020, 0.026, 0.013], 14);
+  blob(root, face, "NostrilFar", [-1.84, 0.98, -0.245], [0.020, 0.026, 0.013], 14);
   curve(root, face, "Smile", [
     new THREE.Vector3(-1.85, 0.83, 0.280),
     new THREE.Vector3(-1.71, 0.79, 0.339),
     new THREE.Vector3(-1.55, 0.82, 0.376),
   ], 0.012);
+  curve(root, face, "SmileFar", [
+    new THREE.Vector3(-1.85, 0.83, -0.280),
+    new THREE.Vector3(-1.71, 0.79, -0.339),
+    new THREE.Vector3(-1.55, 0.82, -0.376),
+  ], 0.012);
   turtleSpot(root, spot, [-1.66, 1.29, 0.357], 0.055);
   turtleSpot(root, spot, [-1.49, 1.34, 0.382], 0.045);
   turtleSpot(root, spot, [-1.78, 1.23, 0.292], 0.039);
+  turtleSpot(root, spot, [-1.66, 1.29, -0.357], 0.055);
+  turtleSpot(root, spot, [-1.49, 1.34, -0.382], 0.045);
+  turtleSpot(root, spot, [-1.78, 1.23, -0.292], 0.039);
 
   const limbs = {};
   [

@@ -3,7 +3,7 @@ import {
   createOtterV3 as createOtter,
   createTurtleV3 as createTurtle,
   disposeAnimalV3 as disposeAnimal,
-} from "./cheonhoji-animals-v3-curved.js?rev=game-v3";
+} from "./cheonhoji-animals-v3-curved.js?rev=game-v4";
 
 const sceneElement = document.querySelector("#cheonhoRunScene");
 const canvas = document.querySelector("#cheonhoCharacterCanvas");
@@ -79,7 +79,7 @@ if (sceneElement && canvas && playButton) {
       disposeAnimal(animal);
     }
     animal = selectedCharacter === "turtle" ? createTurtle() : createOtter();
-    animal.rotation.y = selectedCharacter === "turtle" ? -0.34 : 0.50;
+    animal.rotation.y = selectedCharacter === "turtle" ? Math.PI - 0.34 : 0.50;
     animal.scale.setScalar(selectedCharacter === "turtle" ? 0.82 : 0.88);
     animal.position.set(selectedCharacter === "turtle" ? -0.05 : 0, selectedCharacter === "turtle" ? 0.05 : 0.02, 0);
     const parts = animal.userData.parts || {};
@@ -130,6 +130,13 @@ if (sceneElement && canvas && playButton) {
     } catch (error) {
       sceneElement.classList.add("is-fullscreen-fallback");
     }
+    if (window.matchMedia("(max-width: 900px)").matches && screen.orientation?.lock) {
+      try {
+        await screen.orientation.lock("landscape");
+      } catch (error) {
+        // iOS and some browsers use the portrait-to-landscape CSS fallback.
+      }
+    }
     syncFullscreenState();
   }
 
@@ -143,6 +150,7 @@ if (sceneElement && canvas && playButton) {
     } catch (error) {
       // The fixed-position fallback below still restores the page.
     }
+    if (screen.orientation?.unlock) screen.orientation.unlock();
     sceneElement.classList.remove("is-fullscreen-fallback");
     syncFullscreenState();
   }

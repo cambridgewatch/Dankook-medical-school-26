@@ -648,6 +648,27 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   z-index: 10000;
 }
 body.cheonho-fullscreen-open { overflow: hidden; }
+
+@media (max-width: 900px) and (orientation: portrait) {
+  .cheonho-run-scene:fullscreen,
+  .cheonho-run-scene:-webkit-full-screen,
+  .cheonho-run-scene.is-fullscreen-fallback {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 100vh;
+    height: 100vw;
+    min-height: 0;
+    transform: translate(-50%, -50%) rotate(90deg);
+    transform-origin: center;
+  }
+  .cheonho-run-scene:fullscreen .cheonho-fullscreen-exit,
+  .cheonho-run-scene:-webkit-full-screen .cheonho-fullscreen-exit,
+  .cheonho-run-scene.is-fullscreen-fallback .cheonho-fullscreen-exit {
+    top: max(12px, env(safe-area-inset-right));
+    right: max(12px, env(safe-area-inset-bottom));
+  }
+}
 .cheonho-fixed-walkway {
   position: absolute;
   inset: auto 0 0;
