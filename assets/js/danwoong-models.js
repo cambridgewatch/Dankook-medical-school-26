@@ -84,15 +84,18 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
 
   root.add(sphere(brown, "Jacket_Body", [0, bodyCenterY, bodyCenterZ], [bodyWidth, bodyHeight, bodyDepth], 48));
   [-1, 1].forEach((side) => {
-    const shoulder = sphere(
+    const shoulderPoints = [
+      new THREE.Vector3(side * 0.24, 2.83, surfaceZ(2.83, 0.025)),
+      new THREE.Vector3(side * 0.63, 2.98, 1.30),
+      new THREE.Vector3(side * 1.04, 2.87, 1.18),
+    ];
+    root.add(mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(shoulderPoints), 20, 0.20, 12, false),
       brown,
       `Jacket_Shoulder_${side < 0 ? "L" : "R"}`,
-      [side * 0.78, 2.92, 1.08],
-      [0.42, 0.16, variant === "blue" ? 0.29 : 0.27],
-      40
-    );
-    shoulder.rotation.z = side * -0.20;
-    root.add(shoulder);
+      [0, 0, 0],
+      [1, 1, 1]
+    ));
   });
 
   const seamPoints = [1.15, 1.52, 1.90, 2.28, 2.66, 2.91]
