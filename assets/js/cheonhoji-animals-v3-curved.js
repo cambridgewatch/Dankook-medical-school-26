@@ -97,33 +97,82 @@ export function createOtterV3() {
   return root;
 }
 
-function shellTileOnSurface(parent, material, seam, shellShape, tile, side) {
-  const [x, y, sx, sy, rotation] = tile;
-  const dx = (x - shellShape.cx) / shellShape.rx;
-  const dy = (y - shellShape.cy) / shellShape.ry;
-  const radial = Math.max(0.02, 1 - dx * dx - dy * dy);
-  const z = side * shellShape.rz * Math.sqrt(radial);
+function ellipsoidSurfacePoint(shellShape, x, y, side, offset) {
+  let dx = (x - shellShape.cx) / shellShape.rx;
+  let dy = (y - shellShape.cy) / shellShape.ry;
+  const q = dx * dx + dy * dy;
+  if (q > 0.965) {
+    const clamp = Math.sqrt(0.965 / q);
+    dx *= clamp;
+    dy *= clamp;
+    x = shellShape.cx + dx * shellShape.rx;
+    y = shellShape.cy + dy * shellShape.ry;
+  }
+  const z = side * shellShape.rz * Math.sqrt(Math.max(0.001, 1 - dx * dx - dy * dy));
   const normal = new THREE.Vector3(
-    (x - shellShape.cx) / (shellShape.rx * shellShape.rx),
-    (y - shellShape.cy) / (shellShape.ry * shellShape.ry),
+    dx / shellShape.rx,
+    dy / shellShape.ry,
     z / (shellShape.rz * shellShape.rz)
   ).normalize();
-  const tangent = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
-  const twist = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), side * rotation);
+  return new THREE.Vector3(x, y, z).addScaledVector(normal, offset);
+}
 
-  const seamPlate = blob(parent, seam, "ShellTileSeam", [
-    x + normal.x * 0.012,
-    y + normal.y * 0.012,
-    z + normal.z * 0.012,
-  ], [sx * 1.065, sy * 1.065, 0.024], 32);
-  seamPlate.quaternion.copy(tangent).multiply(twist);
+function curvedShellPatch(shellShape, tile, side, offset, scaleFactor = 1) {
+  const [cx, cy, sx, sy, rotation] = tile;
+  const rings = 7;
+  const segments = 32;
+  const positions = [];
+  const indices = [];
+  const cosR = Math.cos(side * rotation);
+  const sinR = Math.sin(side * rotation);
 
-  const plate = blob(parent, material, "ShellTile", [
-    x + normal.x * 0.026,
-    y + normal.y * 0.026,
-    z + normal.z * 0.026,
-  ], [sx, sy, 0.025], 32);
-  plate.quaternion.copy(tangent).multiply(twist);
+  const pushPoint = (radius, angle) => {
+    const localX = sx * scaleFactor * radius * Math.cos(angle);
+    const localY = sy * scaleFactor * radius * Math.sin(angle);
+    const x = cx + localX * cosR - localY * sinR;
+    const y = cy + localX * sinR + localY * cosR;
+    const point = ellipsoidSurfacePoint(shellShape, x, y, side, offset);
+    positions.push(point.x, point.y, point.z);
+  };
+
+  pushPoint(0, 0);
+  for (let ring = 1; ring <= rings; ring += 1) {
+    const radius = ring / rings;
+    for (let segment = 0; segment < segments; segment += 1) {
+      pushPoint(radius, (segment / segments) * Math.PI * 2);
+    }
+  }
+
+  for (let segment = 0; segment < segments; segment += 1) {
+    indices.push(0, 1 + segment, 1 + ((segment + 1) % segments));
+  }
+  for (let ring = 2; ring <= rings; ring += 1) {
+    const inner = 1 + (ring - 2) * segments;
+    const outer = 1 + (ring - 1) * segments;
+    for (let segment = 0; segment < segments; segment += 1) {
+      const next = (segment + 1) % segments;
+      indices.push(inner + segment, outer + segment, outer + next);
+      indices.push(inner + segment, outer + next, inner + next);
+    }
+  }
+  if (side < 0) {
+    for (let index = 0; index < indices.length; index += 3) {
+      const swap = indices[index + 1];
+      indices[index + 1] = indices[index + 2];
+      indices[index + 2] = swap;
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function shellTileOnSurface(parent, material, seam, shellShape, tile, side) {
+  addMesh(parent, curvedShellPatch(shellShape, tile, side, 0.004, 1.055), seam, "ShellTileSeam", [0, 0, 0]);
+  addMesh(parent, curvedShellPatch(shellShape, tile, side, 0.010, 1), material, "ShellTile", [0, 0, 0]);
 }
 
 function turtleSpot(parent, material, position, size) {
