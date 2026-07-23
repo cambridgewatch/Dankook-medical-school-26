@@ -226,11 +226,35 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const ratio = ratios[obstacle.type] || ratios.curb;
     const mobileScale = coarsePointer ? 0.94 : 1;
     const widthScale = mobileTurtle ? 0.87 : mobileScale;
-    const heightScale = mobileTurtle
-      ? (DOUBLE_JUMP_TYPES.has(obstacle.type) ? 1.08 : 0.88)
-      : mobileScale;
-    obstacle.element.style.setProperty("--obstacle-w", `${Math.max(12, sceneWidth * ratio.width * widthScale)}px`);
-    obstacle.element.style.setProperty("--obstacle-h", `${Math.max(8, sceneHeight * ratio.height * heightScale)}px`);
+    const obstacleWidth = Math.max(12, sceneWidth * ratio.width * widthScale);
+    let obstacleHeight;
+
+    if (DOUBLE_JUMP_TYPES.has(obstacle.type)) {
+      const turtleJumpBoost = mobileTurtle ? 1.12 : 1;
+      const gravity = 13.5;
+      const firstJumpVelocity = 6.2 * turtleJumpBoost;
+      const secondJumpVelocity = 6.4 * turtleJumpBoost;
+      const jumpPixelsPerUnit = Math.max(character.offsetHeight, 1) * 0.32;
+      const maximumDoubleJump = (
+        (firstJumpVelocity ** 2 + secondJumpVelocity ** 2) / (2 * gravity)
+      ) * jumpPixelsPerUnit;
+      const obstacleSpeed = Math.max(sceneWidth * 0.095 * difficultyFor(currentLaps()), 1);
+      const halfCrossingTime = (obstacleWidth / 2) / obstacleSpeed;
+      const trajectoryDrop = 0.5 * gravity * (halfCrossingTime ** 2) * jumpPixelsPerUnit;
+      const controlMargin = Math.max(6, character.offsetHeight * 0.09);
+      const thicknessAdjustedHeight = maximumDoubleJump - trajectoryDrop - controlMargin;
+      obstacleHeight = Math.max(
+        sceneHeight * 0.14,
+        Math.min(sceneHeight * 0.205, thicknessAdjustedHeight)
+      );
+      obstacle.element.style.setProperty("--jump-arc-w", `${Math.max(obstacleWidth * 2.45, character.offsetWidth * 1.55)}px`);
+    } else {
+      const heightScale = mobileTurtle ? 0.88 : mobileScale;
+      obstacleHeight = Math.max(8, sceneHeight * ratio.height * heightScale);
+    }
+
+    obstacle.element.style.setProperty("--obstacle-w", `${obstacleWidth}px`);
+    obstacle.element.style.setProperty("--obstacle-h", `${obstacleHeight}px`);
   }
 
   function spawnObstacle() {
@@ -239,7 +263,12 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     element.className = `cheonho-obstacle cheonho-obstacle-${type}`;
     element.dataset.obstacleType = type;
     if (DOUBLE_JUMP_TYPES.has(type)) {
-      element.insertAdjacentHTML("beforeend", '<span class="cheonho-double-jump-label">2× JUMP</span>');
+      element.insertAdjacentHTML("beforeend", `
+        <span class="cheonho-jump-arc" aria-hidden="true">
+          <svg viewBox="0 0 100 48" preserveAspectRatio="none"><path d="M2 46 Q50 1 98 46" /></svg>
+        </span>
+        <span class="cheonho-double-jump-label">2× JUMP</span>
+      `);
     }
     obstacleLayer.appendChild(element);
     const obstacle = { element, x: 108, type };
