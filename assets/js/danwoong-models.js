@@ -72,10 +72,11 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
   const brownDark = material(0x251711, 0.88);
   const ivory = material(0xf4f0e6, 0.82);
   const silver = material(0xf4f5f2, 0.34, 0.16);
-  const bodyWidth = variant === "blue" ? 1.36 : 1.25;
-  const bodyDepth = variant === "blue" ? 1.045 : 0.965;
+  const bodyWidth = variant === "blue" ? 1.47 : 1.34;
+  const bodyHeight = variant === "blue" ? 1.31 : 1.29;
+  const bodyDepth = variant === "blue" ? 1.12 : 1.03;
 
-  root.add(sphere(brown, "Jacket_Body", [0, 2.12, 0.08], [bodyWidth, 1.17, bodyDepth], 48));
+  root.add(sphere(brown, "Jacket_Body", [0, 2.15, 0.08], [bodyWidth, bodyHeight, bodyDepth], 48));
   root.add(mesh(new THREE.BoxGeometry(1, 1, 1), brownDark, "Jacket_Placket", [0, 2.08, bodyDepth + 0.055], [0.095, 1.02, 0.035]));
 
   [2.86, 2.43, 2.0, 1.57, 1.17].forEach((y, index) => {
@@ -87,7 +88,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
       new THREE.BoxGeometry(1, 1, 1),
       ivory,
       `Jacket_Collar_${side < 0 ? "L" : "R"}`,
-      [side * 0.39, 2.74, bodyDepth + 0.105],
+      [side * 0.39, 2.94, bodyDepth * 0.77 + 0.06],
       [0.45, 0.055, 0.035],
       [0, 0, side * -0.48]
     ));
@@ -95,7 +96,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
       new THREE.BoxGeometry(1, 1, 1),
       brownDark,
       `Jacket_CollarStripe_${side < 0 ? "L" : "R"}`,
-      [side * 0.4, 2.785, bodyDepth + 0.135],
+      [side * 0.4, 2.985, bodyDepth * 0.77 + 0.09],
       [0.45, 0.022, 0.02],
       [0, 0, side * -0.48]
     ));
@@ -109,12 +110,12 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
     ));
   });
 
-  [1.38, 1.47, 1.56].forEach((y, index) => {
+  [1.06, 1.16, 1.26].forEach((y, index) => {
     root.add(mesh(
       new THREE.BoxGeometry(1, 1, 1),
       index === 1 ? ivory : brownDark,
       `Jacket_Waistband_${index + 1}`,
-      [0, y, bodyDepth * 0.87 + 0.08],
+      [0, y, bodyDepth * 0.75 + 0.10],
       [bodyWidth * 0.91, 0.035, 0.035]
     ));
   });
@@ -126,12 +127,16 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
     rightArm.add(sphere(ivory, "Jacket_Sleeve_R", [0.03, -0.70, 0.045], [0.37, 0.79, 0.40], 32));
     leftArm.add(mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.16, 28), brownDark, "Jacket_Cuff_L", [-0.03, -1.43, 0.045], [1, 1, 1]));
     rightArm.add(mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.16, 28), brownDark, "Jacket_Cuff_R", [0.03, -1.43, 0.045], [1, 1, 1]));
+    leftArm.add(mesh(new THREE.CylinderGeometry(0.385, 0.385, 0.035, 28), ivory, "Jacket_CuffStripe_L", [-0.03, -1.43, 0.045], [1, 1, 1]));
+    rightArm.add(mesh(new THREE.CylinderGeometry(0.385, 0.385, 0.035, 28), ivory, "Jacket_CuffStripe_R", [0.03, -1.43, 0.045], [1, 1, 1]));
     rightArm.add(labelPlane("26", "Jacket_26", [0.03, -0.59, 0.455], [0.45, 0.34]));
   } else {
     leftArm.add(sphere(ivory, "Jacket_Sleeve_L", [-0.58, -0.03, 0.025], [0.69, 0.34, 0.37], 32));
     rightArm.add(sphere(ivory, "Jacket_Sleeve_R", [0.58, -0.03, 0.025], [0.69, 0.34, 0.37], 32));
     leftArm.add(mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.16, 28), brownDark, "Jacket_Cuff_L", [-1.18, -0.03, 0.025], [1, 1, 1], [0, 0, Math.PI / 2]));
     rightArm.add(mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.16, 28), brownDark, "Jacket_Cuff_R", [1.18, -0.03, 0.025], [1, 1, 1], [0, 0, Math.PI / 2]));
+    leftArm.add(mesh(new THREE.CylinderGeometry(0.355, 0.355, 0.035, 28), ivory, "Jacket_CuffStripe_L", [-1.18, -0.03, 0.025], [1, 1, 1], [0, 0, Math.PI / 2]));
+    rightArm.add(mesh(new THREE.CylinderGeometry(0.355, 0.355, 0.035, 28), ivory, "Jacket_CuffStripe_R", [1.18, -0.03, 0.025], [1, 1, 1], [0, 0, Math.PI / 2]));
     rightArm.add(labelPlane("26", "Jacket_26", [0.58, -0.03, 0.405], [0.43, 0.32]));
   }
 }
