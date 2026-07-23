@@ -737,6 +737,24 @@ body.cheonho-fullscreen-open { overflow: hidden; }
   100% { transform: translate3d(-90.909091%, 0, 0); }
 }
 
+/* A transformed 11-screen-wide layer can exceed the mobile GPU texture limit
+   after fullscreen rotation. Moving it by layout position keeps each scene
+   independently paintable instead of flattening the whole course to one layer. */
+@keyframes cheonho-background-scroll-mobile-fullscreen {
+  0% { left: 0; transform: none; }
+  100% { left: -1000%; transform: none; }
+}
+
+@media (max-width: 900px) {
+  .cheonho-run-scene:fullscreen .cheonho-background-track,
+  .cheonho-run-scene:-webkit-full-screen .cheonho-background-track,
+  .cheonho-run-scene.is-fullscreen-fallback .cheonho-background-track {
+    transform: none;
+    will-change: auto;
+    animation-name: cheonho-background-scroll-mobile-fullscreen;
+  }
+}
+
 @media (max-width: 640px) {
   .mini-game-hub { min-height: 300px; }
   .mini-game-coming-card { align-items: flex-start; gap: 16px; padding: 24px 20px; border-radius: 16px; }
