@@ -9,10 +9,11 @@
   <meta name="apple-mobile-web-app-title" content="의대 26학번" />
   <link rel="apple-touch-icon" href="assets/img/icon-180.png" />
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
-  <title>로그인 · 단국대 의대 26학번</title>
-<link rel="stylesheet" href="assets/css/style.css?v=97" />
+  <title>미니게임 · 단국대 의대 26학번</title>
+  <script src="assets/js/session-hint.js?v=2"></script>
+  <link rel="stylesheet" href="assets/css/style.css?v=97" />
 </head>
-<body>
+<body class="locked">
 
   <header class="site-header">
     <div class="container nav">
@@ -38,38 +39,24 @@
 
   <section class="page-head">
     <div class="container">
-      <span class="eyebrow">MEMBER</span>
-      <h1>로그인</h1>
-      <p>26학번 동기만 이용할 수 있어요. 이름과 비밀번호로 로그인하세요.</p>
+      <span class="eyebrow">MINI GAMES</span>
+      <h1>미니게임</h1>
+      <p>단웅이와 단비가 등장하는 짧은 게임을 즐겨보세요.</p>
     </div>
   </section>
 
-  <section class="section">
+  <main class="section mini-game-hub">
     <div class="container">
-      <div class="auth-wrap">
-
-        <div class="logged-box" id="loggedInBox">
-        <span class="inline-status-icon" data-icon="check"></span>현재 <strong id="loggedInName"></strong> 님으로 로그인되어 있습니다.
-          <a href="index.html">홈으로 →</a>
-          <a href="settings.html">계정 설정 →</a>
+      <article class="mini-game-coming-card">
+        <span class="mini-game-paw" aria-hidden="true"></span>
+        <div>
+          <small>COMING SOON</small>
+          <h2>첫 번째 미니게임 준비 중</h2>
+          <p>간단하게 즐기고 점수를 기록할 수 있는 단웅이·단비 게임이 이곳에 추가될 예정입니다.</p>
         </div>
-
-        <div class="auth-card">
-          <!-- 로그인 -->
-          <form class="auth-form" id="loginForm">
-            <label for="liName">이름</label>
-            <input type="text" id="liName" placeholder="홍길동" autocomplete="username" />
-            <label for="liPw">비밀번호</label>
-            <input type="password" id="liPw" placeholder="비밀번호" autocomplete="current-password" />
-            <button type="submit" class="btn btn-solid">로그인</button>
-            <p class="auth-hint">비밀번호를 모르면 대표에게 문의해 주세요.</p>
-          </form>
-
-          <div class="auth-msg" id="authMsg"></div>
-        </div>
-      </div>
+      </article>
     </div>
-  </section>
+  </main>
 
   <footer class="site-footer">
     <div class="container">
@@ -79,7 +66,12 @@
           <p>Dankook University College of Medicine, Class of 2026.</p>
         </div>
         <div class="footer-links">
-          <div><h5>단국대 링크</h5><a href="https://med.dankook.ac.kr/home" target="_blank" rel="noopener">의과대학 홈페이지 ↗</a><a href="https://portal.dankook.ac.kr/login.jsp" target="_blank" rel="noopener">단국대 포털 ↗</a><a href="https://nlms.dankook.ac.kr/" target="_blank" rel="noopener">이러닝 캠퍼스 ↗</a></div>
+          <div>
+            <h5>단국대 링크</h5>
+            <a href="https://med.dankook.ac.kr/home" target="_blank" rel="noopener">의과대학 홈페이지 ↗</a>
+            <a href="https://portal.dankook.ac.kr/login.jsp" target="_blank" rel="noopener">단국대 포털 ↗</a>
+            <a href="https://nlms.dankook.ac.kr/" target="_blank" rel="noopener">이러닝 캠퍼스 ↗</a>
+          </div>
         </div>
       </div>
       <div class="footer-bottom">
@@ -89,8 +81,9 @@
     </div>
   </footer>
 
-<script src="assets/js/main.js?v=83"></script>
-  <script type="module" src="assets/js/auth.js?v=42"></script>
+  <script src="assets/js/main.js?v=83"></script>
+  <script src="assets/js/effects3d.js?v=11"></script>
   <script type="module" src="assets/js/alerts.js?v=32"></script>
+  <script type="module" src="assets/js/gate.js?v=23"></script>
 </body>
 </html>
