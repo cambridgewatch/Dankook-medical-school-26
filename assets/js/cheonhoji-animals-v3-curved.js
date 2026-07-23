@@ -1,5 +1,7 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
 
+// Curved-shell revision: shell markings are projected onto both sides.
+
 function mat(color, roughness = 0.88) {
   return new THREE.MeshStandardMaterial({ color, roughness, metalness: 0 });
 }
