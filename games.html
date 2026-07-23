@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-  <link rel="stylesheet" href="assets/css/style.css?v=104" />
+  <link rel="stylesheet" href="assets/css/style.css?v=105" />
 </head>
 <body class="locked">
 
@@ -72,7 +72,10 @@
               <button type="button" data-cheonho-character="turtle" aria-pressed="false"><i class="turtle-mark"></i><b>거북이</b></button>
             </div>
           </div>
-          <button type="button" class="cheonho-play-button" id="cheonhoPlayButton" aria-pressed="false"><i>▶</i><span>달리기 시작</span></button>
+          <div class="cheonho-action-buttons">
+            <button type="button" class="cheonho-play-button" id="cheonhoPlayButton" aria-pressed="false"><i>▶</i><span>달리기 시작</span></button>
+            <button type="button" class="cheonho-fullscreen-button" id="cheonhoFullscreenButton" aria-label="전체화면으로 보기"><i aria-hidden="true">⛶</i><span>전체화면</span></button>
+          </div>
         </div>
 
         <div class="cheonho-run-scene is-paused" id="cheonhoRunScene" data-time="day" role="img" aria-label="버스 승차장부터 천호지 주변 명소가 낮과 밤 배경으로 자연스럽게 이어지는 순환 달리기 코스">
@@ -91,6 +94,7 @@
           </div>
           <div class="cheonho-fixed-walkway" aria-hidden="true"></div>
           <canvas class="cheonho-character-canvas" id="cheonhoCharacterCanvas" aria-hidden="true"></canvas>
+          <button type="button" class="cheonho-fullscreen-exit" id="cheonhoFullscreenExit" aria-label="전체화면 닫기">×</button>
         </div>
 
         <footer class="cheonho-run-foot">
@@ -123,6 +127,6 @@
   <script src="assets/js/effects3d.js?v=17"></script>
   <script type="module" src="assets/js/alerts.js?v=33"></script>
   <script type="module" src="assets/js/gate.js?v=23"></script>
-  <script type="module" src="assets/js/cheonhoji-game.js?v=1"></script>
+  <script type="module" src="assets/js/cheonhoji-game.js?v=2"></script>
 </body>
 </html>

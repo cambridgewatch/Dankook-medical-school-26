@@ -4,6 +4,8 @@ import { createOtter, createTurtle, disposeAnimal } from "./cheonhoji-animals.js
 const sceneElement = document.querySelector("#cheonhoRunScene");
 const canvas = document.querySelector("#cheonhoCharacterCanvas");
 const playButton = document.querySelector("#cheonhoPlayButton");
+const fullscreenButton = document.querySelector("#cheonhoFullscreenButton");
+const fullscreenExit = document.querySelector("#cheonhoFullscreenExit");
 const timeButtons = [...document.querySelectorAll("[data-cheonho-time]")];
 const characterButtons = [...document.querySelectorAll("[data-cheonho-character]")];
 
@@ -92,6 +94,57 @@ if (sceneElement && canvas && playButton) {
   timeButtons.forEach((button) => button.addEventListener("click", () => applyTime(button.dataset.cheonhoTime)));
   characterButtons.forEach((button) => button.addEventListener("click", () => applyCharacter(button.dataset.cheonhoCharacter)));
   playButton.addEventListener("click", () => setRunning(!running));
+
+  function fullscreenActive() {
+    return document.fullscreenElement === sceneElement ||
+      document.webkitFullscreenElement === sceneElement ||
+      sceneElement.classList.contains("is-fullscreen-fallback");
+  }
+
+  function syncFullscreenState() {
+    const active = fullscreenActive();
+    sceneElement.classList.toggle("is-native-fullscreen", active && !sceneElement.classList.contains("is-fullscreen-fallback"));
+    document.body.classList.toggle("cheonho-fullscreen-open", active);
+    if (fullscreenButton) {
+      fullscreenButton.setAttribute("aria-pressed", active ? "true" : "false");
+      fullscreenButton.setAttribute("aria-label", active ? "전체화면 닫기" : "전체화면으로 보기");
+    }
+  }
+
+  async function enterFullscreen() {
+    setRunning(true);
+    try {
+      if (sceneElement.requestFullscreen) {
+        await sceneElement.requestFullscreen();
+      } else if (sceneElement.webkitRequestFullscreen) {
+        sceneElement.webkitRequestFullscreen();
+      } else {
+        sceneElement.classList.add("is-fullscreen-fallback");
+      }
+    } catch (error) {
+      sceneElement.classList.add("is-fullscreen-fallback");
+    }
+    syncFullscreenState();
+  }
+
+  async function exitFullscreen() {
+    try {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    } catch (error) {
+      // The fixed-position fallback below still restores the page.
+    }
+    sceneElement.classList.remove("is-fullscreen-fallback");
+    syncFullscreenState();
+  }
+
+  fullscreenButton?.addEventListener("click", () => fullscreenActive() ? exitFullscreen() : enterFullscreen());
+  fullscreenExit?.addEventListener("click", exitFullscreen);
+  document.addEventListener("fullscreenchange", syncFullscreenState);
+  document.addEventListener("webkitfullscreenchange", syncFullscreenState);
 
   function resize() {
     const width = Math.max(1, canvas.clientWidth);

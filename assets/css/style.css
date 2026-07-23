@@ -390,6 +390,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   gap: 18px;
   padding: 0 28px 22px;
 }
+.cheonho-action-buttons { display: flex; align-items: center; gap: 9px; }
 .cheonho-choice-block { display: grid; gap: 8px; }
 .cheonho-choice-block > span {
   color: #6c7a88;
@@ -475,6 +476,26 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-play-button:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(62, 132, 181, .30); }
 .cheonho-play-button i { font-style: normal; font-size: 12px; }
 .cheonho-play-button.is-running { background: #405d76; }
+.cheonho-fullscreen-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 112px;
+  height: 54px;
+  padding: 0 17px;
+  border: 1px solid #c6d6e2;
+  border-radius: 14px;
+  background: #fff;
+  color: #38566d;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, color .18s ease;
+}
+.cheonho-fullscreen-button:hover { border-color: #8eafc7; background: #f1f7fb; color: var(--navy); }
+.cheonho-fullscreen-button i { font-style: normal; font-size: 19px; line-height: 1; }
 
 .cheonho-run-card {
   overflow: hidden;
@@ -520,8 +541,8 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   position: relative;
   isolation: isolate;
   width: 100%;
-  aspect-ratio: 8 / 3;
-  min-height: 280px;
+  aspect-ratio: 16 / 10;
+  min-height: 0;
   overflow: hidden;
   border-top: 1px solid #d9e4ec;
   border-bottom: 1px solid #d9e4ec;
@@ -552,8 +573,8 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   width: 9.090909%;
   height: 100%;
   background-position: center;
-  /* PC에서도 모바일과 같은 중앙 약 60% 구간만 보이도록 좌우를 잘라낸다. */
-  background-size: auto 166.667%;
+  /* 모든 화면에서 원본 위쪽을 보존하고 모바일과 같은 중앙 구간을 사용한다. */
+  background-size: cover;
   background-repeat: no-repeat;
 }
 .cheonho-run-scene[data-time="day"] .scene-01 { background-image: url("../img/cheonhoji-day-01-bus-stop-v2.jpg"); }
@@ -588,6 +609,45 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   pointer-events: none;
   filter: drop-shadow(0 8px 8px rgba(20, 34, 39, .25));
 }
+.cheonho-fullscreen-exit {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  z-index: 12;
+  display: none;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.48);
+  border-radius: 50%;
+  background: rgba(12,31,44,.48);
+  color: #fff;
+  font: inherit;
+  font-size: 29px;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.cheonho-run-scene:fullscreen,
+.cheonho-run-scene:-webkit-full-screen,
+.cheonho-run-scene.is-fullscreen-fallback {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+}
+.cheonho-run-scene:fullscreen .cheonho-fullscreen-exit,
+.cheonho-run-scene:-webkit-full-screen .cheonho-fullscreen-exit,
+.cheonho-run-scene.is-fullscreen-fallback .cheonho-fullscreen-exit { display: grid; }
+.cheonho-run-scene.is-fullscreen-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+}
+body.cheonho-fullscreen-open { overflow: hidden; }
 .cheonho-fixed-walkway {
   position: absolute;
   inset: auto 0 0;
@@ -678,8 +738,11 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .otter-mark,
   .turtle-mark { transform: scale(.84); }
   .cheonho-play-button { grid-column: 1 / -1; width: 100%; height: 48px; min-width: 0; border-radius: 12px; }
+  .cheonho-action-buttons { grid-column: 1 / -1; width: 100%; }
+  .cheonho-action-buttons .cheonho-play-button { flex: 1 1 auto; }
+  .cheonho-fullscreen-button { flex: 0 0 auto; height: 48px; min-width: 48px; padding: 0 14px; border-radius: 12px; }
+  .cheonho-fullscreen-button span { display: none; }
   .cheonho-run-scene { aspect-ratio: 16 / 10; min-height: 0; }
-  .cheonho-background-track > span { background-size: cover; }
   .cheonho-background-track { animation-duration: 100s; }
   .cheonho-fixed-walkway { height: 26%; border-top-width: 5px; }
   .cheonho-fixed-walkway::before { top: -25px; height: 25px; background: linear-gradient(180deg, #754326 0 5px, transparent 5px 19px, #754326 19px 24px), repeating-linear-gradient(90deg, #6b3b22 0 5px, transparent 5px 53px); }
