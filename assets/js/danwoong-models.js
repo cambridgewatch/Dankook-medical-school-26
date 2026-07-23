@@ -83,6 +83,15 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
   };
 
   root.add(sphere(brown, "Jacket_Body", [0, bodyCenterY, bodyCenterZ], [bodyWidth, bodyHeight, bodyDepth], 48));
+  [-1, 1].forEach((side) => {
+    root.add(sphere(
+      brown,
+      `Jacket_Shoulder_${side < 0 ? "L" : "R"}`,
+      [side * bodyWidth * 0.67, 2.96, 0.10],
+      [bodyWidth * 0.47, 0.48, variant === "blue" ? 1.30 : 1.20],
+      40
+    ));
+  });
 
   const seamPoints = [1.15, 1.52, 1.90, 2.28, 2.66, 2.91]
     .map((y) => new THREE.Vector3(0, y, surfaceZ(y, 0.035)));
