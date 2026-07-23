@@ -87,7 +87,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
       new THREE.BoxGeometry(1, 1, 1),
       ivory,
       `Jacket_Collar_${side < 0 ? "L" : "R"}`,
-      [side * 0.39, 3.01, bodyDepth + 0.105],
+      [side * 0.39, 2.74, bodyDepth + 0.105],
       [0.45, 0.055, 0.035],
       [0, 0, side * -0.48]
     ));
@@ -95,7 +95,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
       new THREE.BoxGeometry(1, 1, 1),
       brownDark,
       `Jacket_CollarStripe_${side < 0 ? "L" : "R"}`,
-      [side * 0.4, 3.055, bodyDepth + 0.135],
+      [side * 0.4, 2.785, bodyDepth + 0.135],
       [0.45, 0.022, 0.02],
       [0, 0, side * -0.48]
     ));
@@ -109,12 +109,12 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
     ));
   });
 
-  [1.03, 1.13, 1.23].forEach((y, index) => {
+  [1.38, 1.47, 1.56].forEach((y, index) => {
     root.add(mesh(
       new THREE.BoxGeometry(1, 1, 1),
       index === 1 ? ivory : brownDark,
       `Jacket_Waistband_${index + 1}`,
-      [0, y, bodyDepth + 0.07],
+      [0, y, bodyDepth * 0.87 + 0.08],
       [bodyWidth * 0.91, 0.035, 0.035]
     ));
   });
