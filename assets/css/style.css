@@ -422,6 +422,19 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 }
 .cheonho-segmented button { min-width: 74px; padding: 0 17px; }
 .cheonho-segmented button i { margin-right: 6px; font-style: normal; }
+.cheonho-light-control { display: inline-flex; }
+.cheonho-light-toggle { min-width: 120px !important; }
+.cheonho-segmented .cheonho-light-toggle {
+  background: #fff;
+  color: #38566d;
+  box-shadow: 0 4px 13px rgba(28, 61, 87, .11);
+}
+.cheonho-light-toggle b { font: inherit; }
+.cheonho-light-toggle.is-night {
+  background: #243b50;
+  color: #fff;
+  box-shadow: 0 5px 15px rgba(13, 31, 47, .24);
+}
 .cheonho-character-options button {
   display: inline-flex;
   align-items: center;
@@ -757,6 +770,12 @@ body.cheonho-fullscreen-open { overflow: hidden; }
     will-change: auto;
     animation-name: cheonho-background-scroll-mobile-fullscreen;
   }
+  .cheonho-run-scene:fullscreen .cheonho-background-track > span,
+  .cheonho-run-scene:-webkit-full-screen .cheonho-background-track > span,
+  .cheonho-run-scene.is-fullscreen-fallback .cheonho-background-track > span {
+    background-size: auto 140%;
+    background-position: center center;
+  }
 }
 
 @media (max-width: 640px) {
@@ -777,6 +796,7 @@ body.cheonho-fullscreen-open { overflow: hidden; }
   .cheonho-segmented button,
   .cheonho-character-options button { min-height: 40px; padding: 0 10px; font-size: 12px; }
   .cheonho-segmented button { min-width: 0; flex: 1; }
+  .cheonho-light-toggle { min-width: 112px !important; }
   .cheonho-character-options button { gap: 5px; }
   .otter-mark,
   .turtle-mark { transform: scale(.84); }
