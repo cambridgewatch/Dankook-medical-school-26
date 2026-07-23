@@ -19,6 +19,12 @@ if (sceneElement && canvas && playButton) {
   let selectedCharacter = savedCharacter;
   let running = false;
   let animal = null;
+  let jumping = false;
+  let jumpHeld = false;
+  let jumpOffset = 0;
+  let jumpVelocity = 0;
+  let jumpHoldUntil = 0;
+  let previousFrameTime = 0;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -125,8 +131,54 @@ if (sceneElement && canvas && playButton) {
     camera.lookAt(center.x, center.y + lookLift, center.z);
   }
 
+  function resetJump() {
+    jumping = false;
+    jumpHeld = false;
+    jumpOffset = 0;
+    jumpVelocity = 0;
+    jumpHoldUntil = 0;
+    canvas.style.setProperty("--cheonho-jump-y", "0px");
+    sceneElement.classList.remove("is-jumping");
+  }
+
+  function startJump() {
+    if (!running || jumping) return false;
+    jumping = true;
+    jumpHeld = true;
+    jumpOffset = 0;
+    jumpVelocity = 4.3;
+    jumpHoldUntil = performance.now() + 320;
+    sceneElement.classList.add("is-jumping", "has-jumped");
+    return true;
+  }
+
+  function releaseJump() {
+    jumpHeld = false;
+  }
+
+  function updateJump(time) {
+    const delta = previousFrameTime ? Math.min((time - previousFrameTime) / 1000, 0.034) : 0;
+    previousFrameTime = time;
+    if (!jumping || delta <= 0) return jumpOffset;
+
+    if (jumpHeld && time < jumpHoldUntil) {
+      jumpVelocity += 9 * delta;
+    } else {
+      jumpHeld = false;
+    }
+    jumpVelocity -= 13.5 * delta;
+    jumpOffset += jumpVelocity * delta;
+
+    if (jumpOffset <= 0 && jumpVelocity < 0) {
+      resetJump();
+      return 0;
+    }
+    return jumpOffset;
+  }
+
   function setRunning(value) {
     running = Boolean(value);
+    if (!running) resetJump();
     sceneElement.classList.toggle("is-running", running);
     sceneElement.classList.toggle("is-paused", !running);
     playButton.classList.toggle("is-running", running);
@@ -199,6 +251,25 @@ if (sceneElement && canvas && playButton) {
   document.addEventListener("fullscreenchange", syncFullscreenState);
   document.addEventListener("webkitfullscreenchange", syncFullscreenState);
 
+  sceneElement.addEventListener("pointerdown", (event) => {
+    if (event.target.closest("button") || (event.pointerType === "mouse" && event.button !== 0)) return;
+    if (!startJump()) return;
+    event.preventDefault();
+    try { sceneElement.setPointerCapture(event.pointerId); } catch (error) { /* Pointer capture is optional. */ }
+  });
+  sceneElement.addEventListener("pointerup", releaseJump);
+  sceneElement.addEventListener("pointercancel", releaseJump);
+  sceneElement.addEventListener("contextmenu", (event) => {
+    if (running && !event.target.closest("button")) event.preventDefault();
+  });
+  window.addEventListener("keydown", (event) => {
+    if (event.code !== "Space" || event.repeat || event.target.closest("input, textarea, select, button")) return;
+    if (startJump()) event.preventDefault();
+  });
+  window.addEventListener("keyup", (event) => {
+    if (event.code === "Space") releaseJump();
+  });
+
   let lastFullscreenTouchEnd = 0;
   sceneElement.addEventListener("touchend", (event) => {
     if (!fullscreenActive() || !window.matchMedia("(pointer: coarse)").matches) return;
@@ -228,6 +299,11 @@ if (sceneElement && canvas && playButton) {
     const speed = selectedCharacter === "turtle" ? 5.2 : 8.2;
     const phase = t * speed;
     const strength = running ? 1 : 0.10;
+    const currentJumpOffset = updateJump(time);
+    canvas.style.setProperty(
+      "--cheonho-jump-y",
+      `${currentJumpOffset * sceneElement.clientHeight * 0.10}px`
+    );
     const parts = animal.userData.parts || {};
 
     if (selectedCharacter === "otter") {
