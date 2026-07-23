@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-  <link rel="stylesheet" href="assets/css/style.css?v=98" />
+<link rel="stylesheet" href="assets/css/style.css?v=99" />
 </head>
 <body class="locked">
 
@@ -57,10 +57,17 @@
           <span>ROUTE PREVIEW</span>
         </header>
 
-        <div class="cheonho-run-scene" role="img" aria-label="연꽃이 핀 천호지와 캠퍼스 앞 나무 산책로 게임 경로">
+        <div class="cheonho-run-scene" role="img" aria-label="천호지, 버스 승차장, 보행교 배경이 움직이고 직선 나무 산책로가 고정된 게임 경로">
+          <div class="cheonho-background-track" aria-hidden="true">
+            <span class="scene-lake"></span>
+            <span class="scene-bus-stop"></span>
+            <span class="scene-bridge"></span>
+            <span class="scene-lake"></span>
+          </div>
+          <div class="cheonho-fixed-walkway" aria-hidden="true"></div>
           <svg class="cheonho-route-overlay" viewBox="0 0 1600 600" preserveAspectRatio="none" aria-hidden="true">
-            <path class="cheonho-route-glow" d="M38 494 C 330 545, 720 526, 1050 507 S 1410 475, 1562 452" />
-            <path class="cheonho-route-line" d="M38 494 C 330 545, 720 526, 1050 507 S 1410 475, 1562 452" />
+            <path class="cheonho-route-glow" d="M42 522 L1558 522" />
+            <path class="cheonho-route-line" d="M42 522 L1558 522" />
           </svg>
           <span class="cheonho-route-marker start"><i></i><b>START</b></span>
           <span class="cheonho-route-arrow arrow-one">›</span>
@@ -70,7 +77,7 @@
         </div>
 
         <footer class="cheonho-run-foot">
-          <span><i class="route-dot"></i>천호지 수변 산책로</span>
+          <span><i class="route-dot"></i>천호지 → 버스 승차장 → 보행교</span>
           <span>캐릭터와 장애물은 다음 단계에서 추가됩니다.</span>
         </footer>
       </article>

@@ -432,28 +432,79 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   overflow: hidden;
   border-top: 1px solid #d9e4ec;
   border-bottom: 1px solid #d9e4ec;
-  background: #b9dceb url("../img/cheonhoji-run-background-v1.png") center / cover no-repeat;
+  background: #b9dceb;
 }
 .cheonho-run-scene::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 7;
   pointer-events: none;
   background: linear-gradient(180deg, rgba(5, 36, 61, 0.02) 45%, rgba(5, 31, 48, 0.18) 100%);
   box-shadow: inset 0 0 55px rgba(21, 61, 83, 0.13);
 }
-.cheonho-route-overlay { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; }
+.cheonho-background-track {
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: 0;
+  display: flex;
+  width: 400%;
+  height: 100%;
+  will-change: transform;
+  animation: cheonho-background-scroll 42s linear infinite;
+}
+.cheonho-background-track > span {
+  flex: 0 0 25%;
+  width: 25%;
+  height: 100%;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.cheonho-background-track .scene-lake { background-image: url("../img/cheonhoji-run-background-v1.png"); }
+.cheonho-background-track .scene-bus-stop { background-image: url("../img/cheonhoji-bus-stop-v1.png"); }
+.cheonho-background-track .scene-bridge { background-image: url("../img/cheonhoji-bridge-v1.png"); }
+.cheonho-fixed-walkway {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 3;
+  height: 24%;
+  border-top: 7px solid #744225;
+  background:
+    linear-gradient(180deg, rgba(255, 219, 169, 0.12), rgba(67, 27, 11, 0.18)),
+    repeating-linear-gradient(90deg, #a96034 0 72px, #8d4b28 73px 76px, #bb7040 77px 148px);
+  box-shadow: 0 -6px 18px rgba(18, 42, 46, 0.22), inset 0 3px rgba(255, 232, 197, 0.22);
+}
+.cheonho-fixed-walkway::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -35px;
+  height: 35px;
+  background:
+    linear-gradient(180deg, #754326 0 7px, transparent 7px 27px, #754326 27px 34px),
+    repeating-linear-gradient(90deg, #6b3b22 0 7px, transparent 7px 78px);
+  filter: drop-shadow(0 2px 2px rgba(35, 19, 10, 0.25));
+}
+.cheonho-fixed-walkway::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(8deg, transparent 0 33px, rgba(76, 35, 18, 0.20) 34px 36px);
+  pointer-events: none;
+}
+.cheonho-route-overlay { position: absolute; inset: 0; z-index: 5; width: 100%; height: 100%; }
 .cheonho-route-glow,
 .cheonho-route-line { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .cheonho-route-glow {
   stroke: rgba(255, 255, 255, 0.82);
-  stroke-width: 19;
+  stroke-width: 17;
   filter: drop-shadow(0 3px 5px rgba(9, 38, 59, 0.45));
 }
 .cheonho-route-line {
   stroke: #1d587c;
-  stroke-width: 6;
+  stroke-width: 5;
   stroke-dasharray: 20 18;
   animation: cheonho-route-flow 2.2s linear infinite;
 }
@@ -469,8 +520,8 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   letter-spacing: 1.2px;
   text-shadow: 0 1px 3px rgba(5, 33, 51, 0.65);
 }
-.cheonho-route-marker.start { left: 1.4%; bottom: 8.5%; }
-.cheonho-route-marker.goal { right: 1.2%; bottom: 15.5%; }
+.cheonho-route-marker.start { left: 1.4%; bottom: 6.2%; }
+.cheonho-route-marker.goal { right: 1.2%; bottom: 6.2%; }
 .cheonho-route-marker i {
   width: 21px;
   height: 21px;
@@ -489,7 +540,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-route-arrow {
   position: absolute;
   z-index: 5;
-  bottom: 11%;
+  bottom: 7.5%;
   color: #fff;
   font-size: 30px;
   font-weight: 900;
@@ -498,8 +549,8 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   text-shadow: 0 2px 5px rgba(6, 37, 56, 0.72);
 }
 .cheonho-route-arrow.arrow-one { left: 26%; }
-.cheonho-route-arrow.arrow-two { left: 50%; bottom: 12%; }
-.cheonho-route-arrow.arrow-three { left: 75%; bottom: 15%; }
+.cheonho-route-arrow.arrow-two { left: 50%; bottom: 7.5%; }
+.cheonho-route-arrow.arrow-three { left: 75%; bottom: 7.5%; }
 .cheonho-run-foot {
   display: flex;
   align-items: center;
@@ -521,6 +572,10 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 }
 
 @keyframes cheonho-route-flow { to { stroke-dashoffset: -38; } }
+@keyframes cheonho-background-scroll {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-75%, 0, 0); }
+}
 
 @media (max-width: 640px) {
   .mini-game-hub { min-height: 300px; }
@@ -533,20 +588,24 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .cheonho-run-head h2 { font-size: 22px; }
   .cheonho-run-head p { font-size: 13px; line-height: 1.55; }
   .cheonho-run-head > span { display: none; }
-  .cheonho-run-scene { aspect-ratio: 16 / 10; min-height: 0; background-position: center; }
+  .cheonho-run-scene { aspect-ratio: 16 / 10; min-height: 0; }
+  .cheonho-background-track { animation-duration: 34s; }
+  .cheonho-fixed-walkway { height: 26%; border-top-width: 5px; }
+  .cheonho-fixed-walkway::before { top: -25px; height: 25px; background: linear-gradient(180deg, #754326 0 5px, transparent 5px 19px, #754326 19px 24px), repeating-linear-gradient(90deg, #6b3b22 0 5px, transparent 5px 53px); }
   .cheonho-route-glow { stroke-width: 25; }
   .cheonho-route-line { stroke-width: 8; stroke-dasharray: 26 22; }
-  .cheonho-route-marker.start { left: 1%; bottom: 7%; }
-  .cheonho-route-marker.goal { right: 1%; bottom: 14%; }
+  .cheonho-route-marker.start { left: 1%; bottom: 5%; }
+  .cheonho-route-marker.goal { right: 1%; bottom: 5%; }
   .cheonho-route-marker b { padding: 3px 6px; font-size: 8px; }
-  .cheonho-route-arrow { bottom: 10%; font-size: 23px; }
-  .cheonho-route-arrow.arrow-two { bottom: 11%; }
-  .cheonho-route-arrow.arrow-three { bottom: 14%; }
+  .cheonho-route-arrow { bottom: 6.5%; font-size: 23px; }
+  .cheonho-route-arrow.arrow-two,
+  .cheonho-route-arrow.arrow-three { bottom: 6.5%; }
   .cheonho-run-foot { align-items: flex-start; flex-direction: column; gap: 5px; padding: 12px 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cheonho-route-line { animation: none; }
+  .cheonho-route-line,
+  .cheonho-background-track { animation: none; }
 }
 
 /* ---------- 알림 벨 ---------- */
