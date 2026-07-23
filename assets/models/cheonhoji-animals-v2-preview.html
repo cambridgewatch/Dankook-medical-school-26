@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>천호지 캐릭터 V2 3D 미리보기</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;padding:26px;background:#edf3f7;color:#102f4c;font-family:Pretendard,"Noto Sans KR",sans-serif}header{max-width:1180px;margin:0 auto 19px}h1{margin:0 0 7px;font-size:clamp(26px,4vw,39px);letter-spacing:-1px}p{margin:0;color:#64788b}main{max-width:1180px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{overflow:hidden;border:1px solid #d5e1ea;border-radius:24px;background:#fff;box-shadow:0 16px 44px #183c5617}.title{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px}.title strong{font-size:19px}.view-buttons{display:flex;gap:5px}.view-buttons button{padding:6px 10px;border:1px solid #d7e2eb;border-radius:999px;background:#f6f9fb;color:#597084;font:inherit;font-size:11px;font-weight:800;cursor:pointer}.view-buttons button:hover,.view-buttons button.active{border-color:#80aaca;background:#eaf4fb;color:#16486e}canvas{display:block;width:100%;height:min(70vh,650px);touch-action:none;cursor:grab;background:radial-gradient(circle at 50% 34%,#fff 0,#f8fbfd 48%,#e6eef4 100%)}canvas:active{cursor:grabbing}.note{padding:12px 18px 16px;color:#728495;font-size:12px;line-height:1.55}@media(max-width:760px){body{padding:14px}main{grid-template-columns:1fr}.title{align-items:flex-start;flex-direction:column}canvas{height:500px}}
+  </style>
+</head>
+<body>
+  <header><h1>천호지 캐릭터 V2</h1><p>참고 이미지의 둥근 비율과 얼굴 특징을 반영했습니다. 드래그하면 360도로 회전합니다.</p></header>
+  <main>
+    <article class="card">
+      <div class="title"><strong>수달</strong><div class="view-buttons"><button data-model="otter" data-angle="0">정면</button><button data-model="otter" data-angle="1.5708">측면</button><button data-model="otter" data-angle="3.1416">후면</button></div></div>
+      <canvas id="otter"></canvas><div class="note">큰 머리와 눈, 크림색 얼굴·배, 짧은 팔다리와 굵게 휘어진 꼬리를 분리된 입체 부품으로 제작했습니다.</div>
+    </article>
+    <article class="card">
+      <div class="title"><strong>거북이</strong><div class="view-buttons"><button data-model="turtle" data-angle="0">측면</button><button data-model="turtle" data-angle="1.5708">정면</button><button data-model="turtle" data-angle="3.1416">반대 측면</button></div></div>
+      <canvas id="turtle"></canvas><div class="note">붉은 갈색 등껍질 판, 연두색 머리와 물갈퀴, 피부 반점과 큰 눈을 입체적으로 분리했습니다.</div>
+    </article>
+  </main>
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
+    import { createOtterV2, createTurtleV2 } from "../js/cheonhoji-animals-v2.js?v=1";
+    function mount(canvas, create, kind){
+      const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.03;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+      const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(30,1,.1,40);camera.position.set(0,kind==="turtle"?1.55:2.15,kind==="turtle"?7.2:7.7);camera.lookAt(0,kind==="turtle"?.83:1.55,0);scene.add(new THREE.HemisphereLight(0xffffff,0x8398a7,2.55));const key=new THREE.DirectionalLight(0xffffff,3.7);key.position.set(-4.5,7,6);key.castShadow=true;scene.add(key);const fill=new THREE.DirectionalLight(0xffdfc0,1.1);fill.position.set(4,2,4);scene.add(fill);const rim=new THREE.DirectionalLight(0x9bd2f4,1.55);rim.position.set(4,4,-5);scene.add(rim);
+      const model=create();scene.add(model);const floor=new THREE.Mesh(new THREE.CircleGeometry(kind==="turtle"?2.0:1.7,64),new THREE.ShadowMaterial({color:0x19374e,opacity:.18}));floor.rotation.x=-Math.PI/2;floor.position.y=-.04;floor.receiveShadow=true;scene.add(floor);
+      let dragging=false,lastX=0,auto=true;canvas.addEventListener("pointerdown",e=>{dragging=true;auto=false;lastX=e.clientX;canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointermove",e=>{if(!dragging)return;model.rotation.y+=(e.clientX-lastX)*.012;lastX=e.clientX});canvas.addEventListener("pointerup",()=>dragging=false);canvas.addEventListener("pointercancel",()=>dragging=false);
+      function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;if(canvas.width!==Math.floor(w*renderer.getPixelRatio())||canvas.height!==Math.floor(h*renderer.getPixelRatio())){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}}
+      function frame(){resize();if(auto)model.rotation.y+=.0026;renderer.render(scene,camera);requestAnimationFrame(frame)}frame();return{setAngle(angle){auto=false;model.rotation.y=angle}};
+    }
+    const models={otter:mount(document.querySelector("#otter"),createOtterV2,"otter"),turtle:mount(document.querySelector("#turtle"),createTurtleV2,"turtle")};
+    document.querySelectorAll("[data-model][data-angle]").forEach(button=>button.addEventListener("click",()=>{document.querySelectorAll(`[data-model="${button.dataset.model}"]`).forEach(item=>item.classList.remove("active"));button.classList.add("active");models[button.dataset.model].setAngle(Number(button.dataset.angle))}));
+  </script>
+</body>
+</html>
