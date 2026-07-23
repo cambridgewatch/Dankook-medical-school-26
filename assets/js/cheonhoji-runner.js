@@ -276,7 +276,6 @@ if (scene && track && character && obstacleLayer && scoreElement) {
         <span class="cheonho-jump-arc" aria-hidden="true">
           <svg viewBox="0 0 100 48" preserveAspectRatio="none"><path d="M2 46 Q50 1 98 46" /></svg>
         </span>
-        <span class="cheonho-double-jump-label">2× JUMP</span>
       `);
     }
     obstacleLayer.appendChild(element);

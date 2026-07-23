@@ -971,7 +971,6 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
 .cheonho-jump-arc svg { display:block; width:100%; height:100%; overflow:visible; }
 .cheonho-jump-arc path { fill:none; stroke:rgba(255,255,255,.94); stroke-width:2.2; stroke-linecap:round; stroke-dasharray:4 5; vector-effect:non-scaling-stroke; }
 .cheonho-run-scene[data-time="night"] .cheonho-jump-arc path { stroke:rgba(145,216,255,.92); }
-.cheonho-double-jump-label { position:absolute; left:50%; top:-20px; z-index:2; padding:3px 6px; border-radius:999px; background:rgba(20,48,65,.78); color:#fff; font-size:8px; font-weight:900; letter-spacing:.4px; white-space:nowrap; transform:translateX(-50%); }
 .cheonho-obstacle.is-hit { z-index:4; filter:drop-shadow(0 0 9px #ff493f) drop-shadow(0 6px 5px rgba(32,26,20,.24)); }
 .cheonho-impact-mark { position:absolute; left:50%; top:20%; z-index:5; display:grid; place-items:center; width:30px; height:30px; border:3px solid #fff; border-radius:50%; background:#ed493f; color:#fff; font-size:19px; font-weight:950; transform:translate(-50%,-50%); animation:cheonho-impact-pop .32s ease-out both; box-shadow:0 0 0 6px rgba(237,73,63,.24); }
 .cheonho-run-scene.has-collision { animation:none; }
