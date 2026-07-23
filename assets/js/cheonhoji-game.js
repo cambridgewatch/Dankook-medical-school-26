@@ -117,7 +117,7 @@ if (sceneElement && canvas && playButton) {
     const verticalDistance = size.y / (2 * Math.tan(verticalFov / 2));
     const horizontalDistance = size.x / (2 * Math.tan(horizontalFov / 2));
     const distance = Math.max(verticalDistance, horizontalDistance) *
-      (selectedCharacter === "otter" ? 1.32 : 1.18);
+      (selectedCharacter === "otter" ? 1.15 : 1.18);
 
     const cameraLift = selectedCharacter === "otter" ? 0.08 : 0.16;
     const lookLift = selectedCharacter === "otter" ? 0.02 : 0.06;
