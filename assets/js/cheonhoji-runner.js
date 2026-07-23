@@ -72,6 +72,14 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     return Math.min(1.85, 1 + Math.max(0, laps - 0.25) * 0.16);
   }
 
+  const DOUBLE_JUMP_TYPES = new Set(["barrier", "fence", "gate", "kiosk", "mapboard"]);
+  const OBSTACLE_TIERS = [
+    ["puddle", "rock", "curb", "bottle", "leaves", "picnicmat", "ducktoy", "rainboot"],
+    ["cooler", "planter", "basket", "bollard", "chair", "stump", "sandbag", "flowerpot", "backpack", "umbrella", "bucket", "crate"],
+    ["cone", "bin", "sign", "scooter", "lifebuoy", "lantern", "hydrant", "bench", "cart", "bike", "tire", "flowerbox", "camera", "tripod", "skateboard"],
+    ["barrier", "fence", "gate", "kiosk", "mapboard"],
+  ];
+
   const baseLapDuration = Math.max(animationDurationSeconds(), 1);
 
   function setBackgroundSpeed(multiplier) {
@@ -94,13 +102,10 @@ if (scene && track && character && obstacleLayer && scoreElement) {
 
   function obstacleTypeForProgress(laps) {
     const tier = laps < 0.25 ? 0 : laps < 0.65 ? 1 : laps < 1 ? 2 : 3;
-    const choices = tier === 0
-      ? ["puddle", "rock", "curb", "bottle"]
-      : tier === 1
-        ? ["puddle", "rock", "curb", "bottle", "cooler", "planter", "basket", "bollard", "chair"]
-        : tier === 2
-          ? ["puddle", "rock", "curb", "bottle", "cooler", "planter", "basket", "bollard", "chair", "cone", "bin", "sign", "scooter", "lifebuoy"]
-          : ["puddle", "rock", "curb", "bottle", "cooler", "planter", "basket", "bollard", "chair", "cone", "bin", "sign", "scooter", "lifebuoy", "barrier"];
+    const unlocked = OBSTACLE_TIERS.slice(0, tier + 1).flat();
+    const choices = tier === 3
+      ? [...unlocked, ...OBSTACLE_TIERS[3]]
+      : unlocked;
 
     if (tier !== obstacleTier || obstacleBag.length === 0) {
       obstacleTier = tier;
@@ -112,7 +117,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     }
 
     let type = obstacleBag.shift() || "puddle";
-    const tallTypes = new Set(["bin", "sign", "barrier"]);
+    const tallTypes = new Set(["bin", "sign", "lantern", "hydrant", "tripod", ...DOUBLE_JUMP_TYPES]);
     if (tallTypes.has(type) && tallTypes.has(lastObstacleType)) {
       const replacementIndex = obstacleBag.findIndex((candidate) => !tallTypes.has(candidate));
       if (replacementIndex >= 0) {
@@ -145,12 +150,37 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       scooter: { width: 0.070, height: 0.085 },
       lifebuoy: { width: 0.045, height: 0.100 },
       barrier: { width: 0.035, height: 0.180 },
+      leaves: { width: 0.060, height: 0.025 },
+      stump: { width: 0.042, height: 0.060 },
+      sandbag: { width: 0.060, height: 0.045 },
+      flowerpot: { width: 0.038, height: 0.070 },
+      backpack: { width: 0.045, height: 0.080 },
+      umbrella: { width: 0.065, height: 0.070 },
+      picnicmat: { width: 0.080, height: 0.018 },
+      lantern: { width: 0.032, height: 0.105 },
+      hydrant: { width: 0.035, height: 0.095 },
+      bench: { width: 0.075, height: 0.085 },
+      cart: { width: 0.070, height: 0.095 },
+      fence: { width: 0.050, height: 0.180 },
+      gate: { width: 0.055, height: 0.180 },
+      kiosk: { width: 0.060, height: 0.180 },
+      bike: { width: 0.075, height: 0.085 },
+      tire: { width: 0.045, height: 0.075 },
+      bucket: { width: 0.043, height: 0.070 },
+      crate: { width: 0.055, height: 0.075 },
+      flowerbox: { width: 0.065, height: 0.070 },
+      camera: { width: 0.045, height: 0.065 },
+      tripod: { width: 0.050, height: 0.105 },
+      ducktoy: { width: 0.050, height: 0.050 },
+      rainboot: { width: 0.035, height: 0.070 },
+      skateboard: { width: 0.075, height: 0.035 },
+      mapboard: { width: 0.060, height: 0.180 },
     };
     const ratio = ratios[obstacle.type] || ratios.curb;
     const mobileScale = coarsePointer ? 0.94 : 1;
     const widthScale = mobileTurtle ? 0.87 : mobileScale;
     const heightScale = mobileTurtle
-      ? (obstacle.type === "barrier" ? 1.08 : 0.88)
+      ? (DOUBLE_JUMP_TYPES.has(obstacle.type) ? 1.08 : 0.88)
       : mobileScale;
     obstacle.element.style.setProperty("--obstacle-w", `${Math.max(12, sceneWidth * ratio.width * widthScale)}px`);
     obstacle.element.style.setProperty("--obstacle-h", `${Math.max(8, sceneHeight * ratio.height * heightScale)}px`);
@@ -161,7 +191,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const element = document.createElement("div");
     element.className = `cheonho-obstacle cheonho-obstacle-${type}`;
     element.dataset.obstacleType = type;
-    if (type === "barrier") {
+    if (DOUBLE_JUMP_TYPES.has(type)) {
       element.insertAdjacentHTML("beforeend", '<span class="cheonho-double-jump-label">2× JUMP</span>');
     }
     obstacleLayer.appendChild(element);
@@ -173,7 +203,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   function scheduleNextSpawn(laps) {
     const difficulty = difficultyFor(laps);
     const base = 2.9 + Math.random() * 1.5;
-    const recoveryMinimum = lastObstacleType === "barrier" ? 2.25 : 1.42;
+    const recoveryMinimum = DOUBLE_JUMP_TYPES.has(lastObstacleType) ? 2.25 : 1.42;
     const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
     const turtle = scene.dataset.character === "turtle";
     const spacingScale = coarsePointer ? (turtle ? 1.32 : 1.14) : 1;
@@ -280,6 +310,9 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       const board = roundedRectContains(localX, localY, width * 0.08, height * 0.24, width * 0.92, height * 0.90, Math.min(7, height * 0.10));
       const base = roundedRectContains(localX, localY, 0, height * 0.87, width, height, Math.min(6, height * 0.08));
       return board || base;
+    }
+    if (DOUBLE_JUMP_TYPES.has(type)) {
+      return roundedRectContains(localX, localY, 0, 0, width, height, Math.min(8, width * 0.12));
     }
     const radius = type === "bollard" || type === "bin"
       ? Math.min(11, width * 0.42)
@@ -397,6 +430,31 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       scooter: "주차된 킥보드",
       lifebuoy: "구명환 거치대",
       barrier: "높은 차단판",
+      leaves: "낙엽 더미",
+      stump: "나무 그루터기",
+      sandbag: "모래주머니",
+      flowerpot: "꽃 화분",
+      backpack: "놓인 배낭",
+      umbrella: "접힌 우산",
+      picnicmat: "접힌 돗자리",
+      lantern: "산책로 랜턴",
+      hydrant: "소화전",
+      bench: "이동식 벤치",
+      cart: "관리용 손수레",
+      fence: "높은 안전 펜스",
+      gate: "산책로 통제문",
+      kiosk: "안내 키오스크",
+      bike: "세워 둔 자전거",
+      tire: "굴러온 타이어",
+      bucket: "청소용 양동이",
+      crate: "나무 상자",
+      flowerbox: "긴 꽃 상자",
+      camera: "놓인 카메라",
+      tripod: "카메라 삼각대",
+      ducktoy: "오리 장난감",
+      rainboot: "장화",
+      skateboard: "스케이트보드",
+      mapboard: "대형 호수 안내판",
     };
     if (crashReasonElement) crashReasonElement.textContent = `${names[obstacle?.type] || "장애물"}에 부딪혔어요.`;
     if (finalScoreElement) finalScoreElement.textContent = formattedLaps(score);
