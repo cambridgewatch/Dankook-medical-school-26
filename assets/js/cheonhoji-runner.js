@@ -125,32 +125,35 @@ if (scene && track && character && obstacleLayer && scoreElement) {
 
   function sizeObstacle(obstacle) {
     const turtle = scene.dataset.character === "turtle";
-    const mobileTurtle = turtle && window.matchMedia("(pointer: coarse)").matches;
-    const characterWidth = character.offsetWidth;
-    const characterHeight = character.offsetHeight;
-    const visibleCharacterWidth = characterWidth * (turtle ? 0.72 : 0.68);
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const mobileTurtle = turtle && coarsePointer;
+    const sceneWidth = Math.max(scene.clientWidth, 1);
+    const sceneHeight = Math.max(scene.clientHeight, 1);
     const ratios = {
-      puddle: { width: 1.02, height: 0.10 },
-      rock: { width: 0.64, height: 0.19 },
-      curb: { width: 0.90, height: 0.16 },
-      bottle: { width: 0.24, height: 0.32 },
-      cooler: { width: 0.58, height: 0.29 },
-      planter: { width: 0.53, height: 0.29 },
-      basket: { width: 0.64, height: 0.29 },
-      bollard: { width: 0.30, height: 0.34 },
-      chair: { width: 0.54, height: 0.33 },
-      cone: { width: 0.34, height: 0.35 },
-      bin: { width: 0.42, height: 0.37 },
-      sign: { width: 0.47, height: 0.37 },
-      scooter: { width: 0.72, height: 0.34 },
-      lifebuoy: { width: 0.47, height: 0.37 },
-      barrier: { width: 0.36, height: 0.70 },
+      puddle: { width: 0.075, height: 0.020 },
+      rock: { width: 0.045, height: 0.040 },
+      curb: { width: 0.065, height: 0.032 },
+      bottle: { width: 0.020, height: 0.070 },
+      cooler: { width: 0.050, height: 0.065 },
+      planter: { width: 0.045, height: 0.075 },
+      basket: { width: 0.055, height: 0.075 },
+      bollard: { width: 0.025, height: 0.085 },
+      chair: { width: 0.050, height: 0.085 },
+      cone: { width: 0.030, height: 0.090 },
+      bin: { width: 0.040, height: 0.100 },
+      sign: { width: 0.045, height: 0.100 },
+      scooter: { width: 0.070, height: 0.085 },
+      lifebuoy: { width: 0.045, height: 0.100 },
+      barrier: { width: 0.035, height: 0.180 },
     };
     const ratio = ratios[obstacle.type] || ratios.curb;
-    const widthScale = mobileTurtle ? 0.90 : 1;
-    const heightScale = mobileTurtle ? (obstacle.type === "barrier" ? 1.25 : 0.90) : 1;
-    obstacle.element.style.setProperty("--obstacle-w", `${Math.max(12, visibleCharacterWidth * ratio.width * widthScale)}px`);
-    obstacle.element.style.setProperty("--obstacle-h", `${Math.max(8, characterHeight * ratio.height * heightScale)}px`);
+    const mobileScale = coarsePointer ? 0.94 : 1;
+    const widthScale = mobileTurtle ? 0.87 : mobileScale;
+    const heightScale = mobileTurtle
+      ? (obstacle.type === "barrier" ? 1.08 : 0.88)
+      : mobileScale;
+    obstacle.element.style.setProperty("--obstacle-w", `${Math.max(12, sceneWidth * ratio.width * widthScale)}px`);
+    obstacle.element.style.setProperty("--obstacle-h", `${Math.max(8, sceneHeight * ratio.height * heightScale)}px`);
   }
 
   function spawnObstacle() {
@@ -171,7 +174,13 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const difficulty = difficultyFor(laps);
     const base = 2.9 + Math.random() * 1.5;
     const recoveryMinimum = lastObstacleType === "barrier" ? 2.25 : 1.42;
-    nextSpawnIn = Math.max(recoveryMinimum, base / difficulty);
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const turtle = scene.dataset.character === "turtle";
+    const spacingScale = coarsePointer ? (turtle ? 1.32 : 1.14) : 1;
+    nextSpawnIn = Math.max(
+      recoveryMinimum * spacingScale,
+      (base * spacingScale) / difficulty
+    );
   }
 
   function setCharacterX(value) {

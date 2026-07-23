@@ -168,7 +168,7 @@ if (sceneElement && canvas) {
     if (!running || jumpCount >= 2) return false;
     jumping = true;
     const mobileTurtleBoost = selectedCharacter === "turtle" && window.matchMedia("(pointer: coarse)").matches
-      ? 1.10
+      ? 1.12
       : 1;
     jumpVelocity = (jumpCount === 0 ? 6.2 : 6.4) * mobileTurtleBoost;
     jumpCount += 1;
