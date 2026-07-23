@@ -201,12 +201,12 @@ export function createTurtleV3() {
 
   // Six broad, low-contrast plates instead of many reptile-like scales.
   const shellTiles = [
-    { data: [-0.48, 1.27, 0.29, 0.21, -0.08], material: tileA },
-    { data: [0.03, 1.46, 0.33, 0.23, 0], material: tileB },
-    { data: [0.55, 1.27, 0.29, 0.21, 0.08], material: tileA },
-    { data: [-0.49, 0.88, 0.31, 0.19, 0.08], material: tileB },
-    { data: [0.04, 0.92, 0.33, 0.20, 0], material: tileA },
-    { data: [0.58, 0.88, 0.30, 0.19, -0.08], material: tileB },
+    { data: [-0.48, 1.27, 0.25, 0.18, -0.08], material: tileA },
+    { data: [0.03, 1.46, 0.28, 0.20, 0], material: tileB },
+    { data: [0.55, 1.27, 0.25, 0.18, 0.08], material: tileA },
+    { data: [-0.49, 0.88, 0.26, 0.16, 0.08], material: tileB },
+    { data: [0.04, 0.92, 0.28, 0.17, 0], material: tileA },
+    { data: [0.58, 0.88, 0.25, 0.16, -0.08], material: tileB },
   ];
   shellTiles.forEach(({ data, material }) => {
     shellTileOnSurface(root, material, seam, shellShape, data, 1);
