@@ -192,6 +192,7 @@ export function createTurtleV3() {
   const seam = mat(0x704039);
   const belly = mat(0xead99e);
   const face = mat(0x342c25, 0.72);
+  const cheek = mat(0xd99a7d, 0.94);
 
   // The shell is a closed ellipsoid around the entire torso. Only a narrow
   // pale plastron remains visible from underneath.
@@ -214,21 +215,23 @@ export function createTurtleV3() {
   });
 
   capsule(root, skin, "Neck", [-1.02, 0.86, 0], 0.25, 0.34, [0, 0, Math.PI / 2], [1, 1, 0.92]);
-  const head = blob(root, skin, "Head", [-1.38, 1.00, 0], [0.49, 0.44, 0.41], 52);
-  blob(root, skinLight, "Muzzle", [-1.70, 0.91, 0], [0.23, 0.19, 0.27], 36);
-  softEye(root, -1.54, 1.14, 0.397, 0.84);
-  softEye(root, -1.54, 1.14, -0.397, 0.84, -1);
-  blob(root, face, "Nostril", [-1.84, 0.98, 0.245], [0.020, 0.026, 0.013], 14);
-  blob(root, face, "NostrilFar", [-1.84, 0.98, -0.245], [0.020, 0.026, 0.013], 14);
+  const head = blob(root, skin, "Head", [-1.39, 1.01, 0], [0.54, 0.48, 0.45], 56);
+  blob(root, skinLight, "Muzzle", [-1.74, 0.91, 0], [0.26, 0.21, 0.30], 40);
+  softEye(root, -1.56, 1.17, 0.438, 0.98);
+  softEye(root, -1.56, 1.17, -0.438, 0.98, -1);
+  blob(root, face, "Nostril", [-1.91, 0.99, 0.267], [0.018, 0.023, 0.012], 14);
+  blob(root, face, "NostrilFar", [-1.91, 0.99, -0.267], [0.018, 0.023, 0.012], 14);
+  blob(root, cheek, "Cheek", [-1.60, 0.98, 0.437], [0.085, 0.052, 0.018], 20);
+  blob(root, cheek, "CheekFar", [-1.60, 0.98, -0.437], [0.085, 0.052, 0.018], 20);
   curve(root, face, "Smile", [
-    new THREE.Vector3(-1.85, 0.83, 0.280),
-    new THREE.Vector3(-1.71, 0.79, 0.339),
-    new THREE.Vector3(-1.55, 0.82, 0.376),
+    new THREE.Vector3(-1.90, 0.82, 0.306),
+    new THREE.Vector3(-1.76, 0.78, 0.382),
+    new THREE.Vector3(-1.61, 0.82, 0.420),
   ], 0.012);
   curve(root, face, "SmileFar", [
-    new THREE.Vector3(-1.85, 0.83, -0.280),
-    new THREE.Vector3(-1.71, 0.79, -0.339),
-    new THREE.Vector3(-1.55, 0.82, -0.376),
+    new THREE.Vector3(-1.90, 0.82, -0.306),
+    new THREE.Vector3(-1.76, 0.78, -0.382),
+    new THREE.Vector3(-1.61, 0.82, -0.420),
   ], 0.012);
   turtleSpot(root, spot, [-1.66, 1.29, 0.357], 0.055);
   turtleSpot(root, spot, [-1.49, 1.34, 0.382], 0.045);
@@ -256,7 +259,7 @@ export function createTurtleV3() {
   });
 
   const tail = makePivot(root, "TailPivot", [1.12, 0.72, 0]);
-  addMesh(tail, new THREE.ConeGeometry(0.13, 0.43, 24), skin, "Tail", [0.21, -0.01, 0], [1, 1, 0.82], [0, 0, -Math.PI / 2]);
+  capsule(tail, skin, "Tail", [0.18, -0.01, 0], 0.13, 0.18, [0, 0, Math.PI / 2], [1, 1, 0.90]);
 
   root.userData.parts = { ...limbs, tail, shell: shellBody, head };
   return root;

@@ -3,7 +3,7 @@ import {
   createOtterV3 as createOtter,
   createTurtleV3 as createTurtle,
   disposeAnimalV3 as disposeAnimal,
-} from "./cheonhoji-animals-v3-curved.js?rev=game-v4";
+} from "./cheonhoji-animals-v3-curved.js?rev=game-v5";
 
 const sceneElement = document.querySelector("#cheonhoRunScene");
 const canvas = document.querySelector("#cheonhoCharacterCanvas");
