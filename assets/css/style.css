@@ -477,8 +477,9 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   padding: 0 20px;
   border: 0;
   border-radius: 14px;
-  background: var(--primary);
-  color: #fff;
+  background: linear-gradient(135deg, #4f9aca 0%, #2f739f 100%) !important;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff;
   font: inherit;
   font-size: 14px;
   font-weight: 850;
@@ -486,9 +487,17 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   cursor: pointer;
   transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
 }
+.cheonho-play-button > i,
+.cheonho-play-button > span {
+  display: inline-block;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
 .cheonho-play-button:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(62, 132, 181, .30); }
 .cheonho-play-button i { font-style: normal; font-size: 12px; }
-.cheonho-play-button.is-running { background: #405d76; }
+.cheonho-play-button.is-running { background: #405d76 !important; }
 .cheonho-fullscreen-button {
   display: inline-flex;
   align-items: center;
