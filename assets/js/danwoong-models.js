@@ -92,9 +92,9 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
   const brownDark = material(0x251711, 0.88);
   const ivory = material(0xf4f0e6, 0.82);
   const silver = material(0xf4f5f2, 0.34, 0.16);
-  const bodyWidth = variant === "blue" ? 1.51 : 1.38;
+  const bodyWidth = variant === "blue" ? 1.40 : 1.27;
   const bodyHeight = variant === "blue" ? 1.31 : 1.29;
-  const bodyDepth = variant === "blue" ? 1.68 : 1.58;
+  const bodyDepth = variant === "blue" ? 1.10 : 1.00;
   const bodyCenterY = 2.12;
   const bodyCenterZ = 0.08;
   const surfaceZ = (y, lift = 0.06) => {
@@ -103,7 +103,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
   };
 
   root.add(sphere(brown, "Jacket_Body", [0, bodyCenterY, bodyCenterZ], [bodyWidth, bodyHeight, bodyDepth], 48));
-  root.add(jacketBackPanel(bodyWidth, brown));
+  root.add(jacketBackPanel(bodyWidth + 0.12, brown));
   [-1, 1].forEach((side) => {
     const shoulderPoints = [
       new THREE.Vector3(side * 0.24, 2.83, surfaceZ(2.83, 0.025)),
