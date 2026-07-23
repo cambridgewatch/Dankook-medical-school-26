@@ -768,12 +768,12 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .cheonho-run-scene:fullscreen .cheonho-character-canvas,
   .cheonho-run-scene:-webkit-full-screen .cheonho-character-canvas,
   .cheonho-run-scene.is-fullscreen-fallback .cheonho-character-canvas {
-    --cheonho-character-ground-trim: 42.5%;
+    --cheonho-character-ground-trim: 39.5%;
   }
   .cheonho-run-scene[data-character="turtle"]:fullscreen .cheonho-character-canvas,
   .cheonho-run-scene[data-character="turtle"]:-webkit-full-screen .cheonho-character-canvas,
   .cheonho-run-scene[data-character="turtle"].is-fullscreen-fallback .cheonho-character-canvas {
-    --cheonho-character-ground-trim: 57.5%;
+    --cheonho-character-ground-trim: 54.5%;
   }
 }
 .cheonho-run-scene.is-fullscreen-fallback {
