@@ -234,7 +234,8 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       const gravity = 13.5;
       const firstJumpVelocity = 6.2 * turtleJumpBoost;
       const secondJumpVelocity = 6.4 * turtleJumpBoost;
-      const jumpPixelsPerUnit = Math.max(character.offsetHeight, 1) * 0.32;
+      const jumpScale = Number.parseFloat(scene.dataset.jumpScale || "0.32") || 0.32;
+      const jumpPixelsPerUnit = Math.max(character.offsetHeight, 1) * jumpScale;
       const maximumDoubleJump = (
         (firstJumpVelocity ** 2 + secondJumpVelocity ** 2) / (2 * gravity)
       ) * jumpPixelsPerUnit;

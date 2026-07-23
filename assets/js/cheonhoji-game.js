@@ -227,6 +227,8 @@ if (sceneElement && canvas) {
 
   function syncFullscreenState() {
     const active = fullscreenActive();
+    const desktopFullscreen = active && !window.matchMedia("(max-width: 900px)").matches;
+    sceneElement.dataset.jumpScale = desktopFullscreen ? "0.25" : "0.32";
     sceneElement.classList.toggle("is-native-fullscreen", active && !sceneElement.classList.contains("is-fullscreen-fallback"));
     document.body.classList.toggle("cheonho-fullscreen-open", active);
     if (fullscreenButton) {
@@ -333,9 +335,10 @@ if (sceneElement && canvas) {
     const phase = t * speed;
     const strength = running ? 1 : 0.10;
     const currentJumpOffset = updateJump(time);
+    const jumpScale = Number.parseFloat(sceneElement.dataset.jumpScale || "0.32") || 0.32;
     canvas.style.setProperty(
       "--cheonho-jump-y",
-      `${currentJumpOffset * canvas.clientHeight * 0.32}px`
+      `${currentJumpOffset * canvas.clientHeight * jumpScale}px`
     );
     const parts = animal.userData.parts || {};
 
