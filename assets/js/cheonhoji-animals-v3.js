@@ -95,9 +95,33 @@ export function createOtterV3() {
   return root;
 }
 
-function shellTile(parent, material, seam, position, scale, rotation = 0) {
-  blob(parent, seam, "ShellTileSeam", [position[0], position[1], position[2] - 0.008], [scale[0] * 1.07, scale[1] * 1.07, 0.026], 28).rotation.z = rotation;
-  blob(parent, material, "ShellTile", position, [scale[0], scale[1], 0.030], 28).rotation.z = rotation;
+function shellTileOnSurface(parent, material, seam, shellShape, tile, side) {
+  const [x, y, sx, sy, rotation] = tile;
+  const dx = (x - shellShape.cx) / shellShape.rx;
+  const dy = (y - shellShape.cy) / shellShape.ry;
+  const radial = Math.max(0.02, 1 - dx * dx - dy * dy);
+  const z = side * shellShape.rz * Math.sqrt(radial);
+  const normal = new THREE.Vector3(
+    (x - shellShape.cx) / (shellShape.rx * shellShape.rx),
+    (y - shellShape.cy) / (shellShape.ry * shellShape.ry),
+    z / (shellShape.rz * shellShape.rz)
+  ).normalize();
+  const tangent = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+  const twist = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), side * rotation);
+
+  const seamPlate = blob(parent, seam, "ShellTileSeam", [
+    x + normal.x * 0.012,
+    y + normal.y * 0.012,
+    z + normal.z * 0.012,
+  ], [sx * 1.065, sy * 1.065, 0.024], 32);
+  seamPlate.quaternion.copy(tangent).multiply(twist);
+
+  const plate = blob(parent, material, "ShellTile", [
+    x + normal.x * 0.026,
+    y + normal.y * 0.026,
+    z + normal.z * 0.026,
+  ], [sx, sy, 0.025], 32);
+  plate.quaternion.copy(tangent).multiply(twist);
 }
 
 function turtleSpot(parent, material, position, size) {
@@ -118,18 +142,25 @@ export function createTurtleV3() {
   const belly = mat(0xead99e);
   const face = mat(0x342c25, 0.72);
 
-  blob(root, belly, "Plastron", [0, 0.66, 0], [0.94, 0.39, 0.55], 52);
-  const shellBody = blob(root, shell, "Shell", [0.08, 1.02, 0], [1.17, 0.73, 0.61], 64);
+  // The shell is a closed ellipsoid around the entire torso. Only a narrow
+  // pale plastron remains visible from underneath.
+  const shellShape = { cx: 0.08, cy: 0.96, rx: 1.20, ry: 0.88, rz: 0.70 };
+  blob(root, belly, "Plastron", [0.03, 0.48, 0], [0.88, 0.24, 0.54], 52);
+  const shellBody = blob(root, shell, "Shell", [shellShape.cx, shellShape.cy, 0], [shellShape.rx, shellShape.ry, shellShape.rz], 64);
 
   // Six broad, low-contrast plates instead of many reptile-like scales.
-  [
-    [-0.48, 1.25, 0.603, 0.35, 0.27, -0.08, tileA],
-    [0.02, 1.39, 0.623, 0.39, 0.28, 0, tileB],
-    [0.53, 1.24, 0.584, 0.34, 0.26, 0.08, tileA],
-    [-0.48, 0.91, 0.590, 0.37, 0.24, 0.08, tileB],
-    [0.03, 0.97, 0.625, 0.39, 0.26, 0, tileA],
-    [0.54, 0.91, 0.568, 0.35, 0.23, -0.08, tileB],
-  ].forEach(([x, y, z, sx, sy, r, material]) => shellTile(root, material, seam, [x, y, z], [sx, sy], r));
+  const shellTiles = [
+    { data: [-0.48, 1.25, 0.34, 0.26, -0.08], material: tileA },
+    { data: [0.02, 1.42, 0.39, 0.28, 0], material: tileB },
+    { data: [0.54, 1.25, 0.34, 0.26, 0.08], material: tileA },
+    { data: [-0.50, 0.89, 0.36, 0.24, 0.08], material: tileB },
+    { data: [0.03, 0.94, 0.39, 0.26, 0], material: tileA },
+    { data: [0.57, 0.89, 0.35, 0.23, -0.08], material: tileB },
+  ];
+  shellTiles.forEach(({ data, material }) => {
+    shellTileOnSurface(root, material, seam, shellShape, data, 1);
+    shellTileOnSurface(root, material, seam, shellShape, data, -1);
+  });
 
   capsule(root, skin, "Neck", [-1.02, 0.86, 0], 0.25, 0.34, [0, 0, Math.PI / 2], [1, 1, 0.92]);
   const head = blob(root, skin, "Head", [-1.38, 1.00, 0.03], [0.49, 0.44, 0.41], 52);
