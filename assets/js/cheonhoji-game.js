@@ -108,6 +108,7 @@ if (sceneElement && canvas) {
   function applyCharacter(value) {
     selectedCharacter = value === "turtle" ? "turtle" : "otter";
     sceneElement.dataset.character = selectedCharacter;
+    syncJumpPhysics();
     localStorage.setItem("cheonhojiGameCharacter", selectedCharacter);
     setButtonState(characterButtons, selectedCharacter, "cheonhoCharacter");
     if (animal) {
@@ -164,13 +165,39 @@ if (sceneElement && canvas) {
     sceneElement.classList.remove("is-jumping");
   }
 
+  function currentJumpPhysics() {
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    if (coarsePointer && selectedCharacter === "turtle") {
+      const gravity = 3.2;
+      return {
+        gravity,
+        firstVelocity: Math.sqrt(2 * gravity * 1.50),
+        secondVelocity: Math.sqrt(2 * gravity * 1.65),
+      };
+    }
+    if (coarsePointer) {
+      const gravity = 3.8;
+      return {
+        gravity,
+        firstVelocity: Math.sqrt(2 * gravity * 1.42),
+        secondVelocity: Math.sqrt(2 * gravity * 1.55),
+      };
+    }
+    return { gravity: 13.5, firstVelocity: 6.2, secondVelocity: 6.4 };
+  }
+
+  function syncJumpPhysics() {
+    const physics = currentJumpPhysics();
+    sceneElement.dataset.jumpGravity = String(physics.gravity);
+    sceneElement.dataset.firstJumpVelocity = String(physics.firstVelocity);
+    sceneElement.dataset.secondJumpVelocity = String(physics.secondVelocity);
+  }
+
   function startJump() {
     if (!running || jumpCount >= 2) return false;
     jumping = true;
-    const mobileTurtleBoost = selectedCharacter === "turtle" && window.matchMedia("(pointer: coarse)").matches
-      ? 1.12
-      : 1;
-    jumpVelocity = (jumpCount === 0 ? 6.2 : 6.4) * mobileTurtleBoost;
+    const physics = currentJumpPhysics();
+    jumpVelocity = jumpCount === 0 ? physics.firstVelocity : physics.secondVelocity;
     jumpCount += 1;
     sceneElement.classList.add("is-jumping", "has-jumped");
     return true;
@@ -181,7 +208,7 @@ if (sceneElement && canvas) {
     previousFrameTime = time;
     if (!jumping || delta <= 0) return jumpOffset;
 
-    jumpVelocity -= 13.5 * delta;
+    jumpVelocity -= currentJumpPhysics().gravity * delta;
     jumpOffset += jumpVelocity * delta;
 
     if (jumpOffset <= 0 && jumpVelocity < 0) {
@@ -229,6 +256,7 @@ if (sceneElement && canvas) {
     const active = fullscreenActive();
     const desktopFullscreen = active && !window.matchMedia("(max-width: 900px)").matches;
     sceneElement.dataset.jumpScale = desktopFullscreen ? "0.25" : "0.32";
+    syncJumpPhysics();
     sceneElement.classList.toggle("is-native-fullscreen", active && !sceneElement.classList.contains("is-fullscreen-fallback"));
     document.body.classList.toggle("cheonho-fullscreen-open", active);
     if (fullscreenButton) {

@@ -73,7 +73,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function difficultyFor(laps) {
-    return Math.min(1.85, 1 + Math.max(0, laps - 0.25) * 0.16);
+    return 1 + Math.max(0, laps) * 0.5;
   }
 
   const DOUBLE_JUMP_TYPES = new Set(["barrier", "fence", "gate", "kiosk", "mapboard"]);
@@ -130,14 +130,13 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     if (obstacleCategoryBag.length === 0) {
       obstacleCategoryBag = rateTier === 0
         ? shuffled([
-          "double", "double", "double",
-          "regular", "regular", "regular", "regular", "regular",
-          "regular", "regular", "regular", "regular",
-        ])
-        : shuffled([
           "double", "double", "double", "double",
           "regular", "regular", "regular", "regular",
           "regular", "regular", "regular", "regular",
+        ])
+        : shuffled([
+          "double", "double", "double", "double", "double", "double",
+          "regular", "regular", "regular", "regular", "regular", "regular",
         ]);
     }
 
@@ -226,29 +225,38 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const ratio = ratios[obstacle.type] || ratios.curb;
     const mobileScale = coarsePointer ? 0.94 : 1;
     const widthScale = mobileTurtle ? 0.87 : mobileScale;
-    const obstacleWidth = Math.max(12, sceneWidth * ratio.width * widthScale);
+    let obstacleWidth = Math.max(12, sceneWidth * ratio.width * widthScale);
     let obstacleHeight;
 
     if (DOUBLE_JUMP_TYPES.has(obstacle.type)) {
-      const turtleJumpBoost = mobileTurtle ? 1.12 : 1;
-      const gravity = 13.5;
-      const firstJumpVelocity = 6.2 * turtleJumpBoost;
-      const secondJumpVelocity = 6.4 * turtleJumpBoost;
+      const gravity = Number.parseFloat(scene.dataset.jumpGravity || "13.5") || 13.5;
+      const firstJumpVelocity = Number.parseFloat(scene.dataset.firstJumpVelocity || "6.2") || 6.2;
+      const secondJumpVelocity = Number.parseFloat(scene.dataset.secondJumpVelocity || "6.4") || 6.4;
       const jumpScale = Number.parseFloat(scene.dataset.jumpScale || "0.32") || 0.32;
       const jumpPixelsPerUnit = Math.max(character.offsetHeight, 1) * jumpScale;
       const maximumDoubleJump = (
         (firstJumpVelocity ** 2 + secondJumpVelocity ** 2) / (2 * gravity)
       ) * jumpPixelsPerUnit;
       const obstacleSpeed = Math.max(sceneWidth * 0.095 * difficultyFor(currentLaps()), 1);
-      const halfCrossingTime = (obstacleWidth / 2) / obstacleSpeed;
-      const trajectoryDrop = 0.5 * gravity * (halfCrossingTime ** 2) * jumpPixelsPerUnit;
-      const controlMargin = Math.max(6, character.offsetHeight * 0.09);
-      const thicknessAdjustedHeight = maximumDoubleJump - trajectoryDrop - controlMargin;
-      obstacleHeight = Math.max(
-        sceneHeight * 0.14,
-        Math.min(sceneHeight * 0.205, thicknessAdjustedHeight)
+      const collisionFootprintRatio = turtle ? 0.55 : 0.50;
+      const characterCollisionWidth = character.offsetWidth * collisionFootprintRatio;
+      const optimalAirTime = (firstJumpVelocity / gravity) + (2 * secondJumpVelocity / gravity);
+      const maximumPassableWidth = Math.max(
+        10,
+        obstacleSpeed * optimalAirTime * 0.90 - characterCollisionWidth
       );
-      obstacle.element.style.setProperty("--jump-arc-w", `${Math.max(obstacleWidth * 2.45, character.offsetWidth * 1.55)}px`);
+      obstacleWidth = Math.min(obstacleWidth, maximumPassableWidth);
+      const effectiveCrossingWidth = obstacleWidth + characterCollisionWidth;
+      const halfCrossingTime = (effectiveCrossingWidth / 2) / obstacleSpeed;
+      const trajectoryDrop = 0.5 * gravity * (halfCrossingTime ** 2) * jumpPixelsPerUnit;
+      const controlMargin = Math.max(5, character.offsetHeight * 0.07);
+      const thicknessAdjustedHeight = Math.max(
+        5,
+        (maximumDoubleJump - trajectoryDrop - controlMargin) * 0.92
+      );
+      obstacleHeight = Math.min(sceneHeight * 0.18, thicknessAdjustedHeight);
+      obstacle.element.style.setProperty("--jump-arc-w", `${Math.max(effectiveCrossingWidth * 1.18, obstacleWidth * 2.2)}px`);
+      obstacle.element.style.setProperty("--jump-arc-h", `${Math.max(obstacleHeight + 24, maximumDoubleJump * 0.90)}px`);
     } else {
       const heightScale = mobileTurtle ? 0.88 : mobileScale;
       obstacleHeight = Math.max(8, sceneHeight * ratio.height * heightScale);
