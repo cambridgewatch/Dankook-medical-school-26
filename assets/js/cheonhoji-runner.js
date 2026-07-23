@@ -5,6 +5,7 @@ import {
   doc,
   getCountFromServer,
   getDoc,
+  getDocs,
   limit,
   onSnapshot,
   orderBy,
@@ -31,6 +32,7 @@ const myBestElement = document.querySelector("#cheonhoMyBest");
 const myRankElement = document.querySelector("#cheonhoMyRank");
 const topScoreElement = document.querySelector("#cheonhoTopScore");
 const adminRanking = document.querySelector("#cheonhoAdminRanking");
+const rankingCharacterButtons = [...document.querySelectorAll("[data-cheonho-ranking-character]")];
 
 if (scene && track && character && obstacleLayer && scoreElement) {
   const obstacles = [];
@@ -53,6 +55,23 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   let consecutiveDoubleJumps = 0;
   let obstacleTier = -1;
   let obstacleRateTier = -1;
+  let rankingCharacter = localStorage.getItem("cheonhojiRankingCharacter") === "turtle" ? "turtle" : "otter";
+
+  function scoreField(characterName = rankingCharacter) {
+    return characterName === "turtle" ? "turtleBestLaps" : "otterBestLaps";
+  }
+
+  function rankingCharacterLabel() {
+    return rankingCharacter === "turtle" ? "거북이" : "수달";
+  }
+
+  function syncRankingCharacterButtons() {
+    rankingCharacterButtons.forEach((button) => {
+      const active = button.dataset.cheonhoRankingCharacter === rankingCharacter;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  }
 
   function animationDurationSeconds() {
     const raw = getComputedStyle(track).animationDuration.split(",")[0].trim();
@@ -458,24 +477,34 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   async function saveBestScore(score) {
     if (!currentUser || !Number.isFinite(score)) return;
     const uid = currentUser.uid;
+    const playedCharacter = scene.dataset.character === "turtle" ? "turtle" : "otter";
+    const characterScoreField = scoreField(playedCharacter);
     const scoreRef = doc(db, "gameScores", uid);
     const leaderboardRef = doc(db, "gameLeaderboard", uid);
     try {
       await runTransaction(db, async (transaction) => {
         const existing = await transaction.get(scoreRef);
-        const previousBest = existing.exists() ? Number(existing.data().bestLaps || 0) : 0;
-        if (score <= previousBest) return;
-        const bestLaps = Number(score.toFixed(4));
+        const existingData = existing.exists() ? existing.data() : {};
+        const previousCharacterBest = Number(existingData[characterScoreField] || 0);
+        if (score <= previousCharacterBest) return;
+        const characterBestLaps = Number(score.toFixed(4));
+        const bestLaps = Math.max(Number(existingData.bestLaps || 0), characterBestLaps);
         transaction.set(scoreRef, {
           uid,
           email: currentUser.email || "",
           name: emailToName(currentUser.email || "") || "동기",
           bestLaps,
+          [characterScoreField]: characterBestLaps,
           updatedAt: serverTimestamp(),
-        });
-        transaction.set(leaderboardRef, { bestLaps, updatedAt: serverTimestamp() });
+        }, { merge: true });
+        transaction.set(leaderboardRef, {
+          bestLaps,
+          [characterScoreField]: characterBestLaps,
+          isAdmin: currentUser.email === ADMIN_EMAIL,
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
       });
-      if (currentUser.email !== ADMIN_EMAIL) await refreshMyRank();
+      if (rankingCharacter === playedCharacter && currentUser.email !== ADMIN_EMAIL) await refreshMyRank();
     } catch (error) {
       if (rankingStatus) rankingStatus.textContent = "기록 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.";
       console.error("Cheonhoji score save failed", error);
@@ -737,17 +766,27 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   async function refreshMyRank() {
     if (!currentUser) return;
     try {
+      const selectedScoreField = scoreField();
       const ownSnapshot = await getDoc(doc(db, "gameScores", currentUser.uid));
-      const ownBest = ownSnapshot.exists() ? Number(ownSnapshot.data().bestLaps || 0) : 0;
+      const ownBest = ownSnapshot.exists() ? Number(ownSnapshot.data()[selectedScoreField] || 0) : 0;
       if (!ownBest) {
         if (myRankElement) myRankElement.textContent = "기록 없음";
         return;
       }
-      const higherScores = await getCountFromServer(query(
-        collection(db, "gameLeaderboard"),
-        where("bestLaps", ">", ownBest)
-      ));
-      if (myRankElement) myRankElement.textContent = `${higherScores.data().count + 1}위`;
+      const [higherScores, adminScores] = await Promise.all([
+        getCountFromServer(query(
+          collection(db, "gameLeaderboard"),
+          where(selectedScoreField, ">", ownBest)
+        )),
+        getDocs(query(
+          collection(db, "gameLeaderboard"),
+          where("isAdmin", "==", true),
+          limit(1)
+        )),
+      ]);
+      const adminRanksHigher = adminScores.docs.some((entry) => Number(entry.data()[selectedScoreField] || 0) > ownBest);
+      const memberHigherCount = Math.max(0, higherScores.data().count - (adminRanksHigher ? 1 : 0));
+      if (myRankElement) myRankElement.textContent = `${memberHigherCount + 1}위`;
     } catch (error) {
       if (myRankElement) myRankElement.textContent = "불러오기 실패";
     }
@@ -756,23 +795,25 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   function subscribeRankings(user) {
     if (unsubscribeRanking) unsubscribeRanking();
     const isAdmin = user.email === ADMIN_EMAIL;
-    if (rankingStatus) rankingStatus.textContent = "최고 기록은 계정별로 저장됩니다.";
+    const selectedScoreField = scoreField();
+    if (rankingStatus) rankingStatus.textContent = `${rankingCharacterLabel()} 기록을 표시합니다.`;
 
     if (isAdmin) {
       if (rankingSummary) rankingSummary.hidden = true;
       if (adminRanking) adminRanking.hidden = false;
       unsubscribeRanking = onSnapshot(
-        query(collection(db, "gameScores"), orderBy("bestLaps", "desc")),
+        query(collection(db, "gameScores"), orderBy(selectedScoreField, "desc")),
         (snapshot) => {
           if (!adminRanking) return;
-          if (snapshot.empty) {
+          const rankedEntries = snapshot.docs;
+          if (!rankedEntries.length) {
             adminRanking.innerHTML = '<p class="cheonho-ranking-empty">아직 저장된 기록이 없습니다.</p>';
             return;
           }
-          adminRanking.innerHTML = snapshot.docs.map((entry, index) => {
+          adminRanking.innerHTML = rankedEntries.map((entry, index) => {
             const data = entry.data();
             const name = String(data.name || emailToName(data.email || "") || "동기").replace(/[<>&"']/g, "");
-            return `<div class="cheonho-ranking-row"><span>${index + 1}위</span><strong>${name}</strong><b>${formattedLaps(Number(data.bestLaps || 0))}바퀴</b></div>`;
+            return `<div class="cheonho-ranking-row"><span>${index + 1}위</span><strong>${name}</strong><b>${formattedLaps(Number(data[selectedScoreField] || 0))}바퀴</b></div>`;
           }).join("");
         },
         () => {
@@ -787,7 +828,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       unsubscribers.push(onSnapshot(
         doc(db, "gameScores", user.uid),
         (snapshot) => {
-          const best = snapshot.exists() ? Number(snapshot.data().bestLaps || 0) : 0;
+          const best = snapshot.exists() ? Number(snapshot.data()[selectedScoreField] || 0) : 0;
           if (myBestElement) myBestElement.textContent = best ? `${formattedLaps(best)}바퀴` : "기록 없음";
           refreshMyRank();
         },
@@ -798,9 +839,10 @@ if (scene && track && character && obstacleLayer && scoreElement) {
         }
       ));
       unsubscribers.push(onSnapshot(
-        query(collection(db, "gameLeaderboard"), orderBy("bestLaps", "desc"), limit(1)),
+        query(collection(db, "gameLeaderboard"), orderBy(selectedScoreField, "desc"), limit(3)),
         (snapshot) => {
-          const best = snapshot.empty ? 0 : Number(snapshot.docs[0].data().bestLaps || 0);
+          const memberLeader = snapshot.docs.find((entry) => entry.data().isAdmin !== true);
+          const best = memberLeader ? Number(memberLeader.data()[selectedScoreField] || 0) : 0;
           if (topScoreElement) topScoreElement.textContent = best ? `${formattedLaps(best)}바퀴` : "기록 없음";
         },
         () => {
@@ -821,6 +863,23 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     subscribeRankings(user);
   });
 
+  rankingCharacterButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      rankingCharacter = button.dataset.cheonhoRankingCharacter === "turtle" ? "turtle" : "otter";
+      localStorage.setItem("cheonhojiRankingCharacter", rankingCharacter);
+      syncRankingCharacterButtons();
+      if (currentUser) subscribeRankings(currentUser);
+    });
+  });
+
+  scene.addEventListener("cheonho:characterchange", () => {
+    rankingCharacter = scene.dataset.character === "turtle" ? "turtle" : "otter";
+    localStorage.setItem("cheonhojiRankingCharacter", rankingCharacter);
+    syncRankingCharacterButtons();
+    if (currentUser) subscribeRankings(currentUser);
+  });
+
+  syncRankingCharacterButtons();
   renderScore();
   setCharacterX(initialCharacterX());
   requestAnimationFrame(frame);

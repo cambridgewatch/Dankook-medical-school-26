@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-  <link rel="stylesheet" href="assets/css/style.css?v=141" />
+  <link rel="stylesheet" href="assets/css/style.css?v=142" />
 </head>
 <body class="locked">
 
@@ -78,10 +78,23 @@
               <button type="button" data-cheonho-mode="walk" aria-pressed="false">산책</button>
             </div>
           </div>
-          <div class="cheonho-action-buttons">
-            <button type="button" class="cheonho-fullscreen-button" id="cheonhoFullscreenButton" aria-label="전체화면으로 보기"><i aria-hidden="true">⛶</i><span>전체화면</span></button>
+          <div class="cheonho-choice-block cheonho-fullscreen-control">
+            <span>전체화면</span>
+            <div class="cheonho-action-buttons">
+              <button type="button" class="cheonho-fullscreen-button" id="cheonhoFullscreenButton" aria-label="전체화면으로 보기"><i aria-hidden="true">⛶</i><span>전체화면</span></button>
+            </div>
           </div>
         </div>
+
+        <details class="cheonho-play-guide">
+          <summary>플레이 방법</summary>
+          <div>
+            <p><strong>달리기</strong> 화면을 누르거나 Space 키를 누르면 시작하고 점프합니다. 한 번 더 누르면 이중 점프합니다.</p>
+            <p><strong>이동</strong> 모바일은 화면 아래의 좌우 버튼, PC는 ← · → 또는 A · D 키를 사용합니다.</p>
+            <p><strong>빠른 착지</strong> 공중에서 오른쪽 위의 아래 삼각형을 누르거나 PC에서 ↓ · S 키를 누르면 빠르게 내려옵니다.</p>
+            <p><strong>산책</strong> 장애물 없이 풍경을 감상할 수 있으며 바퀴 수도 계속 표시됩니다.</p>
+          </div>
+        </details>
 
         <div class="cheonho-run-scene is-paused" id="cheonhoRunScene" data-time="day" role="img" aria-label="버스 승차장부터 천호지 주변 명소가 낮과 밤 배경으로 자연스럽게 이어지는 순환 달리기 코스">
           <div class="cheonho-background-track" aria-hidden="true">
@@ -128,6 +141,10 @@
             <div><span>RANKING</span><h3 id="cheonhoRankingTitle">천호지 달리기 기록</h3></div>
             <small id="cheonhoRankingStatus">기록을 불러오는 중입니다.</small>
           </header>
+          <div class="cheonho-ranking-character-tabs" role="group" aria-label="캐릭터별 기록 선택">
+            <button type="button" class="is-active" data-cheonho-ranking-character="otter" aria-pressed="true">수달</button>
+            <button type="button" data-cheonho-ranking-character="turtle" aria-pressed="false">거북이</button>
+          </div>
           <div class="cheonho-ranking-summary" id="cheonhoRankingSummary">
             <article><span>내 최고 기록</span><strong id="cheonhoMyBest">불러오는 중</strong></article>
             <article><span>내 순위</span><strong id="cheonhoMyRank">불러오는 중</strong></article>
@@ -162,6 +179,6 @@
   <script type="module" src="assets/js/alerts.js?v=33"></script>
   <script type="module" src="assets/js/gate.js?v=23"></script>
   <script type="module" src="assets/js/cheonhoji-game.js?v=24"></script>
-  <script type="module" src="assets/js/cheonhoji-runner.js?v=20"></script>
+  <script type="module" src="assets/js/cheonhoji-runner.js?v=22"></script>
 </body>
 </html>

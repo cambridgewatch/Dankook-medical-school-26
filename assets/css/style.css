@@ -423,7 +423,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-segmented button { min-width: 74px; padding: 0 17px; }
 .cheonho-segmented button i { margin-right: 6px; font-style: normal; }
 .cheonho-light-control { display: inline-flex; }
-.cheonho-light-toggle { min-width: 120px !important; }
+.cheonho-light-toggle { min-width: 98px !important; }
 .cheonho-segmented .cheonho-light-toggle {
   background: #fff;
   color: #38566d;
@@ -443,6 +443,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   flex: 1 1 0;
   gap: 9px;
   padding: 0 18px;
+  white-space: nowrap;
 }
 .cheonho-segmented button:hover,
 .cheonho-character-options button:hover { color: var(--navy); transform: translateY(-1px); }
@@ -519,6 +520,42 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 }
 .cheonho-fullscreen-button:hover { border-color: #8eafc7; background: #f1f7fb; color: var(--navy); }
 .cheonho-fullscreen-button i { font-style: normal; font-size: 19px; line-height: 1; }
+.cheonho-fullscreen-control .cheonho-action-buttons { height: 100%; }
+
+.cheonho-play-guide {
+  margin: 0 28px 20px;
+  border: 1px solid #dce6ed;
+  border-radius: 14px;
+  background: #f8fbfd;
+  overflow: hidden;
+}
+.cheonho-play-guide summary {
+  position: relative;
+  padding: 13px 44px 13px 16px;
+  color: #31546c;
+  font-size: 13px;
+  font-weight: 850;
+  cursor: pointer;
+  list-style: none;
+}
+.cheonho-play-guide summary::-webkit-details-marker { display: none; }
+.cheonho-play-guide summary::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #628096;
+  border-bottom: 2px solid #628096;
+  transform: translateY(-65%) rotate(45deg);
+  transition: transform .18s ease;
+}
+.cheonho-play-guide[open] summary::after { transform: translateY(-25%) rotate(225deg); }
+.cheonho-play-guide > div { display: grid; gap: 7px; padding: 0 16px 15px; border-top: 1px solid #e6edf2; }
+.cheonho-play-guide p { margin: 11px 0 0; color: #607483; font-size: 12px; line-height: 1.6; }
+.cheonho-play-guide p + p { margin-top: 0; }
+.cheonho-play-guide strong { color: #234d69; }
 
 .cheonho-run-card {
   overflow: hidden;
@@ -1012,6 +1049,9 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
 .cheonho-ranking-summary article { padding:15px 16px; border:1px solid #e0e9ef; border-radius:13px; background:#f7fafc; }
 .cheonho-ranking-summary article span { display:block; margin-bottom:6px; color:#758793; font-size:11px; }
 .cheonho-ranking-summary article strong { color:#143f5d; font-size:21px; font-variant-numeric:tabular-nums; }
+.cheonho-ranking-character-tabs { display:inline-flex; gap:5px; margin:0 0 12px; padding:4px; border:1px solid #dbe6ed; border-radius:12px; background:#f4f8fa; }
+.cheonho-ranking-character-tabs button { min-width:74px; height:34px; padding:0 15px; border:0; border-radius:9px; background:transparent; color:#71828e; font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
+.cheonho-ranking-character-tabs button.is-active { background:#fff; color:#20577a; box-shadow:0 3px 10px rgba(28,61,87,.12); }
 .cheonho-admin-ranking { margin-top:12px; overflow:hidden; border:1px solid #e0e9ef; border-radius:13px; }
 .cheonho-ranking-row { display:grid; grid-template-columns:50px 1fr auto; align-items:center; gap:10px; padding:11px 14px; border-bottom:1px solid #e8eef2; font-size:13px; }
 .cheonho-ranking-row:last-child { border-bottom:0; }
@@ -1078,15 +1118,22 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-character-options button { min-height: 40px; padding: 0 10px; font-size: 12px; }
   .cheonho-segmented button { min-width: 0; flex: 1; }
   .cheonho-mode-options { width:100%; }
-  .cheonho-light-toggle { min-width: 112px !important; }
-  .cheonho-character-options button { gap: 5px; }
+  .cheonho-light-control,
+  .cheonho-character-options,
+  .cheonho-mode-options,
+  .cheonho-action-buttons { width:100%; }
+  .cheonho-light-toggle { width:100%; min-width:0 !important; }
+  .cheonho-character-options button { min-width:0; gap: 4px; padding-inline:5px; }
   .otter-mark,
   .turtle-mark { transform: scale(.84); }
   .cheonho-play-button { grid-column: 1 / -1; width: 100%; height: 48px; min-width: 0; border-radius: 12px; }
-  .cheonho-action-buttons { grid-column: 1 / -1; width: 100%; }
+  .cheonho-action-buttons { width: 100%; }
   .cheonho-action-buttons .cheonho-play-button { flex: 1 1 auto; }
-  .cheonho-fullscreen-button { flex: 0 0 auto; height: 48px; min-width: 48px; padding: 0 14px; border-radius: 12px; }
+  .cheonho-fullscreen-button { flex: 1 1 auto; width:100%; height: 48px; min-width: 0; padding: 0 12px; border-radius: 12px; }
   .cheonho-fullscreen-button span { display: none; }
+  .cheonho-play-guide { margin:0 16px 16px; border-radius:12px; }
+  .cheonho-play-guide summary { padding:12px 40px 12px 14px; font-size:12px; }
+  .cheonho-play-guide > div { padding:0 14px 13px; }
   .cheonho-run-scene { --cheonho-walkway-height:26%; --cheonho-ground-bottom:13%; aspect-ratio: 16 / 10; min-height: 0; }
   .cheonho-background-track { animation-duration: 100s; }
   .cheonho-fixed-walkway { height:var(--cheonho-walkway-height); border-top-width: 5px; }
@@ -1117,12 +1164,13 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-run-foot { align-items: flex-start; flex-direction: column; gap: 5px; padding: 12px 16px; }
   .cheonho-game-hud { top:8px; right:8px; padding:6px 9px; }
   .cheonho-game-hud strong { font-size:14px; }
-  .cheonho-fast-land-button { position:absolute; top:51px; right:8px; z-index:13; display:grid; place-items:center; width:46px; height:46px; padding:0; border:1px solid rgba(255,255,255,.55); border-radius:15px; outline:0; background:linear-gradient(145deg,rgba(86,181,235,.96),rgba(31,111,171,.96)); color:#fff; font:900 27px/1 sans-serif; box-shadow:0 7px 18px rgba(20,81,123,.26); touch-action:none; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; transition:opacity .16s ease,transform .16s ease,filter .16s ease; }
-  .cheonho-fast-land-button:disabled { opacity:.38; filter:saturate(.55); }
-  .cheonho-fast-land-button:not(:disabled):active { transform:translateY(2px) scale(.94); }
+  .cheonho-fast-land-button { position:absolute; top:51px; right:8px; z-index:13; display:grid; place-items:center; width:46px; height:42px; padding:0; border:0; border-radius:0; outline:0; clip-path:polygon(0 0,100% 0,50% 100%); background:linear-gradient(145deg,rgba(85,174,230,.96),rgba(35,112,169,.96)); color:transparent; font-size:0; box-shadow:none; filter:drop-shadow(0 6px 9px rgba(24,91,137,.24)); touch-action:none; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; transition:opacity .18s ease,transform .18s cubic-bezier(.2,.8,.2,1),filter .18s ease,background .18s ease; }
+  .cheonho-fast-land-button:disabled { opacity:.34; filter:drop-shadow(0 3px 5px rgba(24,91,137,.12)) saturate(.55); }
+  .cheonho-fast-land-button:not(:disabled):active { background:linear-gradient(145deg,#77c8f3,#3e91c9); transform:scale(.91); filter:drop-shadow(0 3px 5px rgba(24,91,137,.18)); }
+  .cheonho-run-scene.is-fast-falling .cheonho-fast-land-button { opacity:.62; background:linear-gradient(145deg,#77c8f3,#3e91c9); transform:scale(.91); filter:drop-shadow(0 3px 5px rgba(24,91,137,.18)); }
   .cheonho-run-scene:fullscreen .cheonho-fast-land-button,
   .cheonho-run-scene:-webkit-full-screen .cheonho-fast-land-button,
-  .cheonho-run-scene.is-fullscreen-fallback .cheonho-fast-land-button { top:max(62px,calc(env(safe-area-inset-top) + 58px)); right:max(70px,calc(env(safe-area-inset-right) + 70px)); width:52px; height:52px; font-size:31px; }
+  .cheonho-run-scene.is-fullscreen-fallback .cheonho-fast-land-button { top:max(62px,calc(env(safe-area-inset-top) + 58px)); right:max(70px,calc(env(safe-area-inset-right) + 70px)); width:52px; height:48px; }
   .cheonho-mobile-move-controls { position:absolute; left:max(30px,calc(env(safe-area-inset-left) + 22px)); bottom:max(25px,calc(env(safe-area-inset-bottom) + 18px)); z-index:13; display:flex; gap:8px; touch-action:none; overscroll-behavior:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
   .cheonho-mobile-move-controls button { display:grid; place-items:center; width:64px; height:58px; padding:0; border:0; border-radius:0; outline:0; background:linear-gradient(145deg,rgba(85,174,230,.96),rgba(35,112,169,.96)); color:transparent; font:inherit; font-size:0; box-shadow:none; filter:drop-shadow(0 6px 9px rgba(24,91,137,.24)); touch-action:none; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; backdrop-filter:blur(8px); transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s ease,background .18s ease; }
   .cheonho-mobile-move-controls button[data-cheonho-move="left"] { clip-path:polygon(100% 0,100% 100%,0 50%); }
