@@ -321,7 +321,6 @@ export function createNavyDanwoong() {
   const orange = material(COLORS.orange, 0.66);
 
   root.add(sphere(navy, "Body", [0, 2.22, 0], [1.25, 2.02, 0.92], 52));
-  root.add(sphere(belly, "Belly", [0, 1.67, 0.81], [0.84, 0.93, 0.12], 40));
   root.add(sphere(black, "Ear_L", [-0.57, 4.02, 0.02], [0.25, 0.27, 0.19], 30));
   root.add(sphere(black, "Ear_R", [0.57, 4.02, 0.02], [0.25, 0.27, 0.19], 30));
 
