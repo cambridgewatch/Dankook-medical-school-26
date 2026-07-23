@@ -88,6 +88,20 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     return type;
   }
 
+  function sizeObstacle(obstacle) {
+    const characterRect = character.getBoundingClientRect();
+    const visibleCharacterWidth = characterRect.width * (scene.dataset.character === "turtle" ? 0.72 : 0.68);
+    const ratios = {
+      curb: { width: 0.90, height: 0.16 },
+      planter: { width: 0.55, height: 0.34 },
+      bollard: { width: 0.32, height: 0.48 },
+      barrier: { width: 0.75, height: 0.95 },
+    };
+    const ratio = ratios[obstacle.type] || ratios.curb;
+    obstacle.element.style.setProperty("--obstacle-w", `${Math.max(12, visibleCharacterWidth * ratio.width)}px`);
+    obstacle.element.style.setProperty("--obstacle-h", `${Math.max(8, characterRect.height * ratio.height)}px`);
+  }
+
   function spawnObstacle() {
     const type = obstacleTypeForProgress(currentLaps());
     const element = document.createElement("div");
@@ -97,7 +111,9 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       element.insertAdjacentHTML("beforeend", '<span class="cheonho-double-jump-label">2× JUMP</span>');
     }
     obstacleLayer.appendChild(element);
-    obstacles.push({ element, x: 108, type });
+    const obstacle = { element, x: 108, type };
+    sizeObstacle(obstacle);
+    obstacles.push(obstacle);
   }
 
   function scheduleNextSpawn(laps) {
@@ -220,6 +236,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
 
     for (let index = obstacles.length - 1; index >= 0; index -= 1) {
       const obstacle = obstacles[index];
+      sizeObstacle(obstacle);
       obstacle.x -= obstaclePercentPerSecond * delta;
       obstacle.element.style.setProperty("--obstacle-x", `${obstacle.x}%`);
       if (obstacle.x < -10) {
