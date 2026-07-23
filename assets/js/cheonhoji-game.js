@@ -92,6 +92,28 @@ if (sceneElement && canvas && playButton) {
     const parts = animal.userData.parts || {};
     animal.userData.restHeadX = parts.head?.position.x ?? 0;
     stage.add(animal);
+    fitCameraToCharacter();
+  }
+
+  function fitCameraToCharacter() {
+    if (!animal || selectedCharacter !== "turtle") {
+      camera.position.set(0.15, 2.05, 7.2);
+      camera.lookAt(0, 1.36, 0);
+      return;
+    }
+
+    animal.updateWorldMatrix(true, true);
+    const bounds = new THREE.Box3().setFromObject(animal);
+    const size = bounds.getSize(new THREE.Vector3());
+    const center = bounds.getCenter(new THREE.Vector3());
+    const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+    const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * Math.max(camera.aspect, 0.1));
+    const verticalDistance = size.y / (2 * Math.tan(verticalFov / 2));
+    const horizontalDistance = size.x / (2 * Math.tan(horizontalFov / 2));
+    const distance = Math.max(verticalDistance, horizontalDistance) * 1.18;
+
+    camera.position.set(center.x, center.y + 0.16, center.z + distance);
+    camera.lookAt(center.x, center.y + 0.06, center.z);
   }
 
   function setRunning(value) {
@@ -175,6 +197,7 @@ if (sceneElement && canvas && playButton) {
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+      fitCameraToCharacter();
     }
   }
 
