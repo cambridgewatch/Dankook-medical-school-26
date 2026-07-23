@@ -885,6 +885,11 @@ body.cheonho-fullscreen-open { overflow: hidden; }
 }
 .cheonho-obstacle-barrier::before { content:""; position:absolute; left:8%; right:8%; bottom:10%; height:66%; border:4px solid #8a542c; border-radius:7px; background:repeating-linear-gradient(-45deg,#f8e9c7 0 10px,#e36a38 10px 20px); box-shadow:inset 0 0 0 2px rgba(255,255,255,.42); }
 .cheonho-obstacle-barrier::after { content:""; position:absolute; left:0; right:0; bottom:0; height:13%; border-radius:6px; background:#5b3a25; box-shadow:15px -4px 0 -3px #5b3a25,-15px -4px 0 -3px #5b3a25; }
+.cheonho-double-jump-label { position:absolute; left:50%; top:-20px; z-index:2; padding:3px 6px; border-radius:999px; background:rgba(20,48,65,.78); color:#fff; font-size:8px; font-weight:900; letter-spacing:.4px; white-space:nowrap; transform:translateX(-50%); }
+.cheonho-obstacle.is-hit { z-index:4; filter:drop-shadow(0 0 9px #ff493f) drop-shadow(0 6px 5px rgba(32,26,20,.24)); }
+.cheonho-impact-mark { position:absolute; left:50%; top:20%; z-index:5; display:grid; place-items:center; width:30px; height:30px; border:3px solid #fff; border-radius:50%; background:#ed493f; color:#fff; font-size:19px; font-weight:950; transform:translate(-50%,-50%); animation:cheonho-impact-pop .32s ease-out both; box-shadow:0 0 0 6px rgba(237,73,63,.24); }
+.cheonho-run-scene.has-collision { animation:cheonho-collision-shake .34s ease-out; }
+.cheonho-run-scene.has-collision::after { background:radial-gradient(circle at 50% 50%,transparent 25%,rgba(211,38,35,.42) 100%); animation:cheonho-collision-flash .65s ease-out both; }
 .cheonho-mobile-move-controls { display:none; }
 .cheonho-game-over {
   position:absolute;
@@ -909,6 +914,7 @@ body.cheonho-fullscreen-open { overflow: hidden; }
 .cheonho-game-over > span { color:#a9d9f1; font-size:11px; font-weight:900; letter-spacing:2px; }
 .cheonho-game-over strong { font-size:27px; }
 .cheonho-game-over strong b { font-size:38px; font-variant-numeric:tabular-nums; }
+.cheonho-game-over p { margin:0; color:#dcebf3; font-size:13px; }
 .cheonho-game-over button { min-width:150px; height:44px; margin-top:5px; border:0; border-radius:12px; background:#e9f5fb; color:#173e58; font:inherit; font-weight:850; cursor:pointer; }
 .cheonho-ranking-panel { margin:18px 0 0; padding:22px; border:1px solid #dce6ed; border-radius:18px; background:#fff; }
 .cheonho-ranking-panel > header { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:15px; }
@@ -938,6 +944,9 @@ body.cheonho-fullscreen-open { overflow: hidden; }
   0% { transform: translate3d(0, 0, 0); }
   100% { transform: translate3d(-90.909091%, 0, 0); }
 }
+@keyframes cheonho-impact-pop { from { opacity:0; transform:translate(-50%,-50%) scale(.25) rotate(-20deg); } to { opacity:1; transform:translate(-50%,-50%) scale(1) rotate(0); } }
+@keyframes cheonho-collision-shake { 0%,100% { transform:translateX(0); } 20% { transform:translateX(-7px); } 45% { transform:translateX(6px); } 70% { transform:translateX(-3px); } }
+@keyframes cheonho-collision-flash { 0% { opacity:1; } 100% { opacity:.35; } }
 
 /* A transformed 11-screen-wide layer can exceed the mobile GPU texture limit
    after fullscreen rotation. Moving it by layout position keeps each scene

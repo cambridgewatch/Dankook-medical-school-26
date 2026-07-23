@@ -20,6 +20,7 @@ const character = document.querySelector("#cheonhoCharacterCanvas");
 const obstacleLayer = document.querySelector("#cheonhoObstacleLayer");
 const scoreElement = document.querySelector("#cheonhoLapScore");
 const finalScoreElement = document.querySelector("#cheonhoFinalScore");
+const crashReasonElement = document.querySelector("#cheonhoCrashReason");
 const gameOverElement = document.querySelector("#cheonhoGameOver");
 const retryButton = document.querySelector("#cheonhoRetryButton");
 const moveButtons = [...document.querySelectorAll("[data-cheonho-move]")];
@@ -91,6 +92,9 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const element = document.createElement("div");
     element.className = `cheonho-obstacle cheonho-obstacle-${type}`;
     element.dataset.obstacleType = type;
+    if (type === "barrier") {
+      element.insertAdjacentHTML("beforeend", '<span class="cheonho-double-jump-label">2× JUMP</span>');
+    }
     obstacleLayer.appendChild(element);
     obstacles.push({ element, x: 108, type });
   }
@@ -106,26 +110,23 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     character.style.left = `${characterX}%`;
   }
 
-  function hitboxesOverlap(obstacleElement) {
+  function hitboxesOverlap(obstacleElement, type) {
     const characterRect = character.getBoundingClientRect();
     const obstacleRect = obstacleElement.getBoundingClientRect();
     const turtle = scene.dataset.character === "turtle";
-    const characterBox = {
-      left: characterRect.left + characterRect.width * (turtle ? 0.20 : 0.27),
-      right: characterRect.right - characterRect.width * (turtle ? 0.20 : 0.27),
-      top: characterRect.top + characterRect.height * 0.16,
-      bottom: characterRect.bottom - characterRect.height * 0.08,
-    };
-    const obstacleBox = {
-      left: obstacleRect.left + obstacleRect.width * 0.12,
-      right: obstacleRect.right - obstacleRect.width * 0.12,
-      top: obstacleRect.top + obstacleRect.height * 0.08,
-      bottom: obstacleRect.bottom,
-    };
-    return characterBox.left < obstacleBox.right &&
-      characterBox.right > obstacleBox.left &&
-      characterBox.top < obstacleBox.bottom &&
-      characterBox.bottom > obstacleBox.top;
+    const characterInsetX = turtle ? 0.28 : 0.34;
+    const obstacleInsetX = type === "puddle" ? 0.18 : 0.22;
+    const horizontalOverlap =
+      characterRect.left + characterRect.width * characterInsetX < obstacleRect.right - obstacleRect.width * obstacleInsetX &&
+      characterRect.right - characterRect.width * characterInsetX > obstacleRect.left + obstacleRect.width * obstacleInsetX;
+    if (!horizontalOverlap) return false;
+
+    // 캔버스의 투명 여백이 아니라 캐릭터의 실제 발 위치로 판정한다.
+    // 낮은 장애물은 일반 점프 한 번으로, 높은 차단막만 더블 점프로 넘을 수 있다.
+    const feetY = characterRect.bottom - characterRect.height * (turtle ? 0.20 : 0.14);
+    const topInsetByType = { puddle: 0, branch: 0.12, cone: 0.20, barrier: 0.08 };
+    const obstacleTop = obstacleRect.top + obstacleRect.height * (topInsetByType[type] || 0);
+    return feetY > obstacleTop;
   }
 
   async function saveBestScore(score) {
@@ -155,15 +156,22 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     }
   }
 
-  function finishGame() {
+  function finishGame(obstacle) {
     if (gameOver) return;
     gameOver = true;
     scene.dataset.gameOver = "true";
     scene.dispatchEvent(new CustomEvent("cheonho:setrunning", { detail: { running: false } }));
     movement.left = false;
     movement.right = false;
+    scene.classList.add("has-collision");
+    obstacle?.element.classList.add("is-hit");
+    if (obstacle?.element && !obstacle.element.querySelector(".cheonho-impact-mark")) {
+      obstacle.element.insertAdjacentHTML("beforeend", '<span class="cheonho-impact-mark">!</span>');
+    }
     moveButtons.forEach((button) => button.classList.remove("is-pressed"));
     const score = currentLaps();
+    const names = { puddle: "물웅덩이", branch: "나뭇가지", cone: "안전 콘", barrier: "높은 차단막" };
+    if (crashReasonElement) crashReasonElement.textContent = `${names[obstacle?.type] || "장애물"}에 부딪혔어요.`;
     if (finalScoreElement) finalScoreElement.textContent = formattedLaps(score);
     if (gameOverElement) gameOverElement.hidden = false;
     saveBestScore(score);
@@ -177,6 +185,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     gameOver = false;
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-jumped", "is-jumping");
+    scene.classList.remove("has-collision");
     setCharacterX(11);
     renderScore();
     if (gameOverElement) gameOverElement.hidden = true;
@@ -209,8 +218,8 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       if (obstacle.x < -10) {
         obstacle.element.remove();
         obstacles.splice(index, 1);
-      } else if (hitboxesOverlap(obstacle.element)) {
-        finishGame();
+      } else if (hitboxesOverlap(obstacle.element, obstacle.type)) {
+        finishGame(obstacle);
         break;
       }
     }
