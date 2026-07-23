@@ -67,6 +67,36 @@ function labelPlane(text, name, position, size, textColor = "#f7f2e7", outlineCo
   return plane;
 }
 
+function jacketFront(bodyWidth, mat) {
+  const shape = new THREE.Shape();
+  const shoulder = bodyWidth * 0.84;
+  const hem = bodyWidth * 0.91;
+  shape.moveTo(-shoulder, 3.08);
+  shape.lineTo(-0.48, 3.01);
+  shape.lineTo(0, 2.76);
+  shape.lineTo(0.48, 3.01);
+  shape.lineTo(shoulder, 3.08);
+  shape.quadraticCurveTo(bodyWidth, 2.83, bodyWidth, 2.40);
+  shape.lineTo(hem, 1.03);
+  shape.quadraticCurveTo(0.72, 0.88, 0, 0.88);
+  shape.quadraticCurveTo(-0.72, 0.88, -hem, 1.03);
+  shape.lineTo(-bodyWidth, 2.40);
+  shape.quadraticCurveTo(-bodyWidth, 2.83, -shoulder, 3.08);
+  shape.closePath();
+
+  const geometry = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.13,
+    bevelEnabled: true,
+    bevelSegments: 3,
+    bevelSize: 0.045,
+    bevelThickness: 0.035,
+    curveSegments: 16,
+  });
+  const front = mesh(geometry, mat, "Jacket_Front", [0, 0, 1.04], [1, 1, 1]);
+  front.renderOrder = 2;
+  return front;
+}
+
 function addVarsityJacket(root, leftArm, rightArm, variant) {
   const brown = material(0x35231c, 0.84);
   const brownDark = material(0x251711, 0.88);
@@ -77,6 +107,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
   const bodyDepth = variant === "blue" ? 1.12 : 1.03;
 
   root.add(sphere(brown, "Jacket_Body", [0, 2.15, 0.08], [bodyWidth, bodyHeight, bodyDepth], 48));
+  root.add(jacketFront(bodyWidth, brown));
   root.add(mesh(new THREE.BoxGeometry(1, 1, 1), brownDark, "Jacket_Placket", [0, 2.08, bodyDepth + 0.055], [0.095, 1.02, 0.035]));
 
   [2.86, 2.43, 2.0, 1.57, 1.17].forEach((y, index) => {
@@ -115,7 +146,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
       new THREE.BoxGeometry(1, 1, 1),
       index === 1 ? ivory : brownDark,
       `Jacket_Waistband_${index + 1}`,
-      [0, y, bodyDepth * 0.75 + 0.10],
+      [0, y, bodyDepth + 0.10],
       [bodyWidth * 0.91, 0.035, 0.035]
     ));
   });
