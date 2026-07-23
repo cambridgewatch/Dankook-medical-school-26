@@ -271,11 +271,19 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     if (button) button.classList.toggle("is-pressed", active);
   }
 
+  function containMoveControlEvent(event) {
+    if (event?.cancelable) event.preventDefault();
+    event?.stopPropagation();
+  }
+
   moveButtons.forEach((button) => {
     const direction = button.dataset.cheonhoMove;
-    const stop = () => setMovement(direction, false, button);
+    const stop = (event) => {
+      containMoveControlEvent(event);
+      setMovement(direction, false, button);
+    };
     button.addEventListener("pointerdown", (event) => {
-      event.preventDefault();
+      containMoveControlEvent(event);
       setMovement(direction, true, button);
       try { button.setPointerCapture(event.pointerId); } catch (error) { /* Optional. */ }
     });
@@ -283,14 +291,17 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     button.addEventListener("pointercancel", stop);
     button.addEventListener("lostpointercapture", stop);
     button.addEventListener("touchstart", (event) => {
-      event.preventDefault();
+      containMoveControlEvent(event);
       setMovement(direction, true, button);
     }, { passive: false });
     button.addEventListener("touchend", (event) => {
-      event.preventDefault();
+      containMoveControlEvent(event);
       stop();
     }, { passive: false });
     button.addEventListener("touchcancel", stop, { passive: false });
+    button.addEventListener("touchmove", containMoveControlEvent, { passive: false });
+    button.addEventListener("click", containMoveControlEvent);
+    button.addEventListener("dblclick", containMoveControlEvent);
     button.addEventListener("contextmenu", (event) => event.preventDefault());
     button.addEventListener("selectstart", (event) => event.preventDefault());
     button.addEventListener("dragstart", (event) => event.preventDefault());
