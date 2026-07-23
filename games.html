@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-  <link rel="stylesheet" href="assets/css/style.css?v=97" />
+  <link rel="stylesheet" href="assets/css/style.css?v=98" />
 </head>
 <body class="locked">
 
@@ -47,13 +47,32 @@
 
   <main class="section mini-game-hub">
     <div class="container">
-      <article class="mini-game-coming-card">
-        <span class="mini-game-paw" aria-hidden="true"></span>
-        <div>
-          <small>COMING SOON</small>
-          <h2>첫 번째 미니게임 준비 중</h2>
-          <p>간단하게 즐기고 점수를 기록할 수 있는 단웅이·단비 게임이 이곳에 추가될 예정입니다.</p>
+      <article class="cheonho-run-card">
+        <header class="cheonho-run-head">
+          <div>
+            <small>COURSE 01</small>
+            <h2>천호지 한 바퀴</h2>
+            <p>연꽃이 펼쳐진 천호지 산책로를 따라 달리는 코스입니다.</p>
+          </div>
+          <span>ROUTE PREVIEW</span>
+        </header>
+
+        <div class="cheonho-run-scene" role="img" aria-label="연꽃이 핀 천호지와 캠퍼스 앞 나무 산책로 게임 경로">
+          <svg class="cheonho-route-overlay" viewBox="0 0 1600 600" preserveAspectRatio="none" aria-hidden="true">
+            <path class="cheonho-route-glow" d="M38 494 C 330 545, 720 526, 1050 507 S 1410 475, 1562 452" />
+            <path class="cheonho-route-line" d="M38 494 C 330 545, 720 526, 1050 507 S 1410 475, 1562 452" />
+          </svg>
+          <span class="cheonho-route-marker start"><i></i><b>START</b></span>
+          <span class="cheonho-route-arrow arrow-one">›</span>
+          <span class="cheonho-route-arrow arrow-two">›</span>
+          <span class="cheonho-route-arrow arrow-three">›</span>
+          <span class="cheonho-route-marker goal"><i></i><b>GOAL</b></span>
         </div>
+
+        <footer class="cheonho-run-foot">
+          <span><i class="route-dot"></i>천호지 수변 산책로</span>
+          <span>캐릭터와 장애물은 다음 단계에서 추가됩니다.</span>
+        </footer>
       </article>
     </div>
   </main>
