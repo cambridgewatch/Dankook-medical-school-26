@@ -473,45 +473,31 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-background-track .scene-reference-06 { background-image: url("../img/cheonhoji-scene-06-rice-fields-v1.jpg"); }
 .cheonho-background-track .scene-reference-07 { background-image: url("../img/cheonhoji-scene-07-opposite-lakeside-v1.jpg"); }
 .cheonho-background-track .scene-reference-08 { background-image: url("../img/cheonhoji-scene-08-sports-park-v1.jpg"); }
-.scene-transition-tree {
+.cheonho-background-track .scene-bus-stop { --next-scene: url("../img/cheonhoji-scene-06-rice-fields-v1.jpg"); }
+.cheonho-background-track .scene-reference-06 { --next-scene: url("../img/cheonhoji-scene-07-opposite-lakeside-v1.jpg"); }
+.cheonho-background-track .scene-reference-07 { --next-scene: url("../img/cheonhoji-course-bridge-v1.jpg"); }
+.cheonho-background-track .scene-bridge { --next-scene: url("../img/cheonhoji-scene-08-sports-park-v1.jpg"); }
+.cheonho-background-track .scene-reference-08 { --next-scene: url("../img/cheonhoji-scene-01-medical-campus-v1.jpg"); }
+.cheonho-background-track .scene-reference-01 { --next-scene: url("../img/cheonhoji-scene-02-redbrick-campus-v1.jpg"); }
+.cheonho-background-track .scene-reference-02 { --next-scene: url("../img/cheonhoji-scene-03-stadium-v1.jpg"); }
+.cheonho-background-track .scene-reference-03 { --next-scene: url("../img/cheonhoji-scene-04-gymnasium-v1.jpg"); }
+.cheonho-background-track .scene-reference-04 { --next-scene: url("../img/cheonhoji-scene-05-lakeside-building-v1.jpg"); }
+.cheonho-background-track .scene-reference-05 { --next-scene: url("../img/cheonhoji-course-bus-stop-v1.jpg"); }
+.cheonho-background-track > span::after {
+  content: "";
   position: absolute;
-  top: -4%;
-  bottom: 22%;
-  z-index: 4;
-  width: 1.9%;
-  transform: translateX(-50%);
+  top: 0;
+  right: -1px;
+  bottom: 0;
+  z-index: 2;
+  width: 18%;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 13%, #8bc96f 0 15%, transparent 16%),
-    radial-gradient(ellipse at 27% 27%, #6eb458 0 20%, transparent 21%),
-    radial-gradient(ellipse at 73% 29%, #75bc5e 0 21%, transparent 22%),
-    radial-gradient(ellipse at 48% 43%, #4f9d47 0 28%, transparent 29%),
-    radial-gradient(ellipse at 18% 54%, #65ad51 0 18%, transparent 19%),
-    radial-gradient(ellipse at 82% 55%, #4f9845 0 20%, transparent 21%);
-  filter: drop-shadow(0 5px 7px rgba(18, 59, 39, .28));
-}
-.scene-transition-tree::before {
-  content: "";
-  position: absolute;
-  left: 47%;
-  bottom: -2%;
-  width: 6%;
-  height: 64%;
-  border-radius: 55% 45% 12% 12%;
-  background: linear-gradient(90deg, #62452e, #8a6340 55%, #553923);
-  box-shadow: -4.3vw 2.2vh 0 -1px #725036, 4.1vw 1.5vh 0 -1px #68482f;
-}
-.scene-transition-tree::after {
-  content: "";
-  position: absolute;
-  left: -8%;
-  right: -8%;
-  bottom: -5%;
-  height: 28%;
-  background:
-    radial-gradient(ellipse at 18% 100%, #3f883d 0 45%, transparent 47%),
-    radial-gradient(ellipse at 50% 100%, #58a44a 0 52%, transparent 54%),
-    radial-gradient(ellipse at 82% 100%, #347a38 0 46%, transparent 48%);
+  background-image: var(--next-scene);
+  background-position: left center;
+  background-size: 555.556% 100%;
+  background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.12) 18%, #000 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.12) 18%, #000 100%);
 }
 .cheonho-fixed-walkway {
   position: absolute;
@@ -639,7 +625,11 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .cheonho-run-head > span { display: none; }
   .cheonho-run-scene { aspect-ratio: 16 / 10; min-height: 0; }
   .cheonho-background-track { animation-duration: 100s; }
-  .scene-transition-tree { width: 2.6%; bottom: 24%; }
+  .cheonho-background-track > span::after {
+    width: 20%;
+    background-size: 833.334% 100%;
+    background-position: 22.4% center;
+  }
   .cheonho-fixed-walkway { height: 26%; border-top-width: 5px; }
   .cheonho-fixed-walkway::before { top: -25px; height: 25px; background: linear-gradient(180deg, #754326 0 5px, transparent 5px 19px, #754326 19px 24px), repeating-linear-gradient(90deg, #6b3b22 0 5px, transparent 5px 53px); }
   .cheonho-route-glow { stroke-width: 25; }
