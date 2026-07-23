@@ -12,19 +12,19 @@ const fullscreenButton = document.querySelector("#cheonhoFullscreenButton");
 const fullscreenExit = document.querySelector("#cheonhoFullscreenExit");
 const lightToggleButtons = [...document.querySelectorAll("[data-cheonho-light-toggle]")];
 const characterButtons = [...document.querySelectorAll("[data-cheonho-character]")];
+const modeButtons = [...document.querySelectorAll("[data-cheonho-mode]")];
 
 if (sceneElement && canvas && playButton) {
   const savedCharacter = localStorage.getItem("cheonhojiGameCharacter") === "turtle" ? "turtle" : "otter";
   let selectedTime = "day";
   let selectedCharacter = savedCharacter;
+  let selectedMode = "run";
   let running = false;
   let animal = null;
   let jumping = false;
-  let jumpHeld = false;
   let jumpOffset = 0;
   let jumpVelocity = 0;
   let jumpCount = 0;
-  let jumpHoldUntil = 0;
   let previousFrameTime = 0;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
@@ -134,11 +134,9 @@ if (sceneElement && canvas && playButton) {
 
   function resetJump() {
     jumping = false;
-    jumpHeld = false;
     jumpOffset = 0;
     jumpVelocity = 0;
     jumpCount = 0;
-    jumpHoldUntil = 0;
     canvas.style.setProperty("--cheonho-jump-y", "0px");
     sceneElement.classList.remove("is-jumping");
   }
@@ -146,16 +144,10 @@ if (sceneElement && canvas && playButton) {
   function startJump() {
     if (!running || jumpCount >= 2) return false;
     jumping = true;
-    jumpHeld = true;
-    jumpVelocity = jumpCount === 0 ? 4.3 : 4.55;
+    jumpVelocity = jumpCount === 0 ? 6.2 : 6.4;
     jumpCount += 1;
-    jumpHoldUntil = performance.now() + 320;
     sceneElement.classList.add("is-jumping", "has-jumped");
     return true;
-  }
-
-  function releaseJump() {
-    jumpHeld = false;
   }
 
   function updateJump(time) {
@@ -163,11 +155,6 @@ if (sceneElement && canvas && playButton) {
     previousFrameTime = time;
     if (!jumping || delta <= 0) return jumpOffset;
 
-    if (jumpHeld && time < jumpHoldUntil) {
-      jumpVelocity += 9 * delta;
-    } else {
-      jumpHeld = false;
-    }
     jumpVelocity -= 13.5 * delta;
     jumpOffset += jumpVelocity * delta;
 
@@ -185,7 +172,9 @@ if (sceneElement && canvas && playButton) {
     sceneElement.classList.toggle("is-paused", !running);
     playButton.classList.toggle("is-running", running);
     playButton.setAttribute("aria-pressed", running ? "true" : "false");
-    playButton.querySelector("span").textContent = running ? "잠시 멈추기" : "달리기 시작";
+    playButton.querySelector("span").textContent = running
+      ? "잠시 멈추기"
+      : (selectedMode === "walk" ? "산책 시작" : "달리기 시작");
     playButton.querySelector("i").textContent = running ? "Ⅱ" : "▶";
     sceneElement.dispatchEvent(new CustomEvent("cheonho:runningchange", {
       detail: { running },
@@ -194,6 +183,13 @@ if (sceneElement && canvas && playButton) {
 
   lightToggleButtons.forEach((button) => button.addEventListener("click", () => applyTime(selectedTime === "day" ? "night" : "day")));
   characterButtons.forEach((button) => button.addEventListener("click", () => applyCharacter(button.dataset.cheonhoCharacter)));
+  modeButtons.forEach((button) => button.addEventListener("click", () => {
+    selectedMode = button.dataset.cheonhoMode === "walk" ? "walk" : "run";
+    setButtonState(modeButtons, selectedMode, "cheonhoMode");
+    sceneElement.dataset.mode = selectedMode;
+    setRunning(false);
+    sceneElement.dispatchEvent(new CustomEvent("cheonho:modechange", { detail: { mode: selectedMode } }));
+  }));
   playButton.addEventListener("click", () => {
     if (sceneElement.dataset.gameOver === "true") {
       sceneElement.dispatchEvent(new CustomEvent("cheonho:restart"));
@@ -275,17 +271,12 @@ if (sceneElement && canvas && playButton) {
     event.preventDefault();
     try { sceneElement.setPointerCapture(event.pointerId); } catch (error) { /* Pointer capture is optional. */ }
   });
-  sceneElement.addEventListener("pointerup", releaseJump);
-  sceneElement.addEventListener("pointercancel", releaseJump);
   sceneElement.addEventListener("contextmenu", (event) => {
     if (running && !event.target.closest("button")) event.preventDefault();
   });
   window.addEventListener("keydown", (event) => {
     if (event.code !== "Space" || event.repeat || event.target.closest("input, textarea, select, button")) return;
     if (startJump()) event.preventDefault();
-  });
-  window.addEventListener("keyup", (event) => {
-    if (event.code === "Space") releaseJump();
   });
 
   let lastFullscreenTouchEnd = 0;
@@ -352,6 +343,8 @@ if (sceneElement && canvas && playButton) {
 
   applyTime(selectedTime);
   applyCharacter(selectedCharacter);
+  sceneElement.dataset.mode = selectedMode;
+  setButtonState(modeButtons, selectedMode, "cheonhoMode");
   setRunning(false);
   requestAnimationFrame(frame);
 }

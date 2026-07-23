@@ -385,7 +385,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 
 .cheonho-game-controls {
   display: grid;
-  grid-template-columns: auto minmax(280px, 1fr) auto;
+  grid-template-columns: auto minmax(240px, 1fr) auto auto;
   align-items: end;
   gap: 18px;
   padding: 0 28px 22px;
@@ -429,6 +429,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   color: #38566d;
   box-shadow: 0 4px 13px rgba(28, 61, 87, .11);
 }
+.cheonho-mode-options button { min-width:72px; }
 .cheonho-light-toggle b { font: inherit; }
 .cheonho-light-toggle.is-night {
   background: #243b50;
@@ -844,6 +845,8 @@ body.cheonho-fullscreen-open { overflow: hidden; }
   backdrop-filter: blur(9px);
 }
 .cheonho-game-hud strong { font-size: 17px; line-height: 1; font-variant-numeric: tabular-nums; }
+.cheonho-run-scene[data-mode="walk"] .cheonho-game-hud,
+.cheonho-run-scene[data-mode="walk"] .cheonho-jump-hint { display:none; }
 .cheonho-obstacle-layer { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
 .cheonho-obstacle {
   --obstacle-x: 105%;
@@ -865,6 +868,9 @@ body.cheonho-fullscreen-open { overflow: hidden; }
   box-shadow: inset 0 -4px 7px rgba(5,71,101,.25), 0 2px 0 rgba(255,255,255,.65);
 }
 .cheonho-obstacle-puddle::after { content:""; position:absolute; inset:3px 18%; border-top:2px solid rgba(255,255,255,.65); border-radius:50%; }
+.cheonho-obstacle-curb { --obstacle-w:clamp(52px,6vw,88px); --obstacle-h:clamp(16px,1.8vw,26px); border:3px solid #5d6670; border-radius:7px; background:repeating-linear-gradient(-45deg,#f0c84a 0 10px,#39434d 10px 20px); box-shadow:inset 0 2px rgba(255,255,255,.35); }
+.cheonho-obstacle-planter { --obstacle-w:clamp(38px,4.2vw,62px); --obstacle-h:clamp(30px,3.8vw,52px); border:3px solid #754429; border-radius:6px 6px 10px 10px; background:linear-gradient(180deg,#8e5736 0 22%,#c77a49 23% 100%); box-shadow:inset 0 3px rgba(255,255,255,.22); }
+.cheonho-obstacle-bollard { --obstacle-w:clamp(24px,2.6vw,39px); --obstacle-h:clamp(38px,4.5vw,65px); border:3px solid #424d56; border-radius:11px 11px 5px 5px; background:linear-gradient(180deg,#f2c646 0 24%,#36424b 25% 43%,#f2c646 44% 100%); box-shadow:inset 3px 0 rgba(255,255,255,.25); }
 .cheonho-obstacle-branch {
   --obstacle-w: clamp(45px, 5.6vw, 80px);
   --obstacle-h: clamp(21px, 2.7vw, 39px);
@@ -922,6 +928,7 @@ body.cheonho-fullscreen-open { overflow: hidden; }
 .cheonho-ranking-panel h3 { margin:3px 0 0; color:#173b55; font-size:19px; }
 .cheonho-ranking-panel header small { color:#7d8d99; font-size:11px; }
 .cheonho-ranking-summary { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.cheonho-ranking-summary[hidden] { display:none; }
 .cheonho-ranking-summary article { padding:15px 16px; border:1px solid #e0e9ef; border-radius:13px; background:#f7fafc; }
 .cheonho-ranking-summary article span { display:block; margin-bottom:6px; color:#758793; font-size:11px; }
 .cheonho-ranking-summary article strong { color:#143f5d; font-size:21px; font-variant-numeric:tabular-nums; }
@@ -990,6 +997,7 @@ body.cheonho-fullscreen-open { overflow: hidden; }
   .cheonho-segmented button,
   .cheonho-character-options button { min-height: 40px; padding: 0 10px; font-size: 12px; }
   .cheonho-segmented button { min-width: 0; flex: 1; }
+  .cheonho-mode-options { width:100%; }
   .cheonho-light-toggle { min-width: 112px !important; }
   .cheonho-character-options button { gap: 5px; }
   .otter-mark,

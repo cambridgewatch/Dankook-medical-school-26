@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-  <link rel="stylesheet" href="assets/css/style.css?v=121" />
+  <link rel="stylesheet" href="assets/css/style.css?v=122" />
 </head>
 <body class="locked">
 
@@ -71,6 +71,13 @@
               <button type="button" data-cheonho-character="turtle" aria-pressed="false"><i class="turtle-mark"></i><b>거북이</b></button>
             </div>
           </div>
+          <div class="cheonho-choice-block">
+            <span>모드</span>
+            <div class="cheonho-segmented cheonho-mode-options" role="group" aria-label="플레이 모드 선택">
+              <button type="button" class="is-active" data-cheonho-mode="run" aria-pressed="true">달리기</button>
+              <button type="button" data-cheonho-mode="walk" aria-pressed="false">산책</button>
+            </div>
+          </div>
           <div class="cheonho-action-buttons">
             <button type="button" class="cheonho-play-button" id="cheonhoPlayButton" aria-pressed="false"><i>▶</i><span>달리기 시작</span></button>
             <button type="button" class="cheonho-fullscreen-button" id="cheonhoFullscreenButton" aria-label="전체화면으로 보기"><i aria-hidden="true">⛶</i><span>전체화면</span></button>
@@ -122,9 +129,9 @@
             <small id="cheonhoRankingStatus">기록을 불러오는 중입니다.</small>
           </header>
           <div class="cheonho-ranking-summary" id="cheonhoRankingSummary">
-            <article><span>내 최고 기록</span><strong id="cheonhoMyBest">-</strong></article>
-            <article><span>내 순위</span><strong id="cheonhoMyRank">-</strong></article>
-            <article><span>전체 최고 기록</span><strong id="cheonhoTopScore">-</strong></article>
+            <article><span>내 최고 기록</span><strong id="cheonhoMyBest">불러오는 중</strong></article>
+            <article><span>내 순위</span><strong id="cheonhoMyRank">불러오는 중</strong></article>
+            <article><span>전체 최고 기록</span><strong id="cheonhoTopScore">불러오는 중</strong></article>
           </div>
           <div class="cheonho-admin-ranking" id="cheonhoAdminRanking" hidden></div>
         </section>
@@ -154,7 +161,7 @@
   <script src="assets/js/effects3d.js?v=17"></script>
   <script type="module" src="assets/js/alerts.js?v=33"></script>
   <script type="module" src="assets/js/gate.js?v=23"></script>
-  <script type="module" src="assets/js/cheonhoji-game.js?v=15"></script>
-  <script type="module" src="assets/js/cheonhoji-runner.js?v=2"></script>
+  <script type="module" src="assets/js/cheonhoji-game.js?v=16"></script>
+  <script type="module" src="assets/js/cheonhoji-runner.js?v=3"></script>
 </body>
 </html>

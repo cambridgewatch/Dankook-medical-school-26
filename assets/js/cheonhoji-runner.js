@@ -36,6 +36,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   const movement = { left: false, right: false };
   let running = false;
   let gameOver = false;
+  let gameMode = "run";
   let elapsedSeconds = 0;
   let characterX = 11;
   let lastFrame = 0;
@@ -79,10 +80,10 @@ if (scene && track && character && obstacleLayer && scoreElement) {
 
   function obstacleTypeForProgress(laps) {
     const choices = laps < 0.3
-      ? ["puddle", "branch", "cone"]
-      : ["puddle", "branch", "cone", "barrier"];
+      ? ["curb", "planter", "bollard"]
+      : ["curb", "planter", "bollard", "barrier"];
     let type = choices[Math.floor(Math.random() * choices.length)];
-    if (type === "barrier" && lastObstacleType === "barrier") type = "branch";
+    if (type === "barrier" && lastObstacleType === "barrier") type = "curb";
     lastObstacleType = type;
     return type;
   }
@@ -115,18 +116,15 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const obstacleRect = obstacleElement.getBoundingClientRect();
     const turtle = scene.dataset.character === "turtle";
     const characterInsetX = turtle ? 0.28 : 0.34;
-    const obstacleInsetX = type === "puddle" ? 0.18 : 0.22;
     const horizontalOverlap =
-      characterRect.left + characterRect.width * characterInsetX < obstacleRect.right - obstacleRect.width * obstacleInsetX &&
-      characterRect.right - characterRect.width * characterInsetX > obstacleRect.left + obstacleRect.width * obstacleInsetX;
+      characterRect.left + characterRect.width * characterInsetX < obstacleRect.right &&
+      characterRect.right - characterRect.width * characterInsetX > obstacleRect.left;
     if (!horizontalOverlap) return false;
 
     // 캔버스의 투명 여백이 아니라 캐릭터의 실제 발 위치로 판정한다.
     // 낮은 장애물은 일반 점프 한 번으로, 높은 차단막만 더블 점프로 넘을 수 있다.
     const feetY = characterRect.bottom - characterRect.height * (turtle ? 0.20 : 0.14);
-    const topInsetByType = { puddle: 0, branch: 0.12, cone: 0.20, barrier: 0.08 };
-    const obstacleTop = obstacleRect.top + obstacleRect.height * (topInsetByType[type] || 0);
-    return feetY > obstacleTop;
+    return feetY > obstacleRect.top;
   }
 
   async function saveBestScore(score) {
@@ -170,7 +168,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     }
     moveButtons.forEach((button) => button.classList.remove("is-pressed"));
     const score = currentLaps();
-    const names = { puddle: "물웅덩이", branch: "나뭇가지", cone: "안전 콘", barrier: "높은 차단막" };
+    const names = { curb: "낮은 돌턱", planter: "작은 화분", bollard: "안전 볼라드", barrier: "높은 차단판" };
     if (crashReasonElement) crashReasonElement.textContent = `${names[obstacle?.type] || "장애물"}에 부딪혔어요.`;
     if (finalScoreElement) finalScoreElement.textContent = formattedLaps(score);
     if (gameOverElement) gameOverElement.hidden = false;
@@ -225,10 +223,20 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     }
   }
 
+  function updateWalking(delta) {
+    const characterPercentPerSecond = 8;
+    if (movement.left !== movement.right) {
+      setCharacterX(characterX + (movement.right ? 1 : -1) * characterPercentPerSecond * delta);
+    }
+  }
+
   function frame(time) {
     const delta = lastFrame ? Math.min((time - lastFrame) / 1000, 0.05) : 0;
     lastFrame = time;
-    if (running && !gameOver && delta > 0) updateGame(delta);
+    if (running && !gameOver && delta > 0) {
+      if (gameMode === "walk") updateWalking(delta);
+      else updateGame(delta);
+    }
     requestAnimationFrame(frame);
   }
 
@@ -273,6 +281,19 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   scene.addEventListener("cheonho:runningchange", (event) => {
     running = Boolean(event.detail?.running) && !gameOver;
   });
+  scene.addEventListener("cheonho:modechange", (event) => {
+    gameMode = event.detail?.mode === "walk" ? "walk" : "run";
+    clearObstacles();
+    elapsedSeconds = 0;
+    nextSpawnIn = 3.4;
+    gameOver = false;
+    scene.dataset.gameOver = "false";
+    scene.classList.remove("has-collision", "has-jumped", "is-jumping");
+    if (gameOverElement) gameOverElement.hidden = true;
+    setCharacterX(11);
+    renderScore();
+    resetTrackAnimation();
+  });
   scene.addEventListener("cheonho:restart", restartGame);
   retryButton?.addEventListener("click", restartGame);
 
@@ -291,7 +312,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       ));
       if (myRankElement) myRankElement.textContent = `${higherScores.data().count + 1}위`;
     } catch (error) {
-      if (myRankElement) myRankElement.textContent = "-";
+      if (myRankElement) myRankElement.textContent = "불러오기 실패";
     }
   }
 
@@ -317,7 +338,10 @@ if (scene && track && character && obstacleLayer && scoreElement) {
             return `<div class="cheonho-ranking-row"><span>${index + 1}위</span><strong>${name}</strong><b>${formattedLaps(Number(data.bestLaps || 0))}바퀴</b></div>`;
           }).join("");
         },
-        () => { if (rankingStatus) rankingStatus.textContent = "랭킹을 불러오지 못했습니다."; }
+        () => {
+          if (rankingStatus) rankingStatus.textContent = "기록 저장 규칙을 확인해 주세요.";
+          if (adminRanking) adminRanking.innerHTML = '<p class="cheonho-ranking-empty">랭킹을 불러오지 못했습니다.</p>';
+        }
       );
     } else {
       if (rankingSummary) rankingSummary.hidden = false;
@@ -330,7 +354,11 @@ if (scene && track && character && obstacleLayer && scoreElement) {
           if (myBestElement) myBestElement.textContent = best ? `${formattedLaps(best)}바퀴` : "기록 없음";
           refreshMyRank();
         },
-        () => { if (rankingStatus) rankingStatus.textContent = "내 기록을 불러오지 못했습니다."; }
+        () => {
+          if (rankingStatus) rankingStatus.textContent = "기록 저장 기능을 불러오지 못했습니다.";
+          if (myBestElement) myBestElement.textContent = "불러오기 실패";
+          if (myRankElement) myRankElement.textContent = "불러오기 실패";
+        }
       ));
       unsubscribers.push(onSnapshot(
         query(collection(db, "gameLeaderboard"), orderBy("bestLaps", "desc"), limit(1)),
@@ -338,7 +366,10 @@ if (scene && track && character && obstacleLayer && scoreElement) {
           const best = snapshot.empty ? 0 : Number(snapshot.docs[0].data().bestLaps || 0);
           if (topScoreElement) topScoreElement.textContent = best ? `${formattedLaps(best)}바퀴` : "기록 없음";
         },
-        () => { if (rankingStatus) rankingStatus.textContent = "전체 최고 기록을 불러오지 못했습니다."; }
+        () => {
+          if (rankingStatus) rankingStatus.textContent = "전체 최고 기록을 불러오지 못했습니다.";
+          if (topScoreElement) topScoreElement.textContent = "불러오기 실패";
+        }
       ));
       unsubscribeRanking = () => unsubscribers.forEach((unsubscribe) => unsubscribe());
     }
