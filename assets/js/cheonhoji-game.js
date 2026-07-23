@@ -72,6 +72,7 @@ if (sceneElement && canvas && playButton) {
 
   function applyCharacter(value) {
     selectedCharacter = value === "turtle" ? "turtle" : "otter";
+    sceneElement.dataset.character = selectedCharacter;
     localStorage.setItem("cheonhojiGameCharacter", selectedCharacter);
     setButtonState(characterButtons, selectedCharacter, "cheonhoCharacter");
     if (animal) {
