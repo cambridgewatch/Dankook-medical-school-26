@@ -67,51 +67,35 @@ function labelPlane(text, name, position, size, textColor = "#f7f2e7", outlineCo
   return plane;
 }
 
-function jacketFront(bodyWidth, mat) {
-  const shape = new THREE.Shape();
-  const shoulder = bodyWidth * 0.84;
-  const hem = bodyWidth * 0.91;
-  shape.moveTo(-shoulder, 3.08);
-  shape.lineTo(-0.48, 3.01);
-  shape.lineTo(0, 2.76);
-  shape.lineTo(0.48, 3.01);
-  shape.lineTo(shoulder, 3.08);
-  shape.quadraticCurveTo(bodyWidth, 2.83, bodyWidth, 2.40);
-  shape.lineTo(hem, 1.03);
-  shape.quadraticCurveTo(0.72, 0.88, 0, 0.88);
-  shape.quadraticCurveTo(-0.72, 0.88, -hem, 1.03);
-  shape.lineTo(-bodyWidth, 2.40);
-  shape.quadraticCurveTo(-bodyWidth, 2.83, -shoulder, 3.08);
-  shape.closePath();
-
-  const geometry = new THREE.ExtrudeGeometry(shape, {
-    depth: 0.13,
-    bevelEnabled: true,
-    bevelSegments: 3,
-    bevelSize: 0.045,
-    bevelThickness: 0.035,
-    curveSegments: 16,
-  });
-  const front = mesh(geometry, mat, "Jacket_Front", [0, 0, 1.04], [1, 1, 1]);
-  front.renderOrder = 2;
-  return front;
-}
-
 function addVarsityJacket(root, leftArm, rightArm, variant) {
   const brown = material(0x35231c, 0.84);
   const brownDark = material(0x251711, 0.88);
   const ivory = material(0xf4f0e6, 0.82);
   const silver = material(0xf4f5f2, 0.34, 0.16);
-  const bodyWidth = variant === "blue" ? 1.40 : 1.28;
+  const bodyWidth = variant === "blue" ? 1.40 : 1.27;
   const bodyHeight = variant === "blue" ? 1.31 : 1.29;
-  const bodyDepth = variant === "blue" ? 1.12 : 1.03;
+  const bodyDepth = variant === "blue" ? 1.68 : 1.58;
+  const bodyCenterY = 2.12;
+  const bodyCenterZ = 0.08;
+  const surfaceZ = (y, lift = 0.06) => {
+    const normalizedY = Math.max(-0.995, Math.min(0.995, (y - bodyCenterY) / bodyHeight));
+    return bodyCenterZ + bodyDepth * Math.sqrt(1 - normalizedY * normalizedY) + lift;
+  };
 
-  root.add(sphere(brown, "Jacket_Body", [0, 2.15, 0.08], [bodyWidth, bodyHeight, bodyDepth], 48));
-  root.add(jacketFront(bodyWidth, brown));
-  root.add(mesh(new THREE.BoxGeometry(1, 1, 1), brownDark, "Jacket_Placket", [0, 2.08, 1.23], [0.095, 1.02, 0.035]));
+  root.add(sphere(brown, "Jacket_Body", [0, bodyCenterY, bodyCenterZ], [bodyWidth, bodyHeight, bodyDepth], 48));
+
+  const seamPoints = [1.15, 1.52, 1.90, 2.28, 2.66, 2.91]
+    .map((y) => new THREE.Vector3(0, y, surfaceZ(y, 0.035)));
+  root.add(mesh(
+    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(seamPoints), 28, 0.035, 8, false),
+    brownDark,
+    "Jacket_Placket",
+    [0, 0, 0],
+    [1, 1, 1]
+  ));
 
   [2.86, 2.43, 2.0, 1.57, 1.17].forEach((y, index) => {
-    root.add(sphere(silver, `Jacket_Button_${index + 1}`, [0, y, 1.28], [0.075, 0.075, 0.045], 20));
+    root.add(sphere(silver, `Jacket_Button_${index + 1}`, [0, y, surfaceZ(y, 0.095)], [0.075, 0.075, 0.045], 20));
   });
 
   [-1, 1].forEach((side) => {
@@ -119,7 +103,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
       new THREE.BoxGeometry(1, 1, 1),
       ivory,
       `Jacket_Collar_${side < 0 ? "L" : "R"}`,
-      [side * 0.39, 2.94, 1.22],
+      [side * 0.39, 2.94, surfaceZ(2.94, 0.075)],
       [0.45, 0.055, 0.035],
       [0, 0, side * -0.48]
     ));
@@ -127,7 +111,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
       new THREE.BoxGeometry(1, 1, 1),
       brownDark,
       `Jacket_CollarStripe_${side < 0 ? "L" : "R"}`,
-      [side * 0.4, 2.985, 1.25],
+      [side * 0.4, 2.985, surfaceZ(2.985, 0.105)],
       [0.45, 0.022, 0.02],
       [0, 0, side * -0.48]
     ));
@@ -135,7 +119,7 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
       new THREE.BoxGeometry(1, 1, 1),
       ivory,
       `Jacket_Pocket_${side < 0 ? "L" : "R"}`,
-      [side * 0.70, 1.82, 1.28],
+      [side * 0.70, 1.82, surfaceZ(1.82, 0.09)],
       [0.055, 0.30, 0.03],
       [0, 0, side * -0.22]
     ));
@@ -146,24 +130,24 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
       new THREE.BoxGeometry(1, 1, 1),
       index === 1 ? ivory : brownDark,
       `Jacket_Waistband_${index + 1}`,
-      [0, y, 1.25],
+      [0, y, surfaceZ(y, 0.08)],
       [bodyWidth * 0.91, 0.035, 0.035]
     ));
   });
 
-  root.add(labelPlane("D", "Jacket_D", [0.53, 2.43, 1.30], [0.52, 0.58]));
+  root.add(labelPlane("D", "Jacket_D", [0.53, 2.43, surfaceZ(2.43, 0.12)], [0.52, 0.58]));
 
   if (variant === "blue") {
-    leftArm.add(sphere(ivory, "Jacket_Sleeve_L", [-0.03, -0.70, 0.045], [0.37, 0.79, 0.40], 32));
-    rightArm.add(sphere(ivory, "Jacket_Sleeve_R", [0.03, -0.70, 0.045], [0.37, 0.79, 0.40], 32));
+    leftArm.add(sphere(ivory, "Jacket_Sleeve_L", [-0.03, -0.66, 0.045], [0.39, 0.86, 0.42], 32));
+    rightArm.add(sphere(ivory, "Jacket_Sleeve_R", [0.03, -0.66, 0.045], [0.39, 0.86, 0.42], 32));
     leftArm.add(mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.16, 28), brownDark, "Jacket_Cuff_L", [-0.03, -1.43, 0.045], [1, 1, 1]));
     rightArm.add(mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.16, 28), brownDark, "Jacket_Cuff_R", [0.03, -1.43, 0.045], [1, 1, 1]));
     leftArm.add(mesh(new THREE.CylinderGeometry(0.385, 0.385, 0.035, 28), ivory, "Jacket_CuffStripe_L", [-0.03, -1.43, 0.045], [1, 1, 1]));
     rightArm.add(mesh(new THREE.CylinderGeometry(0.385, 0.385, 0.035, 28), ivory, "Jacket_CuffStripe_R", [0.03, -1.43, 0.045], [1, 1, 1]));
     rightArm.add(labelPlane("26", "Jacket_26", [0.03, -0.59, 0.455], [0.45, 0.34]));
   } else {
-    leftArm.add(sphere(ivory, "Jacket_Sleeve_L", [-0.58, -0.03, 0.025], [0.69, 0.34, 0.37], 32));
-    rightArm.add(sphere(ivory, "Jacket_Sleeve_R", [0.58, -0.03, 0.025], [0.69, 0.34, 0.37], 32));
+    leftArm.add(sphere(ivory, "Jacket_Sleeve_L", [-0.58, -0.03, 0.025], [0.75, 0.36, 0.40], 32));
+    rightArm.add(sphere(ivory, "Jacket_Sleeve_R", [0.58, -0.03, 0.025], [0.75, 0.36, 0.40], 32));
     leftArm.add(mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.16, 28), brownDark, "Jacket_Cuff_L", [-1.18, -0.03, 0.025], [1, 1, 1], [0, 0, Math.PI / 2]));
     rightArm.add(mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.16, 28), brownDark, "Jacket_Cuff_R", [1.18, -0.03, 0.025], [1, 1, 1], [0, 0, Math.PI / 2]));
     leftArm.add(mesh(new THREE.CylinderGeometry(0.355, 0.355, 0.035, 28), ivory, "Jacket_CuffStripe_L", [-1.18, -0.03, 0.025], [1, 1, 1], [0, 0, Math.PI / 2]));
