@@ -10,7 +10,7 @@ const canvas = document.querySelector("#cheonhoCharacterCanvas");
 const playButton = document.querySelector("#cheonhoPlayButton");
 const fullscreenButton = document.querySelector("#cheonhoFullscreenButton");
 const fullscreenExit = document.querySelector("#cheonhoFullscreenExit");
-const lightToggleButton = document.querySelector("#cheonhoLightToggle");
+const lightToggleButtons = [...document.querySelectorAll("[data-cheonho-light-toggle]")];
 const characterButtons = [...document.querySelectorAll("[data-cheonho-character]")];
 
 if (sceneElement && canvas && playButton) {
@@ -64,14 +64,14 @@ if (sceneElement && canvas && playButton) {
     selectedTime = value === "night" ? "night" : "day";
     sceneElement.dataset.time = selectedTime;
     localStorage.removeItem("cheonhojiGameTime");
-    if (lightToggleButton) {
-      const isNight = selectedTime === "night";
-      lightToggleButton.classList.toggle("is-night", isNight);
-      lightToggleButton.setAttribute("aria-pressed", isNight ? "true" : "false");
-      lightToggleButton.setAttribute("aria-label", isNight ? "불을 켜고 낮으로 전환" : "불을 끄고 밤으로 전환");
-      lightToggleButton.querySelector("i").textContent = isNight ? "☾" : "☀";
-      lightToggleButton.querySelector("b").textContent = isNight ? "불 켜기" : "불 끄기";
-    }
+    const isNight = selectedTime === "night";
+    lightToggleButtons.forEach((button) => {
+      button.classList.toggle("is-night", isNight);
+      button.setAttribute("aria-pressed", isNight ? "true" : "false");
+      button.setAttribute("aria-label", isNight ? "불을 켜고 낮으로 전환" : "불을 끄고 밤으로 전환");
+      button.querySelector("i").textContent = isNight ? "☾" : "☀";
+      button.querySelector("b").textContent = isNight ? "불 켜기" : "불 끄기";
+    });
     document.querySelector(".cheonho-run-card")?.classList.toggle("is-night", selectedTime === "night");
     renderer.toneMappingExposure = selectedTime === "night" ? 0.90 : 1.08;
   }
@@ -104,7 +104,7 @@ if (sceneElement && canvas && playButton) {
     playButton.querySelector("i").textContent = running ? "Ⅱ" : "▶";
   }
 
-  lightToggleButton?.addEventListener("click", () => applyTime(selectedTime === "day" ? "night" : "day"));
+  lightToggleButtons.forEach((button) => button.addEventListener("click", () => applyTime(selectedTime === "day" ? "night" : "day")));
   characterButtons.forEach((button) => button.addEventListener("click", () => applyCharacter(button.dataset.cheonhoCharacter)));
   playButton.addEventListener("click", () => setRunning(!running));
 

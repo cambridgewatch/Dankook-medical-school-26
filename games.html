@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-  <link rel="stylesheet" href="assets/css/style.css?v=110" />
+  <link rel="stylesheet" href="assets/css/style.css?v=111" />
 </head>
 <body class="locked">
 
@@ -61,7 +61,7 @@
           <div class="cheonho-choice-block">
             <span>조명</span>
             <div class="cheonho-segmented cheonho-light-control">
-              <button type="button" class="cheonho-light-toggle" id="cheonhoLightToggle" aria-pressed="false" aria-label="불을 끄고 밤으로 전환"><i>☀</i><b>불 끄기</b></button>
+              <button type="button" class="cheonho-light-toggle" id="cheonhoLightToggle" data-cheonho-light-toggle aria-pressed="false" aria-label="불을 끄고 밤으로 전환"><i>☀</i><b>불 끄기</b></button>
             </div>
           </div>
           <div class="cheonho-choice-block">
@@ -93,6 +93,7 @@
           </div>
           <div class="cheonho-fixed-walkway" aria-hidden="true"></div>
           <canvas class="cheonho-character-canvas" id="cheonhoCharacterCanvas" aria-hidden="true"></canvas>
+          <button type="button" class="cheonho-fullscreen-light" data-cheonho-light-toggle aria-pressed="false" aria-label="불을 끄고 밤으로 전환"><i>☀</i><b>불 끄기</b></button>
           <button type="button" class="cheonho-fullscreen-exit" id="cheonhoFullscreenExit" aria-label="전체화면 닫기">×</button>
         </div>
 
@@ -126,6 +127,6 @@
   <script src="assets/js/effects3d.js?v=17"></script>
   <script type="module" src="assets/js/alerts.js?v=33"></script>
   <script type="module" src="assets/js/gate.js?v=23"></script>
-  <script type="module" src="assets/js/cheonhoji-game.js?v=8"></script>
+  <script type="module" src="assets/js/cheonhoji-game.js?v=9"></script>
 </body>
 </html>
