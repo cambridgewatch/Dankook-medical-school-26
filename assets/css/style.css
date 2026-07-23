@@ -883,8 +883,11 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   box-shadow: inset 0 -4px 7px rgba(5,71,101,.25), 0 2px 0 rgba(255,255,255,.65);
 }
 .cheonho-obstacle-puddle::after { content:""; position:absolute; inset:3px 18%; border-top:2px solid rgba(255,255,255,.65); border-radius:50%; }
+.cheonho-obstacle-rock { border:2px solid #66716e; border-radius:50%; background:radial-gradient(circle at 34% 25%,#bdc8bd 0 8%,#87978e 34%,#596761 76%,#3f4b47 100%); box-shadow:inset 4px 4px 5px rgba(255,255,255,.24); }
 .cheonho-obstacle-curb { --obstacle-w:clamp(52px,6vw,88px); --obstacle-h:clamp(16px,1.8vw,26px); border:3px solid #5d6670; border-radius:7px; background:repeating-linear-gradient(-45deg,#f0c84a 0 10px,#39434d 10px 20px); box-shadow:inset 0 2px rgba(255,255,255,.35); }
 .cheonho-obstacle-planter { --obstacle-w:clamp(38px,4.2vw,62px); --obstacle-h:clamp(30px,3.8vw,52px); border:3px solid #754429; border-radius:6px 6px 10px 10px; background:linear-gradient(180deg,#8e5736 0 22%,#c77a49 23% 100%); box-shadow:inset 0 3px rgba(255,255,255,.22); }
+.cheonho-obstacle-basket::before { content:""; position:absolute; left:22%; right:22%; top:0; height:52%; border:clamp(3px,.35vw,5px) solid #7d4b25; border-bottom:0; border-radius:999px 999px 0 0; }
+.cheonho-obstacle-basket::after { content:""; position:absolute; inset:25% 0 0; border:2px solid #815127; border-radius:8px 8px 10px 10px; background:repeating-linear-gradient(0deg,rgba(91,52,24,.28) 0 2px,transparent 2px 7px),repeating-linear-gradient(90deg,#c9904f 0 7px,#dfa965 7px 13px); box-shadow:inset 0 3px rgba(255,255,255,.25); }
 .cheonho-obstacle-bollard { --obstacle-w:clamp(24px,2.6vw,39px); --obstacle-h:clamp(38px,4.5vw,65px); border:3px solid #424d56; border-radius:11px 11px 5px 5px; background:linear-gradient(180deg,#f2c646 0 24%,#36424b 25% 43%,#f2c646 44% 100%); box-shadow:inset 3px 0 rgba(255,255,255,.25); }
 .cheonho-obstacle-branch {
   --obstacle-w: clamp(45px, 5.6vw, 80px);
@@ -900,6 +903,11 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   background: linear-gradient(90deg,#d94b24 0 18%,#ff7a35 42% 58%,#d94b24 82%), linear-gradient(#fff 48% 63%,transparent 63%);
 }
 .cheonho-obstacle-cone::after { content:""; position:absolute; left:20%; right:20%; top:46%; height:16%; background:#f7f7f2; transform:skewX(7deg); }
+.cheonho-obstacle-bin { border:3px solid #314d4a; border-radius:11px 11px 7px 7px; background:linear-gradient(180deg,#b9d3c9 0 10%,#416c63 11% 20%,#5c887d 21% 100%); box-shadow:inset 5px 0 rgba(255,255,255,.14); }
+.cheonho-obstacle-bin::before { content:""; position:absolute; left:10%; right:10%; top:27%; height:8%; border-radius:999px; background:#213d3a; box-shadow:0 10px 0 rgba(32,62,57,.28); }
+.cheonho-obstacle-sign { filter:drop-shadow(0 6px 5px rgba(32,26,20,.24)); }
+.cheonho-obstacle-sign::before { content:"i"; position:absolute; left:0; right:0; top:0; height:48%; display:grid; place-items:center; border:3px solid #31576a; border-radius:7px; background:linear-gradient(145deg,#8dd2e7,#4d9bb9); color:#fff; font:900 clamp(11px,1.5vw,21px)/1 Georgia,serif; box-shadow:inset 0 0 0 2px rgba(255,255,255,.35); }
+.cheonho-obstacle-sign::after { content:""; position:absolute; left:43%; right:43%; top:42%; bottom:6%; border-radius:3px; background:#365766; box-shadow:0 calc(var(--obstacle-h) * .06) 0 calc(var(--obstacle-w) * .12) #29434e; }
 .cheonho-obstacle-barrier {
   --obstacle-w: clamp(53px, 6.2vw, 90px);
   --obstacle-h: clamp(64px, 14vw, 170px);
@@ -909,7 +917,7 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
 .cheonho-double-jump-label { position:absolute; left:50%; top:-20px; z-index:2; padding:3px 6px; border-radius:999px; background:rgba(20,48,65,.78); color:#fff; font-size:8px; font-weight:900; letter-spacing:.4px; white-space:nowrap; transform:translateX(-50%); }
 .cheonho-obstacle.is-hit { z-index:4; filter:drop-shadow(0 0 9px #ff493f) drop-shadow(0 6px 5px rgba(32,26,20,.24)); }
 .cheonho-impact-mark { position:absolute; left:50%; top:20%; z-index:5; display:grid; place-items:center; width:30px; height:30px; border:3px solid #fff; border-radius:50%; background:#ed493f; color:#fff; font-size:19px; font-weight:950; transform:translate(-50%,-50%); animation:cheonho-impact-pop .32s ease-out both; box-shadow:0 0 0 6px rgba(237,73,63,.24); }
-.cheonho-run-scene.has-collision { animation:cheonho-collision-shake .34s ease-out; }
+.cheonho-run-scene.has-collision { animation:none; }
 .cheonho-run-scene.has-collision::after { background:radial-gradient(circle at 50% 50%,transparent 25%,rgba(211,38,35,.42) 100%); animation:cheonho-collision-flash .65s ease-out both; }
 .cheonho-mobile-move-controls { display:none; }
 .cheonho-game-over {

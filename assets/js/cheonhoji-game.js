@@ -167,7 +167,10 @@ if (sceneElement && canvas && playButton) {
   function startJump() {
     if (!running || jumpCount >= 2) return false;
     jumping = true;
-    jumpVelocity = jumpCount === 0 ? 6.2 : 6.4;
+    const mobileTurtleBoost = selectedCharacter === "turtle" && window.matchMedia("(pointer: coarse)").matches
+      ? 1.10
+      : 1;
+    jumpVelocity = (jumpCount === 0 ? 6.2 : 6.4) * mobileTurtleBoost;
     jumpCount += 1;
     sceneElement.classList.add("is-jumping", "has-jumped");
     return true;

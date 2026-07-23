@@ -45,6 +45,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   let currentUser = null;
   let lastObstacleType = "";
   let unsubscribeRanking = null;
+  let gameOverAt = 0;
 
   function animationDurationSeconds() {
     const raw = getComputedStyle(track).animationDuration.split(",")[0].trim();
@@ -80,27 +81,44 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function obstacleTypeForProgress(laps) {
-    const choices = laps < 0.3
-      ? ["curb", "planter", "bollard"]
-      : ["curb", "planter", "bollard", "barrier"];
+    const choices = laps < 0.25
+      ? ["puddle", "rock", "curb"]
+      : laps < 0.65
+        ? ["puddle", "rock", "curb", "planter", "basket", "bollard"]
+        : laps < 1
+          ? ["puddle", "rock", "curb", "planter", "basket", "bollard", "cone", "bin", "sign"]
+          : ["puddle", "rock", "curb", "planter", "basket", "bollard", "cone", "bin", "sign", "barrier"];
     let type = choices[Math.floor(Math.random() * choices.length)];
-    if (type === "barrier" && lastObstacleType === "barrier") type = "curb";
+    const tallTypes = new Set(["bin", "sign", "barrier"]);
+    if (type === lastObstacleType || (tallTypes.has(type) && tallTypes.has(lastObstacleType))) {
+      type = laps < 0.25 ? "puddle" : "rock";
+    }
     lastObstacleType = type;
     return type;
   }
 
   function sizeObstacle(obstacle) {
     const characterRect = character.getBoundingClientRect();
-    const visibleCharacterWidth = characterRect.width * (scene.dataset.character === "turtle" ? 0.72 : 0.68);
+    const turtle = scene.dataset.character === "turtle";
+    const mobileTurtle = turtle && window.matchMedia("(pointer: coarse)").matches;
+    const visibleCharacterWidth = characterRect.width * (turtle ? 0.72 : 0.68);
     const ratios = {
+      puddle: { width: 1.02, height: 0.10 },
+      rock: { width: 0.64, height: 0.19 },
       curb: { width: 0.90, height: 0.16 },
       planter: { width: 0.55, height: 0.34 },
+      basket: { width: 0.68, height: 0.34 },
       bollard: { width: 0.32, height: 0.48 },
-      barrier: { width: 0.75, height: 0.95 },
+      cone: { width: 0.40, height: 0.50 },
+      bin: { width: 0.48, height: 0.66 },
+      sign: { width: 0.58, height: 0.72 },
+      barrier: { width: 0.52, height: 0.82 },
     };
     const ratio = ratios[obstacle.type] || ratios.curb;
-    obstacle.element.style.setProperty("--obstacle-w", `${Math.max(12, visibleCharacterWidth * ratio.width)}px`);
-    obstacle.element.style.setProperty("--obstacle-h", `${Math.max(8, characterRect.height * ratio.height)}px`);
+    const widthScale = mobileTurtle ? 0.90 : 1;
+    const heightScale = mobileTurtle ? 0.90 : 1;
+    obstacle.element.style.setProperty("--obstacle-w", `${Math.max(12, visibleCharacterWidth * ratio.width * widthScale)}px`);
+    obstacle.element.style.setProperty("--obstacle-h", `${Math.max(8, characterRect.height * ratio.height * heightScale)}px`);
   }
 
   function spawnObstacle() {
@@ -120,7 +138,8 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   function scheduleNextSpawn(laps) {
     const difficulty = difficultyFor(laps);
     const base = 2.9 + Math.random() * 1.5;
-    nextSpawnIn = Math.max(1.42, base / difficulty);
+    const recoveryMinimum = lastObstacleType === "barrier" ? 2.25 : 1.42;
+    nextSpawnIn = Math.max(recoveryMinimum, base / difficulty);
   }
 
   function setCharacterX(value) {
@@ -157,12 +176,39 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function obstaclePixelIsOpaque(type, localX, localY, width, height) {
+    if (type === "puddle" || type === "rock") {
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radiusX = Math.max(width / 2, 1);
+      const radiusY = Math.max(height / 2, 1);
+      const normalizedX = (localX - centerX) / radiusX;
+      const normalizedY = (localY - centerY) / radiusY;
+      return normalizedX * normalizedX + normalizedY * normalizedY <= 1;
+    }
+    if (type === "cone") {
+      if (localY >= height * 0.82) return localX >= 0 && localX <= width;
+      const progress = Math.max(0, Math.min(1, localY / (height * 0.82)));
+      const halfWidth = width * (0.07 + progress * 0.25);
+      return Math.abs(localX - width / 2) <= halfWidth;
+    }
+    if (type === "basket") {
+      const body = roundedRectContains(localX, localY, 0, height * 0.25, width, height, Math.min(8, height * 0.15));
+      const outerHandle = roundedRectContains(localX, localY, width * 0.22, 0, width * 0.78, height * 0.52, Math.min(10, width * 0.16));
+      const innerHandle = roundedRectContains(localX, localY, width * 0.34, height * 0.10, width * 0.66, height * 0.42, Math.min(7, width * 0.10));
+      return body || (outerHandle && !innerHandle);
+    }
+    if (type === "sign") {
+      const board = roundedRectContains(localX, localY, 0, 0, width, height * 0.48, Math.min(7, height * 0.08));
+      const post = roundedRectContains(localX, localY, width * 0.43, height * 0.42, width * 0.57, height * 0.94, Math.min(3, width * 0.05));
+      const foot = roundedRectContains(localX, localY, width * 0.25, height * 0.90, width * 0.75, height, Math.min(4, height * 0.04));
+      return board || post || foot;
+    }
     if (type === "barrier") {
       const board = roundedRectContains(localX, localY, width * 0.08, height * 0.24, width * 0.92, height * 0.90, Math.min(7, height * 0.10));
       const base = roundedRectContains(localX, localY, 0, height * 0.87, width, height, Math.min(6, height * 0.08));
       return board || base;
     }
-    const radius = type === "bollard"
+    const radius = type === "bollard" || type === "bin"
       ? Math.min(11, width * 0.42)
       : type === "planter"
         ? Math.min(9, width * 0.18)
@@ -234,6 +280,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   function finishGame(obstacle) {
     if (gameOver) return;
     gameOver = true;
+    gameOverAt = performance.now();
     scene.dataset.gameOver = "true";
     scene.dispatchEvent(new CustomEvent("cheonho:setrunning", { detail: { running: false } }));
     movement.left = false;
@@ -246,7 +293,18 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     moveButtons.forEach((button) => button.classList.remove("is-pressed"));
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     const score = currentLaps();
-    const names = { curb: "낮은 돌턱", planter: "작은 화분", bollard: "안전 볼라드", barrier: "높은 차단판" };
+    const names = {
+      puddle: "물웅덩이",
+      rock: "호숫가 돌",
+      curb: "낮은 돌턱",
+      planter: "작은 화분",
+      basket: "피크닉 바구니",
+      bollard: "안전 볼라드",
+      cone: "안전콘",
+      bin: "산책로 쓰레기통",
+      sign: "호수 안내 표지판",
+      barrier: "높은 차단판",
+    };
     if (crashReasonElement) crashReasonElement.textContent = `${names[obstacle?.type] || "장애물"}에 부딪혔어요.`;
     if (finalScoreElement) finalScoreElement.textContent = formattedLaps(score);
     if (gameOverElement) gameOverElement.hidden = false;
@@ -403,7 +461,14 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   scene.addEventListener("cheonho:layoutchange", () => {
     if (elapsedSeconds < 0.5) setCharacterX(initialCharacterX());
   });
-  retryButton?.addEventListener("click", restartGame);
+  retryButton?.addEventListener("click", (event) => {
+    if (performance.now() - gameOverAt < 650) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    restartGame();
+  });
 
   async function refreshMyRank() {
     if (!currentUser) return;
