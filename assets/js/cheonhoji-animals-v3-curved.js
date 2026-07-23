@@ -233,13 +233,6 @@ export function createTurtleV3() {
     new THREE.Vector3(-1.76, 0.78, -0.382),
     new THREE.Vector3(-1.61, 0.82, -0.420),
   ], 0.012);
-  turtleSpot(root, spot, [-1.66, 1.29, 0.357], 0.055);
-  turtleSpot(root, spot, [-1.49, 1.34, 0.382], 0.045);
-  turtleSpot(root, spot, [-1.78, 1.23, 0.292], 0.039);
-  turtleSpot(root, spot, [-1.66, 1.29, -0.357], 0.055);
-  turtleSpot(root, spot, [-1.49, 1.34, -0.382], 0.045);
-  turtleSpot(root, spot, [-1.78, 1.23, -0.292], 0.039);
-
   const limbs = {};
   [
     ["FrontNear", -0.62, 0.56, 0.43, -0.35, 0.28],

@@ -22,7 +22,7 @@
   </main>
   <script type="module">
     import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
-    import { createOtterV3, createTurtleV3 } from "../js/cheonhoji-animals-v3-curved.js?rev=cute-turtle";
+    import { createOtterV3, createTurtleV3 } from "../js/cheonhoji-animals-v3-curved.js?rev=clean-face";
     function mount(canvas, create, kind){
       const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.98;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
       const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(29,1,.1,40);camera.position.set(0,kind==="turtle"?1.45:1.95,kind==="turtle"?7.25:7.45);camera.lookAt(0,kind==="turtle"?.82:1.43,0);scene.add(new THREE.HemisphereLight(0xffffff,0x91a4ae,2.8));const key=new THREE.DirectionalLight(0xfffaf0,3.1);key.position.set(-4.5,7,6);key.castShadow=true;scene.add(key);const fill=new THREE.DirectionalLight(0xcfe6f5,1.15);fill.position.set(4,3,5);scene.add(fill);const rim=new THREE.DirectionalLight(0xffd7b5,.85);rim.position.set(4,4,-5);scene.add(rim);
