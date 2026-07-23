@@ -96,7 +96,13 @@ if (sceneElement && canvas && playButton) {
   }
 
   function fitCameraToCharacter() {
-    if (!animal || selectedCharacter !== "turtle") {
+    if (!animal) return;
+
+    const fitOtterForDesktopFullscreen = selectedCharacter === "otter" &&
+      fullscreenActive() &&
+      !window.matchMedia("(max-width: 900px)").matches;
+
+    if (selectedCharacter !== "turtle" && !fitOtterForDesktopFullscreen) {
       camera.position.set(0.15, 2.05, 7.2);
       camera.lookAt(0, 1.36, 0);
       return;
@@ -110,10 +116,13 @@ if (sceneElement && canvas && playButton) {
     const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * Math.max(camera.aspect, 0.1));
     const verticalDistance = size.y / (2 * Math.tan(verticalFov / 2));
     const horizontalDistance = size.x / (2 * Math.tan(horizontalFov / 2));
-    const distance = Math.max(verticalDistance, horizontalDistance) * 1.18;
+    const distance = Math.max(verticalDistance, horizontalDistance) *
+      (selectedCharacter === "otter" ? 1.32 : 1.18);
 
-    camera.position.set(center.x, center.y + 0.16, center.z + distance);
-    camera.lookAt(center.x, center.y + 0.06, center.z);
+    const cameraLift = selectedCharacter === "otter" ? 0.08 : 0.16;
+    const lookLift = selectedCharacter === "otter" ? 0.02 : 0.06;
+    camera.position.set(center.x, center.y + cameraLift, center.z + distance);
+    camera.lookAt(center.x, center.y + lookLift, center.z);
   }
 
   function setRunning(value) {
@@ -144,6 +153,7 @@ if (sceneElement && canvas && playButton) {
       fullscreenButton.setAttribute("aria-pressed", active ? "true" : "false");
       fullscreenButton.setAttribute("aria-label", active ? "전체화면 닫기" : "전체화면으로 보기");
     }
+    fitCameraToCharacter();
   }
 
   async function enterFullscreen() {
