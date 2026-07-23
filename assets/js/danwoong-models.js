@@ -90,7 +90,7 @@ function jacketBackPanel(bodyWidth, mat) {
 function jacketTorsoBand(variant, mat) {
   const isBlue = variant === "blue";
   const centerY = isBlue ? 2.25 : 2.22;
-  const scaleY = isBlue ? 2.065 : 2.035;
+  const scaleY = isBlue ? 2.10 : 2.07;
   const topY = 3.10;
   const bottomY = 1.02;
   const thetaStart = Math.acos((topY - centerY) / scaleY);
@@ -109,7 +109,7 @@ function jacketTorsoBand(variant, mat) {
     mat,
     "Jacket_Body",
     [0, centerY, 0],
-    [isBlue ? 1.405 : 1.275, scaleY, isBlue ? 1.045 : 0.945]
+    [isBlue ? 1.44 : 1.31, scaleY, isBlue ? 1.08 : 0.99]
   );
 }
 
@@ -118,9 +118,9 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
   const brownDark = material(0x251711, 0.88);
   const ivory = material(0xf4f0e6, 0.82);
   const silver = material(0xf4f5f2, 0.34, 0.16);
-  const bodyWidth = variant === "blue" ? 1.40 : 1.27;
-  const bodyHeight = variant === "blue" ? 2.065 : 2.035;
-  const bodyDepth = variant === "blue" ? 1.045 : 0.945;
+  const bodyWidth = variant === "blue" ? 1.44 : 1.31;
+  const bodyHeight = variant === "blue" ? 2.10 : 2.07;
+  const bodyDepth = variant === "blue" ? 1.08 : 0.99;
   const bodyCenterY = variant === "blue" ? 2.25 : 2.22;
   const bodyCenterZ = 0;
   const surfaceZ = (y, lift = 0.06) => {
