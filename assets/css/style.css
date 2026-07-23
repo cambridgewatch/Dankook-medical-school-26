@@ -887,10 +887,16 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
 .cheonho-obstacle-puddle::after { content:""; position:absolute; inset:3px 18%; border-top:2px solid rgba(255,255,255,.65); border-radius:50%; }
 .cheonho-obstacle-rock { border:2px solid #66716e; border-radius:50%; background:radial-gradient(circle at 34% 25%,#bdc8bd 0 8%,#87978e 34%,#596761 76%,#3f4b47 100%); box-shadow:inset 4px 4px 5px rgba(255,255,255,.24); }
 .cheonho-obstacle-curb { --obstacle-w:clamp(52px,6vw,88px); --obstacle-h:clamp(16px,1.8vw,26px); border:3px solid #5d6670; border-radius:7px; background:repeating-linear-gradient(-45deg,#f0c84a 0 10px,#39434d 10px 20px); box-shadow:inset 0 2px rgba(255,255,255,.35); }
+.cheonho-obstacle-bottle { background:linear-gradient(90deg,transparent 0 18%,#86cbea 19% 81%,transparent 82%),linear-gradient(90deg,transparent 0 34%,#317da4 35% 65%,transparent 66%); border-radius:35% 35% 28% 28%; box-shadow:inset 4px 0 rgba(255,255,255,.35); }
+.cheonho-obstacle-bottle::before { content:""; position:absolute; left:34%; right:34%; top:0; height:22%; border-radius:4px 4px 1px 1px; background:#24698f; }
+.cheonho-obstacle-cooler::before { content:""; position:absolute; left:16%; right:16%; top:0; height:42%; border:clamp(2px,.3vw,4px) solid #2d718f; border-bottom:0; border-radius:999px 999px 0 0; }
+.cheonho-obstacle-cooler::after { content:""; position:absolute; inset:22% 0 0; border:2px solid #2e718f; border-radius:8px; background:linear-gradient(180deg,#d7f4ff 0 24%,#67bddc 25% 100%); box-shadow:inset 0 3px rgba(255,255,255,.4); }
 .cheonho-obstacle-planter { --obstacle-w:clamp(38px,4.2vw,62px); --obstacle-h:clamp(30px,3.8vw,52px); border:3px solid #754429; border-radius:6px 6px 10px 10px; background:linear-gradient(180deg,#8e5736 0 22%,#c77a49 23% 100%); box-shadow:inset 0 3px rgba(255,255,255,.22); }
 .cheonho-obstacle-basket::before { content:""; position:absolute; left:22%; right:22%; top:0; height:52%; border:clamp(3px,.35vw,5px) solid #7d4b25; border-bottom:0; border-radius:999px 999px 0 0; }
 .cheonho-obstacle-basket::after { content:""; position:absolute; inset:25% 0 0; border:2px solid #815127; border-radius:8px 8px 10px 10px; background:repeating-linear-gradient(0deg,rgba(91,52,24,.28) 0 2px,transparent 2px 7px),repeating-linear-gradient(90deg,#c9904f 0 7px,#dfa965 7px 13px); box-shadow:inset 0 3px rgba(255,255,255,.25); }
 .cheonho-obstacle-bollard { --obstacle-w:clamp(24px,2.6vw,39px); --obstacle-h:clamp(38px,4.5vw,65px); border:3px solid #424d56; border-radius:11px 11px 5px 5px; background:linear-gradient(180deg,#f2c646 0 24%,#36424b 25% 43%,#f2c646 44% 100%); box-shadow:inset 3px 0 rgba(255,255,255,.25); }
+.cheonho-obstacle-chair::before { content:""; position:absolute; left:8%; right:8%; top:43%; height:15%; border-radius:4px; background:#427b83; box-shadow:inset 0 2px rgba(255,255,255,.28); }
+.cheonho-obstacle-chair::after { content:""; position:absolute; inset:0 10% 0 10%; background:linear-gradient(90deg,#345e64 0 14%,transparent 14% 86%,#345e64 86%) 0 0/100% 100%,linear-gradient(76deg,transparent 0 42%,#345e64 43% 53%,transparent 54%) 0 0/100% 100%,linear-gradient(104deg,transparent 0 42%,#345e64 43% 53%,transparent 54%) 0 0/100% 100%; }
 .cheonho-obstacle-branch {
   --obstacle-w: clamp(45px, 5.6vw, 80px);
   --obstacle-h: clamp(21px, 2.7vw, 39px);
@@ -910,6 +916,10 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
 .cheonho-obstacle-sign { filter:drop-shadow(0 6px 5px rgba(32,26,20,.24)); }
 .cheonho-obstacle-sign::before { content:"i"; position:absolute; left:0; right:0; top:0; height:48%; display:grid; place-items:center; border:3px solid #31576a; border-radius:7px; background:linear-gradient(145deg,#8dd2e7,#4d9bb9); color:#fff; font:900 clamp(11px,1.5vw,21px)/1 Georgia,serif; box-shadow:inset 0 0 0 2px rgba(255,255,255,.35); }
 .cheonho-obstacle-sign::after { content:""; position:absolute; left:43%; right:43%; top:42%; bottom:6%; border-radius:3px; background:#365766; box-shadow:0 calc(var(--obstacle-h) * .06) 0 calc(var(--obstacle-w) * .12) #29434e; }
+.cheonho-obstacle-scooter::before { content:""; position:absolute; left:12%; width:67%; top:72%; height:11%; border-radius:999px; background:#4b6f82; box-shadow:0 0 0 2px #294956; }
+.cheonho-obstacle-scooter::after { content:""; position:absolute; left:70%; top:10%; width:8%; height:66%; border-radius:999px; background:#3d6577; box-shadow:-10px -2px 0 -2px #3d6577,10px -2px 0 -2px #3d6577,-44px calc(var(--obstacle-h) * .70) 0 3px #223f4c,0 calc(var(--obstacle-h) * .70) 0 3px #223f4c; }
+.cheonho-obstacle-lifebuoy::before { content:""; position:absolute; left:8%; right:8%; top:2%; height:56%; border:clamp(5px,.65vw,9px) solid #ef673f; border-radius:50%; background:radial-gradient(ellipse at center,transparent 0 45%,rgba(255,255,255,.95) 46% 53%,transparent 54%); box-shadow:inset 0 0 0 2px rgba(129,45,28,.25),0 0 0 2px #fff; }
+.cheonho-obstacle-lifebuoy::after { content:""; position:absolute; left:45%; right:45%; top:53%; bottom:6%; border-radius:3px; background:#536b72; box-shadow:0 calc(var(--obstacle-h) * .06) 0 calc(var(--obstacle-w) * .15) #3c5158; }
 .cheonho-obstacle-barrier {
   --obstacle-w: clamp(53px, 6.2vw, 90px);
   --obstacle-h: clamp(64px, 14vw, 170px);

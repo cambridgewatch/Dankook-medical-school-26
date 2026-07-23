@@ -39,6 +39,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   let gameOver = false;
   let gameMode = "run";
   let elapsedSeconds = 0;
+  let distanceLaps = 0;
   let characterX = 11;
   let lastFrame = 0;
   let nextSpawnIn = 3.4;
@@ -46,6 +47,8 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   let lastObstacleType = "";
   let unsubscribeRanking = null;
   let gameOverAt = 0;
+  let obstacleBag = [];
+  let obstacleTier = -1;
 
   function animationDurationSeconds() {
     const raw = getComputedStyle(track).animationDuration.split(",")[0].trim();
@@ -54,7 +57,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function currentLaps() {
-    return elapsedSeconds / Math.max(animationDurationSeconds(), 1);
+    return distanceLaps;
   }
 
   function formattedLaps(value = currentLaps()) {
@@ -66,8 +69,17 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function difficultyFor(laps) {
-    if (laps < 1) return 1;
-    return Math.min(2.15, 1 + Math.floor((laps - 1) * 2 + 1) * 0.12);
+    return Math.min(1.85, 1 + Math.max(0, laps - 0.25) * 0.16);
+  }
+
+  const baseLapDuration = Math.max(animationDurationSeconds(), 1);
+
+  function setBackgroundSpeed(multiplier) {
+    track.getAnimations().forEach((animation) => {
+      if (Math.abs(animation.playbackRate - multiplier) <= 0.005) return;
+      if (typeof animation.updatePlaybackRate === "function") animation.updatePlaybackRate(multiplier);
+      else animation.playbackRate = multiplier;
+    });
   }
 
   function resetTrackAnimation() {
@@ -81,17 +93,31 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function obstacleTypeForProgress(laps) {
-    const choices = laps < 0.25
-      ? ["puddle", "rock", "curb"]
-      : laps < 0.65
-        ? ["puddle", "rock", "curb", "planter", "basket", "bollard"]
-        : laps < 1
-          ? ["puddle", "rock", "curb", "planter", "basket", "bollard", "cone", "bin", "sign"]
-          : ["puddle", "rock", "curb", "planter", "basket", "bollard", "cone", "bin", "sign", "barrier"];
-    let type = choices[Math.floor(Math.random() * choices.length)];
+    const tier = laps < 0.25 ? 0 : laps < 0.65 ? 1 : laps < 1 ? 2 : 3;
+    const choices = tier === 0
+      ? ["puddle", "rock", "curb", "bottle"]
+      : tier === 1
+        ? ["puddle", "rock", "curb", "bottle", "cooler", "planter", "basket", "bollard", "chair"]
+        : tier === 2
+          ? ["puddle", "rock", "curb", "bottle", "cooler", "planter", "basket", "bollard", "chair", "cone", "bin", "sign", "scooter", "lifebuoy"]
+          : ["puddle", "rock", "curb", "bottle", "cooler", "planter", "basket", "bollard", "chair", "cone", "bin", "sign", "scooter", "lifebuoy", "barrier"];
+
+    if (tier !== obstacleTier || obstacleBag.length === 0) {
+      obstacleTier = tier;
+      obstacleBag = [...choices];
+      for (let index = obstacleBag.length - 1; index > 0; index -= 1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [obstacleBag[index], obstacleBag[swapIndex]] = [obstacleBag[swapIndex], obstacleBag[index]];
+      }
+    }
+
+    let type = obstacleBag.shift() || "puddle";
     const tallTypes = new Set(["bin", "sign", "barrier"]);
-    if (type === lastObstacleType || (tallTypes.has(type) && tallTypes.has(lastObstacleType))) {
-      type = laps < 0.25 ? "puddle" : "rock";
+    if (tallTypes.has(type) && tallTypes.has(lastObstacleType)) {
+      const replacementIndex = obstacleBag.findIndex((candidate) => !tallTypes.has(candidate));
+      if (replacementIndex >= 0) {
+        [type, obstacleBag[replacementIndex]] = [obstacleBag[replacementIndex], type];
+      }
     }
     lastObstacleType = type;
     return type;
@@ -107,17 +133,22 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       puddle: { width: 1.02, height: 0.10 },
       rock: { width: 0.64, height: 0.19 },
       curb: { width: 0.90, height: 0.16 },
-      planter: { width: 0.55, height: 0.34 },
-      basket: { width: 0.68, height: 0.34 },
-      bollard: { width: 0.32, height: 0.48 },
-      cone: { width: 0.40, height: 0.50 },
-      bin: { width: 0.48, height: 0.66 },
-      sign: { width: 0.58, height: 0.72 },
-      barrier: { width: 0.52, height: 0.82 },
+      bottle: { width: 0.24, height: 0.32 },
+      cooler: { width: 0.58, height: 0.29 },
+      planter: { width: 0.53, height: 0.29 },
+      basket: { width: 0.64, height: 0.29 },
+      bollard: { width: 0.30, height: 0.34 },
+      chair: { width: 0.54, height: 0.33 },
+      cone: { width: 0.34, height: 0.35 },
+      bin: { width: 0.42, height: 0.37 },
+      sign: { width: 0.47, height: 0.37 },
+      scooter: { width: 0.72, height: 0.34 },
+      lifebuoy: { width: 0.47, height: 0.37 },
+      barrier: { width: 0.36, height: 0.70 },
     };
     const ratio = ratios[obstacle.type] || ratios.curb;
     const widthScale = mobileTurtle ? 0.90 : 1;
-    const heightScale = mobileTurtle ? 0.90 : 1;
+    const heightScale = mobileTurtle ? (obstacle.type === "barrier" ? 1.25 : 0.90) : 1;
     obstacle.element.style.setProperty("--obstacle-w", `${Math.max(12, visibleCharacterWidth * ratio.width * widthScale)}px`);
     obstacle.element.style.setProperty("--obstacle-h", `${Math.max(8, characterHeight * ratio.height * heightScale)}px`);
   }
@@ -176,15 +207,47 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     return dx * dx + dy * dy <= r * r;
   }
 
+  function ellipseContains(x, y, centerX, centerY, radiusX, radiusY) {
+    const normalizedX = (x - centerX) / Math.max(radiusX, 1);
+    const normalizedY = (y - centerY) / Math.max(radiusY, 1);
+    return normalizedX * normalizedX + normalizedY * normalizedY <= 1;
+  }
+
   function obstaclePixelIsOpaque(type, localX, localY, width, height) {
     if (type === "puddle" || type === "rock") {
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const radiusX = Math.max(width / 2, 1);
-      const radiusY = Math.max(height / 2, 1);
-      const normalizedX = (localX - centerX) / radiusX;
-      const normalizedY = (localY - centerY) / radiusY;
-      return normalizedX * normalizedX + normalizedY * normalizedY <= 1;
+      return ellipseContains(localX, localY, width / 2, height / 2, width / 2, height / 2);
+    }
+    if (type === "bottle") {
+      const body = roundedRectContains(localX, localY, width * 0.18, height * 0.20, width * 0.82, height, width * 0.16);
+      const neck = roundedRectContains(localX, localY, width * 0.34, 0, width * 0.66, height * 0.28, width * 0.08);
+      return body || neck;
+    }
+    if (type === "cooler") {
+      const body = roundedRectContains(localX, localY, 0, height * 0.22, width, height, Math.min(8, height * 0.14));
+      const handle = roundedRectContains(localX, localY, width * 0.16, 0, width * 0.84, height * 0.42, Math.min(8, height * 0.14));
+      return body || handle;
+    }
+    if (type === "chair") {
+      const seat = roundedRectContains(localX, localY, width * 0.08, height * 0.43, width * 0.92, height * 0.58, 3);
+      const back = roundedRectContains(localX, localY, width * 0.10, 0, width * 0.24, height * 0.50, 3);
+      const leftLeg = roundedRectContains(localX, localY, width * 0.16, height * 0.52, width * 0.27, height, 2);
+      const rightLeg = roundedRectContains(localX, localY, width * 0.73, height * 0.52, width * 0.84, height, 2);
+      return seat || back || leftLeg || rightLeg;
+    }
+    if (type === "scooter") {
+      const leftWheel = ellipseContains(localX, localY, width * 0.18, height * 0.88, width * 0.12, height * 0.12);
+      const rightWheel = ellipseContains(localX, localY, width * 0.76, height * 0.88, width * 0.12, height * 0.12);
+      const deck = roundedRectContains(localX, localY, width * 0.12, height * 0.72, width * 0.79, height * 0.83, 3);
+      const stem = roundedRectContains(localX, localY, width * 0.70, height * 0.12, width * 0.78, height * 0.76, 2);
+      const handle = roundedRectContains(localX, localY, width * 0.55, height * 0.08, width * 0.94, height * 0.18, 3);
+      return leftWheel || rightWheel || deck || stem || handle;
+    }
+    if (type === "lifebuoy") {
+      const outerRing = ellipseContains(localX, localY, width * 0.50, height * 0.30, width * 0.42, height * 0.28);
+      const innerRing = ellipseContains(localX, localY, width * 0.50, height * 0.30, width * 0.22, height * 0.13);
+      const post = roundedRectContains(localX, localY, width * 0.45, height * 0.53, width * 0.55, height * 0.94, 2);
+      const foot = roundedRectContains(localX, localY, width * 0.20, height * 0.90, width * 0.80, height, 3);
+      return (outerRing && !innerRing) || post || foot;
     }
     if (type === "cone") {
       if (localY >= height * 0.82) return localX >= 0 && localX <= width;
@@ -313,12 +376,17 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       puddle: "물웅덩이",
       rock: "호숫가 돌",
       curb: "낮은 돌턱",
+      bottle: "산책로 물병",
+      cooler: "피크닉 아이스박스",
       planter: "작은 화분",
       basket: "피크닉 바구니",
       bollard: "안전 볼라드",
+      chair: "접이식 의자",
       cone: "안전콘",
       bin: "산책로 쓰레기통",
       sign: "호수 안내 표지판",
+      scooter: "주차된 킥보드",
+      lifebuoy: "구명환 거치대",
       barrier: "높은 차단판",
     };
     if (crashReasonElement) crashReasonElement.textContent = `${names[obstacle?.type] || "장애물"}에 부딪혔어요.`;
@@ -330,8 +398,11 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   function restartGame() {
     clearObstacles();
     elapsedSeconds = 0;
+    distanceLaps = 0;
     nextSpawnIn = 3.4;
     lastObstacleType = "";
+    obstacleBag = [];
+    obstacleTier = -1;
     gameOver = false;
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-jumped", "is-jumping");
@@ -340,16 +411,20 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     renderScore();
     if (gameOverElement) gameOverElement.hidden = true;
     resetTrackAnimation();
+    setBackgroundSpeed(1);
     scene.dispatchEvent(new CustomEvent("cheonho:setrunning", { detail: { running: true } }));
   }
 
   function updateGame(delta) {
     const laps = currentLaps();
+    const speedMultiplier = difficultyFor(laps);
     elapsedSeconds += delta;
+    distanceLaps += (delta / baseLapDuration) * speedMultiplier;
+    setBackgroundSpeed(speedMultiplier);
     renderScore();
 
     const sceneWidth = Math.max(scene.clientWidth, 1);
-    const obstaclePercentPerSecond = (sceneWidth * 0.095 * difficultyFor(laps) / sceneWidth) * 100;
+    const obstaclePercentPerSecond = (sceneWidth * 0.095 * speedMultiplier / sceneWidth) * 100;
     const characterPercentPerSecond = (sceneWidth * 0.08 / sceneWidth) * 100;
     if (movement.left !== movement.right) {
       setCharacterX(characterX + (movement.right ? 1 : -1) * characterPercentPerSecond * delta);
@@ -378,6 +453,8 @@ if (scene && track && character && obstacleLayer && scoreElement) {
 
   function updateWalking(delta) {
     elapsedSeconds += delta;
+    distanceLaps += delta / baseLapDuration;
+    setBackgroundSpeed(1);
     renderScore();
     const characterPercentPerSecond = 8;
     if (movement.left !== movement.right) {
@@ -465,7 +542,10 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     gameMode = event.detail?.mode === "walk" ? "walk" : "run";
     clearObstacles();
     elapsedSeconds = 0;
+    distanceLaps = 0;
     nextSpawnIn = 3.4;
+    obstacleBag = [];
+    obstacleTier = -1;
     gameOver = false;
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-collision", "has-jumped", "is-jumping");
@@ -473,6 +553,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     setCharacterX(initialCharacterX());
     renderScore();
     resetTrackAnimation();
+    setBackgroundSpeed(1);
   });
   scene.addEventListener("cheonho:restart", restartGame);
   scene.addEventListener("cheonho:characterchange", () => setCharacterX(initialCharacterX()));
