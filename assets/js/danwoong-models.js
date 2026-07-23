@@ -87,8 +87,8 @@ function addVarsityJacket(root, leftArm, rightArm, variant) {
     root.add(sphere(
       brown,
       `Jacket_Shoulder_${side < 0 ? "L" : "R"}`,
-      [side * bodyWidth * 0.67, 2.96, 0.10],
-      [bodyWidth * 0.47, 0.48, variant === "blue" ? 1.30 : 1.20],
+      [side * bodyWidth * 0.65, 2.91, 0.50],
+      [bodyWidth * 0.38, 0.32, variant === "blue" ? 0.80 : 0.74],
       40
     ));
   });
