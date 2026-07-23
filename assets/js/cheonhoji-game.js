@@ -27,7 +27,13 @@ if (sceneElement && canvas && playButton) {
   let jumpCount = 0;
   let previousFrameTime = 0;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    alpha: true,
+    preserveDrawingBuffer: true,
+    powerPreference: "high-performance",
+  });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -35,6 +41,22 @@ if (sceneElement && canvas && playButton) {
   renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  let collisionPixelBuffer = new Uint8Array(0);
+  window.getCheonhoCharacterPixelMask = () => {
+    const gl = renderer.getContext();
+    const width = gl.drawingBufferWidth;
+    const height = gl.drawingBufferHeight;
+    const requiredLength = width * height * 4;
+    if (!width || !height) return null;
+    if (collisionPixelBuffer.length !== requiredLength) collisionPixelBuffer = new Uint8Array(requiredLength);
+    try {
+      gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, collisionPixelBuffer);
+      return { data: collisionPixelBuffer, width, height };
+    } catch (error) {
+      return null;
+    }
+  };
 
   const stage = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(31, 1, 0.1, 30);
@@ -100,6 +122,7 @@ if (sceneElement && canvas && playButton) {
     animal.userData.restHeadX = parts.head?.position.x ?? 0;
     stage.add(animal);
     fitCameraToCharacter();
+    sceneElement.dispatchEvent(new CustomEvent("cheonho:characterchange"));
   }
 
   function fitCameraToCharacter() {
@@ -216,6 +239,7 @@ if (sceneElement && canvas && playButton) {
       fullscreenButton.setAttribute("aria-label", active ? "전체화면 닫기" : "전체화면으로 보기");
     }
     fitCameraToCharacter();
+    sceneElement.dispatchEvent(new CustomEvent("cheonho:layoutchange"));
   }
 
   async function enterFullscreen() {

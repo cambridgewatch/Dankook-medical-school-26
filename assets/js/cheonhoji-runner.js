@@ -18,6 +18,7 @@ const scene = document.querySelector("#cheonhoRunScene");
 const track = scene?.querySelector(".cheonho-background-track");
 const character = document.querySelector("#cheonhoCharacterCanvas");
 const obstacleLayer = document.querySelector("#cheonhoObstacleLayer");
+const moveControls = scene?.querySelector(".cheonho-mobile-move-controls");
 const scoreElement = document.querySelector("#cheonhoLapScore");
 const finalScoreElement = document.querySelector("#cheonhoFinalScore");
 const crashReasonElement = document.querySelector("#cheonhoCrashReason");
@@ -136,20 +137,71 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     character.style.left = `${characterX}%`;
   }
 
-  function hitboxesOverlap(obstacleElement, type) {
+  function initialCharacterX() {
+    if (!moveControls || getComputedStyle(moveControls).display === "none") return 11;
+    const sceneWidth = Math.max(scene.clientWidth, 1);
+    const visibleWidthRatio = scene.dataset.character === "turtle" ? 0.72 : 0.68;
+    const visibleCharacterWidth = character.offsetWidth * visibleWidthRatio;
+    const controlsRight = moveControls.offsetLeft + moveControls.offsetWidth;
+    return ((controlsRight + 12 + visibleCharacterWidth / 2) / sceneWidth) * 100;
+  }
+
+  function roundedRectContains(x, y, left, top, right, bottom, radius) {
+    if (x < left || x > right || y < top || y > bottom) return false;
+    const r = Math.max(0, Math.min(radius, (right - left) / 2, (bottom - top) / 2));
+    const closestX = Math.max(left + r, Math.min(right - r, x));
+    const closestY = Math.max(top + r, Math.min(bottom - r, y));
+    const dx = x - closestX;
+    const dy = y - closestY;
+    return dx * dx + dy * dy <= r * r;
+  }
+
+  function obstaclePixelIsOpaque(type, localX, localY, width, height) {
+    if (type === "barrier") {
+      const board = roundedRectContains(localX, localY, width * 0.08, height * 0.24, width * 0.92, height * 0.90, Math.min(7, height * 0.10));
+      const base = roundedRectContains(localX, localY, 0, height * 0.87, width, height, Math.min(6, height * 0.08));
+      return board || base;
+    }
+    const radius = type === "bollard"
+      ? Math.min(11, width * 0.42)
+      : type === "planter"
+        ? Math.min(9, width * 0.18)
+        : Math.min(7, height * 0.30);
+    return roundedRectContains(localX, localY, 0, 0, width, height, radius);
+  }
+
+  function pixelsOverlap(obstacleElement, type) {
     const characterRect = character.getBoundingClientRect();
     const obstacleRect = obstacleElement.getBoundingClientRect();
-    const turtle = scene.dataset.character === "turtle";
-    const characterInsetX = turtle ? 0.28 : 0.34;
-    const horizontalOverlap =
-      characterRect.left + characterRect.width * characterInsetX < obstacleRect.right &&
-      characterRect.right - characterRect.width * characterInsetX > obstacleRect.left;
-    if (!horizontalOverlap) return false;
+    const left = Math.max(characterRect.left, obstacleRect.left);
+    const right = Math.min(characterRect.right, obstacleRect.right);
+    const top = Math.max(characterRect.top, obstacleRect.top);
+    const bottom = Math.min(characterRect.bottom, obstacleRect.bottom);
+    if (left >= right || top >= bottom) return false;
 
-    // 캔버스의 투명 여백이 아니라 캐릭터의 실제 발 위치로 판정한다.
-    // 낮은 장애물은 일반 점프 한 번으로, 높은 차단막만 더블 점프로 넘을 수 있다.
-    const feetY = characterRect.bottom - characterRect.height * (turtle ? 0.20 : 0.14);
-    return feetY > obstacleRect.top;
+    const mask = window.getCheonhoCharacterPixelMask?.();
+    if (!mask?.data?.length || !mask.width || !mask.height) return false;
+    const startX = Math.floor(left);
+    const endX = Math.ceil(right);
+    const startY = Math.floor(top);
+    const endY = Math.ceil(bottom);
+
+    for (let screenY = startY; screenY < endY; screenY += 1) {
+      const characterY = Math.min(mask.height - 1, Math.max(0,
+        mask.height - 1 - Math.floor(((screenY + 0.5 - characterRect.top) / characterRect.height) * mask.height)
+      ));
+      const obstacleY = screenY + 0.5 - obstacleRect.top;
+      for (let screenX = startX; screenX < endX; screenX += 1) {
+        const obstacleX = screenX + 0.5 - obstacleRect.left;
+        if (!obstaclePixelIsOpaque(type, obstacleX, obstacleY, obstacleRect.width, obstacleRect.height)) continue;
+        const characterXPixel = Math.min(mask.width - 1, Math.max(0,
+          Math.floor(((screenX + 0.5 - characterRect.left) / characterRect.width) * mask.width)
+        ));
+        const alpha = mask.data[(characterY * mask.width + characterXPixel) * 4 + 3];
+        if (alpha >= 96) return true;
+      }
+    }
+    return false;
   }
 
   async function saveBestScore(score) {
@@ -192,6 +244,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       obstacle.element.insertAdjacentHTML("beforeend", '<span class="cheonho-impact-mark">!</span>');
     }
     moveButtons.forEach((button) => button.classList.remove("is-pressed"));
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     const score = currentLaps();
     const names = { curb: "낮은 돌턱", planter: "작은 화분", bollard: "안전 볼라드", barrier: "높은 차단판" };
     if (crashReasonElement) crashReasonElement.textContent = `${names[obstacle?.type] || "장애물"}에 부딪혔어요.`;
@@ -209,7 +262,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-jumped", "is-jumping");
     scene.classList.remove("has-collision");
-    setCharacterX(11);
+    setCharacterX(initialCharacterX());
     renderScore();
     if (gameOverElement) gameOverElement.hidden = true;
     resetTrackAnimation();
@@ -242,7 +295,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       if (obstacle.x < -10) {
         obstacle.element.remove();
         obstacles.splice(index, 1);
-      } else if (hitboxesOverlap(obstacle.element, obstacle.type)) {
+      } else if (pixelsOverlap(obstacle.element, obstacle.type)) {
         finishGame(obstacle);
         break;
       }
@@ -341,11 +394,15 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-collision", "has-jumped", "is-jumping");
     if (gameOverElement) gameOverElement.hidden = true;
-    setCharacterX(11);
+    setCharacterX(initialCharacterX());
     renderScore();
     resetTrackAnimation();
   });
   scene.addEventListener("cheonho:restart", restartGame);
+  scene.addEventListener("cheonho:characterchange", () => setCharacterX(initialCharacterX()));
+  scene.addEventListener("cheonho:layoutchange", () => {
+    if (elapsedSeconds < 0.5) setCharacterX(initialCharacterX());
+  });
   retryButton?.addEventListener("click", restartGame);
 
   async function refreshMyRank() {
@@ -436,6 +493,6 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   });
 
   renderScore();
-  setCharacterX(11);
+  setCharacterX(initialCharacterX());
   requestAnimationFrame(frame);
 }

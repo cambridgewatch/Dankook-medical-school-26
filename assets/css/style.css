@@ -731,6 +731,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
     touch-action: none;
     overscroll-behavior: none;
   }
+  .cheonho-run-scene.has-collision { animation:none; }
 }
 .cheonho-run-scene:fullscreen .cheonho-fullscreen-exit,
 .cheonho-run-scene:-webkit-full-screen .cheonho-fullscreen-exit,
