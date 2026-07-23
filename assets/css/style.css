@@ -624,16 +624,16 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-character-canvas {
   position: absolute;
   left: clamp(18px, 8vw, 120px);
-  bottom: 7.2%;
+  bottom: 3.5%;
   z-index: 6;
-  width: clamp(150px, 17vw, 245px);
-  height: 76%;
+  width: clamp(135px, 14vw, 205px);
+  height: 68%;
   pointer-events: none;
   filter: drop-shadow(0 8px 8px rgba(20, 34, 39, .25));
 }
 .cheonho-run-scene[data-character="turtle"] .cheonho-character-canvas {
   left: clamp(0px, 2vw, 32px);
-  width: clamp(280px, 34vw, 460px);
+  width: clamp(230px, 29vw, 390px);
 }
 .cheonho-fullscreen-exit {
   position: absolute;
@@ -728,8 +728,8 @@ body.cheonho-fullscreen-open { overflow: hidden; }
   position: absolute;
   inset: auto 0 0;
   z-index: 3;
-  height: 24%;
-  border-top: 7px solid #744225;
+  height: 16%;
+  border-top: 5px solid #744225;
   background:
     linear-gradient(180deg, rgba(255, 219, 169, 0.12), rgba(67, 27, 11, 0.18)),
     repeating-linear-gradient(90deg, #a96034 0 72px, #8d4b28 73px 76px, #bb7040 77px 148px);
@@ -746,6 +746,7 @@ body.cheonho-fullscreen-open { overflow: hidden; }
     linear-gradient(180deg, #754326 0 7px, transparent 7px 27px, #754326 27px 34px),
     repeating-linear-gradient(90deg, #6b3b22 0 7px, transparent 7px 78px);
   filter: drop-shadow(0 2px 2px rgba(35, 19, 10, 0.25));
+  display: none;
 }
 .cheonho-fixed-walkway::after {
   content: "";
@@ -845,13 +846,13 @@ body.cheonho-fullscreen-open { overflow: hidden; }
   .cheonho-fullscreen-button span { display: none; }
   .cheonho-run-scene { aspect-ratio: 16 / 10; min-height: 0; }
   .cheonho-background-track { animation-duration: 100s; }
-  .cheonho-fixed-walkway { height: 26%; border-top-width: 5px; }
+  .cheonho-fixed-walkway { height: 18%; border-top-width: 4px; }
   .cheonho-fixed-walkway::before { top: -25px; height: 25px; background: linear-gradient(180deg, #754326 0 5px, transparent 5px 19px, #754326 19px 24px), repeating-linear-gradient(90deg, #6b3b22 0 5px, transparent 5px 53px); }
   .cheonho-run-card.is-night .cheonho-fixed-walkway::before { background: radial-gradient(circle at 9px 10px, #ffd47c 0 2px, rgba(255, 204, 105, .28) 3px 6px, transparent 7px) 0 0 / 53px 100% repeat-x, linear-gradient(180deg, #1b2e3b 0 5px, transparent 5px 19px, #1b2e3b 19px 24px), repeating-linear-gradient(90deg, #152631 0 5px, transparent 5px 53px); }
-  .cheonho-character-canvas { left: 4px; bottom: 8%; width: 145px; height: 70%; }
+  .cheonho-character-canvas { left: 4px; bottom: 3.5%; width: 125px; height: 62%; }
   .cheonho-run-scene[data-character="turtle"] .cheonho-character-canvas {
     left: -4px;
-    width: min(86vw, 360px);
+    width: min(74vw, 310px);
   }
   .cheonho-run-foot { align-items: flex-start; flex-direction: column; gap: 5px; padding: 12px 16px; }
 }
