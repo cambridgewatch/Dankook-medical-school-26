@@ -13,6 +13,7 @@ const lightToggleButtons = [...document.querySelectorAll("[data-cheonho-light-to
 const characterButtons = [...document.querySelectorAll("[data-cheonho-character]")];
 const modeButtons = [...document.querySelectorAll("[data-cheonho-mode]")];
 const jumpHint = document.querySelector("#cheonhoJumpHint");
+const fastLandButton = document.querySelector("#cheonhoFastLandButton");
 
 if (sceneElement && canvas) {
   const savedCharacter = localStorage.getItem("cheonhojiGameCharacter") === "turtle" ? "turtle" : "otter";
@@ -25,6 +26,7 @@ if (sceneElement && canvas) {
   let jumpOffset = 0;
   let jumpVelocity = 0;
   let jumpCount = 0;
+  let fastFalling = false;
   let previousFrameTime = 0;
 
   const renderer = new THREE.WebGLRenderer({
@@ -161,6 +163,9 @@ if (sceneElement && canvas) {
     jumpOffset = 0;
     jumpVelocity = 0;
     jumpCount = 0;
+    fastFalling = false;
+    if (fastLandButton) fastLandButton.disabled = true;
+    sceneElement.classList.remove("is-fast-falling");
     canvas.style.setProperty("--cheonho-jump-y", "0px");
     sceneElement.classList.remove("is-jumping");
   }
@@ -171,8 +176,8 @@ if (sceneElement && canvas) {
       const gravity = 3.2;
       return {
         gravity,
-        firstVelocity: Math.sqrt(2 * gravity * 1.50),
-        secondVelocity: Math.sqrt(2 * gravity * 1.65),
+        firstVelocity: Math.sqrt(2 * gravity * 1.50 * 1.05),
+        secondVelocity: Math.sqrt(2 * gravity * 1.65 * 1.05),
       };
     }
     if (coarsePointer) {
@@ -194,8 +199,11 @@ if (sceneElement && canvas) {
   }
 
   function startJump() {
-    if (!running || jumpCount >= 2) return false;
+    if (!running || jumpCount >= 2 || fastFalling) return false;
     jumping = true;
+    fastFalling = false;
+    if (fastLandButton) fastLandButton.disabled = false;
+    sceneElement.classList.remove("is-fast-falling");
     const physics = currentJumpPhysics();
     jumpVelocity = jumpCount === 0 ? physics.firstVelocity : physics.secondVelocity;
     jumpCount += 1;
@@ -208,7 +216,7 @@ if (sceneElement && canvas) {
     previousFrameTime = time;
     if (!jumping || delta <= 0) return jumpOffset;
 
-    jumpVelocity -= currentJumpPhysics().gravity * delta;
+    jumpVelocity -= currentJumpPhysics().gravity * (fastFalling ? 2.4 : 1) * delta;
     jumpOffset += jumpVelocity * delta;
 
     if (jumpOffset <= 0 && jumpVelocity < 0) {
@@ -216,6 +224,16 @@ if (sceneElement && canvas) {
       return 0;
     }
     return jumpOffset;
+  }
+
+  function triggerFastLanding() {
+    if (!running || !jumping || jumpOffset <= 0 || fastFalling) return false;
+    const physics = currentJumpPhysics();
+    fastFalling = true;
+    jumpVelocity = Math.min(jumpVelocity, physics.firstVelocity * 0.22);
+    sceneElement.classList.add("is-fast-falling");
+    if (fastLandButton) fastLandButton.disabled = true;
+    return true;
   }
 
   function setRunning(value) {
@@ -324,7 +342,13 @@ if (sceneElement && canvas) {
     if (running && !event.target.closest("button")) event.preventDefault();
   });
   window.addEventListener("keydown", (event) => {
-    if (event.code !== "Space" || event.repeat || event.target.closest("input, textarea, select, button")) return;
+    const target = event.target instanceof Element ? event.target : null;
+    if (target?.closest("input, textarea, select, [contenteditable='true']")) return;
+    if ((event.code === "ArrowDown" || event.code === "KeyS") && !event.repeat) {
+      if (triggerFastLanding()) event.preventDefault();
+      return;
+    }
+    if (event.code !== "Space" || event.repeat || target?.closest("button")) return;
     if (!running && sceneElement.dataset.gameOver !== "true") {
       setRunning(true);
       event.preventDefault();
@@ -332,6 +356,17 @@ if (sceneElement && canvas) {
     }
     if (startJump()) event.preventDefault();
   });
+
+  fastLandButton?.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    triggerFastLanding();
+  });
+  fastLandButton?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+  fastLandButton?.addEventListener("contextmenu", (event) => event.preventDefault());
 
   let lastFullscreenTouchEnd = 0;
   sceneElement.addEventListener("touchend", (event) => {

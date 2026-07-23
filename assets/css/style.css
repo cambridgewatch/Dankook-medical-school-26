@@ -876,6 +876,7 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   backdrop-filter: blur(9px);
 }
 .cheonho-game-hud strong { font-size: 17px; line-height: 1; font-variant-numeric: tabular-nums; }
+.cheonho-fast-land-button { display:none; }
 .cheonho-obstacle-layer { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
 .cheonho-obstacle {
   --obstacle-x: 105%;
@@ -1116,6 +1117,12 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-run-foot { align-items: flex-start; flex-direction: column; gap: 5px; padding: 12px 16px; }
   .cheonho-game-hud { top:8px; right:8px; padding:6px 9px; }
   .cheonho-game-hud strong { font-size:14px; }
+  .cheonho-fast-land-button { position:absolute; top:51px; right:8px; z-index:13; display:grid; place-items:center; width:46px; height:46px; padding:0; border:1px solid rgba(255,255,255,.55); border-radius:15px; outline:0; background:linear-gradient(145deg,rgba(86,181,235,.96),rgba(31,111,171,.96)); color:#fff; font:900 27px/1 sans-serif; box-shadow:0 7px 18px rgba(20,81,123,.26); touch-action:none; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; transition:opacity .16s ease,transform .16s ease,filter .16s ease; }
+  .cheonho-fast-land-button:disabled { opacity:.38; filter:saturate(.55); }
+  .cheonho-fast-land-button:not(:disabled):active { transform:translateY(2px) scale(.94); }
+  .cheonho-run-scene:fullscreen .cheonho-fast-land-button,
+  .cheonho-run-scene:-webkit-full-screen .cheonho-fast-land-button,
+  .cheonho-run-scene.is-fullscreen-fallback .cheonho-fast-land-button { top:max(62px,calc(env(safe-area-inset-top) + 58px)); right:max(70px,calc(env(safe-area-inset-right) + 70px)); width:52px; height:52px; font-size:31px; }
   .cheonho-mobile-move-controls { position:absolute; left:max(30px,calc(env(safe-area-inset-left) + 22px)); bottom:max(25px,calc(env(safe-area-inset-bottom) + 18px)); z-index:13; display:flex; gap:8px; touch-action:none; overscroll-behavior:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
   .cheonho-mobile-move-controls button { display:grid; place-items:center; width:64px; height:58px; padding:0; border:0; border-radius:0; outline:0; background:linear-gradient(145deg,rgba(85,174,230,.96),rgba(35,112,169,.96)); color:transparent; font:inherit; font-size:0; box-shadow:none; filter:drop-shadow(0 6px 9px rgba(24,91,137,.24)); touch-action:none; -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; backdrop-filter:blur(8px); transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s ease,background .18s ease; }
   .cheonho-mobile-move-controls button[data-cheonho-move="left"] { clip-path:polygon(100% 0,100% 100%,0 50%); }
