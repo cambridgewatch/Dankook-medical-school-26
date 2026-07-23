@@ -652,17 +652,19 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-run-scene.is-paused .cheonho-background-track { animation-play-state: paused; }
 .cheonho-run-scene.is-running .cheonho-background-track { animation-play-state: running; }
 .cheonho-character-canvas {
+  --cheonho-character-ground-trim: 14%;
   position: absolute;
   left: 11%;
   bottom: var(--cheonho-ground-bottom);
   z-index: 6;
   width: clamp(45px, 4.67vw, 68px);
   height: 22.67%;
-  transform: translate(-50%, calc(-1 * var(--cheonho-jump-y, 0px)));
+  transform: translate(-50%, calc(var(--cheonho-character-ground-trim) - var(--cheonho-jump-y, 0px)));
   pointer-events: none;
   filter: drop-shadow(0 8px 8px rgba(20, 34, 39, .25));
 }
 .cheonho-run-scene[data-character="turtle"] .cheonho-character-canvas {
+  --cheonho-character-ground-trim: 20%;
   left: 11%;
   width: clamp(77px, 9.67vw, 130px);
 }
