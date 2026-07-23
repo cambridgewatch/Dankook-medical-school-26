@@ -98,10 +98,11 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function sizeObstacle(obstacle) {
-    const characterRect = character.getBoundingClientRect();
     const turtle = scene.dataset.character === "turtle";
     const mobileTurtle = turtle && window.matchMedia("(pointer: coarse)").matches;
-    const visibleCharacterWidth = characterRect.width * (turtle ? 0.72 : 0.68);
+    const characterWidth = character.offsetWidth;
+    const characterHeight = character.offsetHeight;
+    const visibleCharacterWidth = characterWidth * (turtle ? 0.72 : 0.68);
     const ratios = {
       puddle: { width: 1.02, height: 0.10 },
       rock: { width: 0.64, height: 0.19 },
@@ -118,7 +119,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const widthScale = mobileTurtle ? 0.90 : 1;
     const heightScale = mobileTurtle ? 0.90 : 1;
     obstacle.element.style.setProperty("--obstacle-w", `${Math.max(12, visibleCharacterWidth * ratio.width * widthScale)}px`);
-    obstacle.element.style.setProperty("--obstacle-h", `${Math.max(8, characterRect.height * ratio.height * heightScale)}px`);
+    obstacle.element.style.setProperty("--obstacle-h", `${Math.max(8, characterHeight * ratio.height * heightScale)}px`);
   }
 
   function spawnObstacle() {
@@ -147,7 +148,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const visibleWidthRatio = scene.dataset.character === "turtle" ? 0.72 : 0.68;
     const characterHalfWidth = Math.min(
       45,
-      (character.getBoundingClientRect().width * visibleWidthRatio / sceneWidth) * 50
+      (character.offsetWidth * visibleWidthRatio / sceneWidth) * 50
     );
     const edgePadding = 0.75;
     const minimumX = characterHalfWidth + edgePadding;
@@ -217,8 +218,23 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function pixelsOverlap(obstacleElement, type) {
-    const characterRect = character.getBoundingClientRect();
-    const obstacleRect = obstacleElement.getBoundingClientRect();
+    function sceneLocalRect(element) {
+      const transformValue = getComputedStyle(element).transform;
+      const matrix = transformValue && transformValue !== "none"
+        ? new DOMMatrixReadOnly(transformValue)
+        : new DOMMatrixReadOnly();
+      return {
+        left: element.offsetLeft + matrix.e,
+        top: element.offsetTop + matrix.f,
+        width: element.offsetWidth,
+        height: element.offsetHeight,
+        right: element.offsetLeft + matrix.e + element.offsetWidth,
+        bottom: element.offsetTop + matrix.f + element.offsetHeight,
+      };
+    }
+
+    const characterRect = sceneLocalRect(character);
+    const obstacleRect = sceneLocalRect(obstacleElement);
     const left = Math.max(characterRect.left, obstacleRect.left);
     const right = Math.min(characterRect.right, obstacleRect.right);
     const top = Math.max(characterRect.top, obstacleRect.top);
@@ -361,6 +377,8 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function updateWalking(delta) {
+    elapsedSeconds += delta;
+    renderScore();
     const characterPercentPerSecond = 8;
     if (movement.left !== movement.right) {
       setCharacterX(characterX + (movement.right ? 1 : -1) * characterPercentPerSecond * delta);

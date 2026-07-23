@@ -7,14 +7,14 @@ import {
 
 const sceneElement = document.querySelector("#cheonhoRunScene");
 const canvas = document.querySelector("#cheonhoCharacterCanvas");
-const playButton = document.querySelector("#cheonhoPlayButton");
 const fullscreenButton = document.querySelector("#cheonhoFullscreenButton");
 const fullscreenExit = document.querySelector("#cheonhoFullscreenExit");
 const lightToggleButtons = [...document.querySelectorAll("[data-cheonho-light-toggle]")];
 const characterButtons = [...document.querySelectorAll("[data-cheonho-character]")];
 const modeButtons = [...document.querySelectorAll("[data-cheonho-mode]")];
+const jumpHint = document.querySelector("#cheonhoJumpHint");
 
-if (sceneElement && canvas && playButton) {
+if (sceneElement && canvas) {
   const savedCharacter = localStorage.getItem("cheonhojiGameCharacter") === "turtle" ? "turtle" : "otter";
   let selectedTime = "day";
   let selectedCharacter = savedCharacter;
@@ -196,12 +196,11 @@ if (sceneElement && canvas && playButton) {
     if (!running) resetJump();
     sceneElement.classList.toggle("is-running", running);
     sceneElement.classList.toggle("is-paused", !running);
-    playButton.classList.toggle("is-running", running);
-    playButton.setAttribute("aria-pressed", running ? "true" : "false");
-    playButton.querySelector("span").textContent = running
-      ? "잠시 멈추기"
-      : (selectedMode === "walk" ? "산책 시작" : "달리기 시작");
-    playButton.querySelector("i").textContent = running ? "Ⅱ" : "▶";
+    if (jumpHint) {
+      jumpHint.textContent = running
+        ? (selectedMode === "walk" ? "산책 중 · 화면을 터치하면 점프" : "터치·클릭하여 점프 · 공중에서 한 번 더 누르면 더블 점프")
+        : "게임 화면을 터치하면 시작";
+    }
     sceneElement.dispatchEvent(new CustomEvent("cheonho:runningchange", {
       detail: { running },
     }));
@@ -216,13 +215,6 @@ if (sceneElement && canvas && playButton) {
     setRunning(false);
     sceneElement.dispatchEvent(new CustomEvent("cheonho:modechange", { detail: { mode: selectedMode } }));
   }));
-  playButton.addEventListener("click", () => {
-    if (sceneElement.dataset.gameOver === "true") {
-      sceneElement.dispatchEvent(new CustomEvent("cheonho:restart"));
-      return;
-    }
-    setRunning(!running);
-  });
   sceneElement.addEventListener("cheonho:setrunning", (event) => {
     setRunning(Boolean(event.detail?.running));
   });
@@ -246,11 +238,6 @@ if (sceneElement && canvas && playButton) {
   }
 
   async function enterFullscreen() {
-    if (sceneElement.dataset.gameOver === "true") {
-      sceneElement.dispatchEvent(new CustomEvent("cheonho:restart"));
-    } else {
-      setRunning(true);
-    }
     try {
       if (sceneElement.requestFullscreen) {
         await sceneElement.requestFullscreen();
@@ -294,6 +281,11 @@ if (sceneElement && canvas && playButton) {
 
   sceneElement.addEventListener("pointerdown", (event) => {
     if (event.target.closest("button") || (event.pointerType === "mouse" && event.button !== 0)) return;
+    if (!running && sceneElement.dataset.gameOver !== "true") {
+      setRunning(true);
+      event.preventDefault();
+      return;
+    }
     if (!startJump()) return;
     event.preventDefault();
     try { sceneElement.setPointerCapture(event.pointerId); } catch (error) { /* Pointer capture is optional. */ }
@@ -303,6 +295,11 @@ if (sceneElement && canvas && playButton) {
   });
   window.addEventListener("keydown", (event) => {
     if (event.code !== "Space" || event.repeat || event.target.closest("input, textarea, select, button")) return;
+    if (!running && sceneElement.dataset.gameOver !== "true") {
+      setRunning(true);
+      event.preventDefault();
+      return;
+    }
     if (startJump()) event.preventDefault();
   });
 

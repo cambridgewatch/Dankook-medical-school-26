@@ -609,6 +609,10 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   opacity: 1;
   transform: translate(-50%, 0);
 }
+.cheonho-run-scene.is-paused:not([data-game-over="true"]) .cheonho-jump-hint {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
 .cheonho-background-track {
   position: absolute;
   inset: 0 auto 0 0;
@@ -860,8 +864,6 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   backdrop-filter: blur(9px);
 }
 .cheonho-game-hud strong { font-size: 17px; line-height: 1; font-variant-numeric: tabular-nums; }
-.cheonho-run-scene[data-mode="walk"] .cheonho-game-hud,
-.cheonho-run-scene[data-mode="walk"] .cheonho-jump-hint { display:none; }
 .cheonho-obstacle-layer { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
 .cheonho-obstacle {
   --obstacle-x: 105%;
