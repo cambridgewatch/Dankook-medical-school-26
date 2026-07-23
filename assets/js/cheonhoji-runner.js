@@ -107,7 +107,16 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function setCharacterX(value) {
-    characterX = Math.max(6, Math.min(55, value));
+    const sceneWidth = Math.max(scene.clientWidth, 1);
+    const visibleWidthRatio = scene.dataset.character === "turtle" ? 0.72 : 0.68;
+    const characterHalfWidth = Math.min(
+      45,
+      (character.getBoundingClientRect().width * visibleWidthRatio / sceneWidth) * 50
+    );
+    const edgePadding = 0.75;
+    const minimumX = characterHalfWidth + edgePadding;
+    const maximumX = 100 - characterHalfWidth - edgePadding;
+    characterX = Math.max(minimumX, Math.min(maximumX, value));
     character.style.left = `${characterX}%`;
   }
 
