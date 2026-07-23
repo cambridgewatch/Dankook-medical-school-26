@@ -623,8 +623,8 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-run-scene.is-running .cheonho-background-track { animation-play-state: running; }
 .cheonho-character-canvas {
   position: absolute;
-  left: 66.667%;
-  bottom: 20%;
+  left: 11%;
+  bottom: 2%;
   z-index: 6;
   width: clamp(45px, 4.67vw, 68px);
   height: 22.67%;
@@ -633,7 +633,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   filter: drop-shadow(0 8px 8px rgba(20, 34, 39, .25));
 }
 .cheonho-run-scene[data-character="turtle"] .cheonho-character-canvas {
-  left: 66.667%;
+  left: 11%;
   width: clamp(77px, 9.67vw, 130px);
 }
 .cheonho-fullscreen-exit {
@@ -701,15 +701,15 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-run-scene:fullscreen .cheonho-character-canvas,
 .cheonho-run-scene:-webkit-full-screen .cheonho-character-canvas,
 .cheonho-run-scene.is-fullscreen-fallback .cheonho-character-canvas {
-  left: 66.667%;
-  bottom: 20%;
+  left: 11%;
+  bottom: 2%;
   width: 4.67%;
   height: 22.67%;
 }
 .cheonho-run-scene[data-character="turtle"]:fullscreen .cheonho-character-canvas,
 .cheonho-run-scene[data-character="turtle"]:-webkit-full-screen .cheonho-character-canvas,
 .cheonho-run-scene[data-character="turtle"].is-fullscreen-fallback .cheonho-character-canvas {
-  left: 66.667%;
+  left: 11%;
   width: 9.67%;
 }
 .cheonho-run-scene.is-fullscreen-fallback {
@@ -864,23 +864,23 @@ body.cheonho-fullscreen-open { overflow: hidden; }
   .cheonho-fixed-walkway { height: 26%; border-top-width: 5px; }
   .cheonho-fixed-walkway::before { top: -25px; height: 25px; background: linear-gradient(180deg, #754326 0 5px, transparent 5px 19px, #754326 19px 24px), repeating-linear-gradient(90deg, #6b3b22 0 5px, transparent 5px 53px); }
   .cheonho-run-card.is-night .cheonho-fixed-walkway::before { background: radial-gradient(circle at 9px 10px, #ffd47c 0 2px, rgba(255, 204, 105, .28) 3px 6px, transparent 7px) 0 0 / 53px 100% repeat-x, linear-gradient(180deg, #1b2e3b 0 5px, transparent 5px 19px, #1b2e3b 19px 24px), repeating-linear-gradient(90deg, #152631 0 5px, transparent 5px 53px); }
-  .cheonho-character-canvas { left: 66.667%; bottom: 22%; width: 42px; height: 20.67%; }
+  .cheonho-character-canvas { left: 11%; bottom: 4%; width: 42px; height: 20.67%; }
   .cheonho-run-scene[data-character="turtle"] .cheonho-character-canvas {
-    left: 66.667%;
+    left: 11%;
     width: min(24.67vw, 103px);
   }
   .cheonho-run-scene:fullscreen .cheonho-character-canvas,
   .cheonho-run-scene:-webkit-full-screen .cheonho-character-canvas,
   .cheonho-run-scene.is-fullscreen-fallback .cheonho-character-canvas {
-    left: 66.667%;
-    bottom: 22%;
+    left: 11%;
+    bottom: 4%;
     width: 10.5%;
     height: 20.67%;
   }
   .cheonho-run-scene[data-character="turtle"]:fullscreen .cheonho-character-canvas,
   .cheonho-run-scene[data-character="turtle"]:-webkit-full-screen .cheonho-character-canvas,
   .cheonho-run-scene[data-character="turtle"].is-fullscreen-fallback .cheonho-character-canvas {
-    left: 66.667%;
+    left: 11%;
     width: 25.75%;
   }
   .cheonho-run-foot { align-items: flex-start; flex-direction: column; gap: 5px; padding: 12px 16px; }
