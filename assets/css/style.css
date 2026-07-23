@@ -448,15 +448,15 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   inset: 0 auto 0 0;
   z-index: 0;
   display: flex;
-  width: 1200%;
+  width: 1100%;
   height: 100%;
   will-change: transform;
-  animation: cheonho-background-scroll 132s linear infinite;
+  animation: cheonho-background-scroll 120s linear infinite;
 }
 .cheonho-background-track > span {
   position: relative;
-  flex: 0 0 8.333333%;
-  width: 8.333333%;
+  flex: 0 0 9.090909%;
+  width: 9.090909%;
   height: 100%;
   background-position: center;
   background-size: cover;
@@ -473,21 +473,45 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-background-track .scene-reference-06 { background-image: url("../img/cheonhoji-scene-06-rice-fields-v1.jpg"); }
 .cheonho-background-track .scene-reference-07 { background-image: url("../img/cheonhoji-scene-07-opposite-lakeside-v1.jpg"); }
 .cheonho-background-track .scene-reference-08 { background-image: url("../img/cheonhoji-scene-08-sports-park-v1.jpg"); }
-.cheonho-background-track .numbered-scene::after {
-  content: "SCENE " attr(data-scene-number);
+.scene-transition-tree {
   position: absolute;
-  top: 16px;
-  left: 18px;
-  padding: 6px 9px;
-  border: 1px solid rgba(255,255,255,.55);
-  border-radius: 999px;
-  background: rgba(8, 44, 67, .62);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 850;
-  letter-spacing: 1px;
-  box-shadow: 0 3px 12px rgba(5, 31, 48, .18);
-  backdrop-filter: blur(5px);
+  top: -4%;
+  bottom: 22%;
+  z-index: 4;
+  width: 1.9%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 13%, #8bc96f 0 15%, transparent 16%),
+    radial-gradient(ellipse at 27% 27%, #6eb458 0 20%, transparent 21%),
+    radial-gradient(ellipse at 73% 29%, #75bc5e 0 21%, transparent 22%),
+    radial-gradient(ellipse at 48% 43%, #4f9d47 0 28%, transparent 29%),
+    radial-gradient(ellipse at 18% 54%, #65ad51 0 18%, transparent 19%),
+    radial-gradient(ellipse at 82% 55%, #4f9845 0 20%, transparent 21%);
+  filter: drop-shadow(0 5px 7px rgba(18, 59, 39, .28));
+}
+.scene-transition-tree::before {
+  content: "";
+  position: absolute;
+  left: 47%;
+  bottom: -2%;
+  width: 6%;
+  height: 64%;
+  border-radius: 55% 45% 12% 12%;
+  background: linear-gradient(90deg, #62452e, #8a6340 55%, #553923);
+  box-shadow: -4.3vw 2.2vh 0 -1px #725036, 4.1vw 1.5vh 0 -1px #68482f;
+}
+.scene-transition-tree::after {
+  content: "";
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  bottom: -5%;
+  height: 28%;
+  background:
+    radial-gradient(ellipse at 18% 100%, #3f883d 0 45%, transparent 47%),
+    radial-gradient(ellipse at 50% 100%, #58a44a 0 52%, transparent 54%),
+    radial-gradient(ellipse at 82% 100%, #347a38 0 46%, transparent 48%);
 }
 .cheonho-fixed-walkway {
   position: absolute;
@@ -599,7 +623,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 @keyframes cheonho-route-flow { to { stroke-dashoffset: -38; } }
 @keyframes cheonho-background-scroll {
   0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-91.666667%, 0, 0); }
+  100% { transform: translate3d(-90.909091%, 0, 0); }
 }
 
 @media (max-width: 640px) {
@@ -614,8 +638,8 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .cheonho-run-head p { font-size: 13px; line-height: 1.55; }
   .cheonho-run-head > span { display: none; }
   .cheonho-run-scene { aspect-ratio: 16 / 10; min-height: 0; }
-  .cheonho-background-track { animation-duration: 110s; }
-  .cheonho-background-track .numbered-scene::after { top: 9px; left: 10px; padding: 4px 7px; font-size: 8px; }
+  .cheonho-background-track { animation-duration: 100s; }
+  .scene-transition-tree { width: 2.6%; bottom: 24%; }
   .cheonho-fixed-walkway { height: 26%; border-top-width: 5px; }
   .cheonho-fixed-walkway::before { top: -25px; height: 25px; background: linear-gradient(180deg, #754326 0 5px, transparent 5px 19px, #754326 19px 24px), repeating-linear-gradient(90deg, #6b3b22 0 5px, transparent 5px 53px); }
   .cheonho-route-glow { stroke-width: 25; }
