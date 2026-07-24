@@ -87,6 +87,12 @@ if (sceneElement && canvas) {
   let safetyLift = 0;
   let targetSafetyLift = 0;
   let hazardous = false;
+  let lastRunMode = true;
+  let walkState = "glide";
+  let walkElapsed = 0;
+  let walkDuration = 6;
+  let walkStart = { x: displayX, y: displayY };
+  let walkEnd = { x: displayX, y: displayY };
 
   const clamp01 = (value) => Math.max(0, Math.min(1, value));
   const smoothstep = (value) => {
@@ -189,6 +195,76 @@ if (sceneElement && canvas) {
     targetMarker.style.top = `${((groundY - sceneRect.top) / sceneRect.height) * 100}%`;
   }
 
+  function beginWalkGlide() {
+    const bounds = safeCanvasBounds();
+    const current = containPosition({ x: displayX, y: displayY });
+    let endX = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
+    if (Math.abs(endX - current.x) < (bounds.maxX - bounds.minX) * 0.42) {
+      endX = current.x >= 50 ? bounds.minX : bounds.maxX;
+    }
+    walkState = "glide";
+    walkElapsed = 0;
+    walkDuration = 5 + Math.random() * 3.5;
+    walkStart = current;
+    walkEnd = {
+      x: endX,
+      y: bounds.minY + 5 + Math.random() * Math.min(13, bounds.maxY - bounds.minY - 7),
+    };
+  }
+
+  function beginWalkPerch() {
+    const bounds = safeCanvasBounds();
+    measureAttackHeights();
+    walkState = "perchApproach";
+    walkElapsed = 0;
+    walkDuration = 2.3;
+    walkStart = containPosition({ x: displayX, y: displayY });
+    walkEnd = containPosition({ x: bounds.maxX - 1.5, y: diveBottomY });
+  }
+
+  function updateWalkFlight(delta) {
+    walkElapsed += delta;
+    if (walkState === "perched") {
+      const perchedPosition = containPosition(walkEnd);
+      if (walkElapsed >= walkDuration) beginWalkGlide();
+      return perchedPosition;
+    }
+    const amount = smoothstep(walkElapsed / walkDuration);
+    const position = containPosition({
+      x: mix(walkStart.x, walkEnd.x, amount),
+      y: mix(walkStart.y, walkEnd.y, amount) - (walkState === "glide" ? Math.sin(Math.PI * amount) * 2.5 : 0),
+    });
+    if (walkElapsed >= walkDuration) {
+      if (walkState === "perchApproach") {
+        walkState = "perched";
+        walkElapsed = 0;
+        walkDuration = 3.5 + Math.random() * 4;
+      } else if (Math.random() < 0.28) {
+        beginWalkPerch();
+      } else {
+        beginWalkGlide();
+      }
+    }
+    return position;
+  }
+
+  function enterWalkMode() {
+    warning.classList.remove("is-visible");
+    targetMarker.classList.remove("is-visible");
+    hazardous = false;
+    targetSafetyLift = 0;
+    safetyLift = 0;
+    beginWalkGlide();
+  }
+
+  function leaveWalkMode() {
+    flightState = "patrol";
+    nextAttackIn = 4.5 + Math.random() * 2.5;
+    hazardous = false;
+    warning.classList.remove("is-visible");
+    targetMarker.classList.remove("is-visible");
+  }
+
   function patternEntry(pattern, flightDirection, targetX) {
     const bounds = safeCanvasBounds();
     const sideX = flightDirection > 0 ? bounds.minX : bounds.maxX;
@@ -228,7 +304,9 @@ if (sceneElement && canvas) {
   function beginWarning() {
     currentPattern = nextPattern();
     attackTargetX = currentPlayerX();
-    direction = attackTargetX >= 50 ? -1 : 1;
+    direction = currentPattern === "horizontal"
+      ? (attackTargetX >= 50 ? 1 : -1)
+      : (attackTargetX >= 50 ? -1 : 1);
     measureAttackHeights();
     flightState = "warning";
     stateElapsed = 0;
@@ -265,10 +343,20 @@ if (sceneElement && canvas) {
   }
 
   function updateFlight(delta, moving, runMode) {
+    if (!runMode) {
+      if (lastRunMode) enterWalkMode();
+      lastRunMode = false;
+      const walkPosition = updateWalkFlight(delta);
+      displayX = walkPosition.x;
+      displayY = walkPosition.y;
+      return;
+    }
+    if (!lastRunMode) leaveWalkMode();
+    lastRunMode = true;
     patrolPhase += delta * (moving ? 0.24 : 0.15);
     safetyLift += (targetSafetyLift - safetyLift) * Math.min(1, delta * 1.25);
 
-    if (!moving || !runMode) {
+    if (!moving) {
       if (flightState !== "patrol" && flightState !== "recovery") beginRecovery(0);
       nextAttackIn = Math.max(nextAttackIn, 3.5);
     }
@@ -358,13 +446,15 @@ if (sceneElement && canvas) {
       heron.rotation.y += facingDelta * Math.min(1, delta * 7.5);
     }
     previousX = displayX;
-    heron.rotation.z = Math.max(-0.10, Math.min(0.10, horizontalVelocity * 0.11));
+    const perched = !runMode && walkState === "perched";
+    heron.rotation.z = perched ? 0 : Math.max(-0.10, Math.min(0.10, horizontalVelocity * 0.11));
 
-    const flapSpeed = flightState === "attack" ? 0.009 : 0.0065;
+    const flapSpeed = runMode && flightState === "attack" ? 0.009 : 0.0048;
     const flap = Math.sin(time * flapSpeed);
-    if (leftWing) leftWing.scale.y = 1 + flap * 0.065;
-    if (rightWing) rightWing.scale.y = 1 + flap * 0.065;
-    heron.position.y = -0.35 + Math.sin(time * 0.004) * 0.045;
+    const wingScale = perched ? 0.54 : 1 + flap * (runMode ? 0.065 : 0.028);
+    if (leftWing) leftWing.scale.y = wingScale;
+    if (rightWing) rightWing.scale.y = wingScale;
+    heron.position.y = perched ? -0.47 : -0.35 + Math.sin(time * 0.004) * 0.045;
   }
 
   function frame(time) {
