@@ -4,6 +4,7 @@ import { createHeron } from "./cheonhoji-heron.js";
 const sceneElement = document.querySelector("#cheonhoRunScene");
 const canvas = document.querySelector("#cheonhoHeronCanvas");
 const characterCanvas = document.querySelector("#cheonhoCharacterCanvas");
+const rideButton = document.querySelector("#cheonhoHeronRideButton");
 
 if (sceneElement && canvas) {
   const renderer = new THREE.WebGLRenderer({
@@ -46,11 +47,6 @@ if (sceneElement && canvas) {
   targetMarker.className = "cheonho-heron-target";
   targetMarker.setAttribute("aria-hidden", "true");
   sceneElement.appendChild(targetMarker);
-  const perchAlert = document.createElement("div");
-  perchAlert.className = "cheonho-heron-perch-alert";
-  perchAlert.textContent = "!";
-  perchAlert.setAttribute("aria-hidden", "true");
-  sceneElement.appendChild(perchAlert);
 
   let pixelBuffer = new Uint8Array(0);
   window.getCheonhoHeronPixelMask = () => {
@@ -93,13 +89,11 @@ if (sceneElement && canvas) {
   let targetSafetyLift = 0;
   let hazardous = false;
   let lastRunMode = true;
-  let walkState = "glide";
   let walkElapsed = 0;
-  let walkDuration = 6;
+  let walkDuration = 20;
   let walkStart = { x: displayX, y: displayY };
   let walkEnd = { x: displayX, y: displayY };
   let riderActive = false;
-  let riderHasTakenOff = false;
 
   const clamp01 = (value) => Math.max(0, Math.min(1, value));
   const smoothstep = (value) => {
@@ -111,12 +105,19 @@ if (sceneElement && canvas) {
   function safeCanvasBounds() {
     const sceneWidth = Math.max(sceneElement.clientWidth, 1);
     const sceneHeight = Math.max(sceneElement.clientHeight, 1);
-    const horizontalPadding = Math.min(32, Math.max(5, (canvas.clientWidth / sceneWidth) * 50 + 1));
+    const heronHorizontalPadding = (canvas.clientWidth / sceneWidth) * 50 + 1;
+    const riderHorizontalPadding = riderActive && characterCanvas
+      ? (characterCanvas.clientWidth / sceneWidth) * 50 + 2
+      : 0;
+    const horizontalPadding = Math.min(44, Math.max(5, heronHorizontalPadding, riderHorizontalPadding));
     const verticalPadding = Math.min(32, Math.max(5, (canvas.clientHeight / sceneHeight) * 50 + 1));
+    const riderTopClearance = riderActive && characterCanvas
+      ? (characterCanvas.clientHeight / sceneHeight) * 78 + 2
+      : 0;
     return {
       minX: horizontalPadding,
       maxX: 100 - horizontalPadding,
-      minY: verticalPadding,
+      minY: Math.min(68, verticalPadding + riderTopClearance),
       maxY: 100 - verticalPadding,
     };
   }
@@ -209,63 +210,41 @@ if (sceneElement && canvas) {
     if (Math.abs(endX - current.x) < (bounds.maxX - bounds.minX) * 0.42) {
       endX = current.x >= 50 ? bounds.minX : bounds.maxX;
     }
-    walkState = "glide";
     walkElapsed = 0;
-    walkDuration = 5 + Math.random() * 3.5;
+    walkDuration = 20;
     walkStart = current;
     walkEnd = {
       x: endX,
       y: bounds.minY + 5 + Math.random() * Math.min(13, bounds.maxY - bounds.minY - 7),
     };
-    if (riderActive) riderHasTakenOff = true;
+  }
+
+  function syncRideButton() {
+    if (!rideButton) return;
+    rideButton.hidden = sceneElement.dataset.mode !== "walk";
+    rideButton.textContent = riderActive ? "백로 내리기" : "백로 타기";
+    rideButton.classList.toggle("is-riding", riderActive);
+    rideButton.setAttribute("aria-pressed", riderActive ? "true" : "false");
   }
 
   function setRiderActive(active) {
     const nextActive = Boolean(active);
     if (riderActive === nextActive) return;
     riderActive = nextActive;
-    if (riderActive) riderHasTakenOff = false;
+    syncRideButton();
     sceneElement.dispatchEvent(new CustomEvent("cheonho:heronridechange", {
       detail: { active: riderActive },
     }));
   }
 
-  function beginWalkPerch() {
-    const bounds = safeCanvasBounds();
-    measureAttackHeights();
-    walkState = "perchApproach";
-    walkElapsed = 0;
-    walkDuration = 2.3;
-    walkStart = containPosition({ x: displayX, y: displayY });
-    walkEnd = containPosition({ x: bounds.maxX - 1.5, y: diveBottomY });
-  }
-
   function updateWalkFlight(delta) {
     walkElapsed += delta;
-    if (walkState === "perched") {
-      const perchedPosition = containPosition(walkEnd);
-      if (walkElapsed >= walkDuration) beginWalkGlide();
-      return perchedPosition;
-    }
     const amount = smoothstep(walkElapsed / walkDuration);
     const position = containPosition({
       x: mix(walkStart.x, walkEnd.x, amount),
-      y: mix(walkStart.y, walkEnd.y, amount) - (walkState === "glide" ? Math.sin(Math.PI * amount) * 2.5 : 0),
+      y: mix(walkStart.y, walkEnd.y, amount) - Math.sin(Math.PI * amount) * 2.5,
     });
-    if (walkElapsed >= walkDuration) {
-      if (walkState === "perchApproach") {
-        walkState = "perched";
-        walkElapsed = 0;
-        walkDuration = 3.5 + Math.random() * 4;
-        if (riderActive && riderHasTakenOff) setRiderActive(false);
-      } else if (riderActive && riderHasTakenOff) {
-        beginWalkPerch();
-      } else if (Math.random() < 0.28) {
-        beginWalkPerch();
-      } else {
-        beginWalkGlide();
-      }
-    }
+    if (walkElapsed >= walkDuration) beginWalkGlide();
     return position;
   }
 
@@ -276,6 +255,7 @@ if (sceneElement && canvas) {
     targetSafetyLift = 0;
     safetyLift = 0;
     beginWalkGlide();
+    syncRideButton();
   }
 
   function leaveWalkMode() {
@@ -285,6 +265,7 @@ if (sceneElement && canvas) {
     hazardous = false;
     warning.classList.remove("is-visible");
     targetMarker.classList.remove("is-visible");
+    syncRideButton();
   }
 
   function patternEntry(pattern, flightDirection, targetX) {
@@ -443,11 +424,16 @@ if (sceneElement && canvas) {
   };
   window.isCheonhoHeronAttackActive = () => flightState === "warning" || flightState === "attack";
   window.isCheonhoHeronHazardous = () => hazardous && flightState === "attack";
-  window.isCheonhoHeronBoardable = () => !lastRunMode && walkState === "perched" && !riderActive;
+  window.isCheonhoHeronBoardable = () => !lastRunMode && !riderActive;
   window.boardCheonhoHeron = () => {
     if (!window.isCheonhoHeronBoardable()) return false;
     setRiderActive(true);
     return true;
+  };
+  window.toggleCheonhoHeronRide = () => {
+    if (lastRunMode) return false;
+    setRiderActive(!riderActive);
+    return riderActive;
   };
   window.getCheonhoHeronRideState = () => ({
     active: riderActive,
@@ -470,8 +456,6 @@ if (sceneElement && canvas) {
     updateFlight(delta, moving, runMode);
     canvas.style.left = `${displayX}%`;
     canvas.style.top = `${displayY}%`;
-    perchAlert.style.left = `${displayX}%`;
-    perchAlert.style.top = `${displayY}%`;
 
     const horizontalVelocity = displayX - previousX;
     if (Math.abs(horizontalVelocity) > 0.01) {
@@ -480,17 +464,22 @@ if (sceneElement && canvas) {
       heron.rotation.y += facingDelta * Math.min(1, delta * 7.5);
     }
     previousX = displayX;
-    const perched = !runMode && walkState === "perched";
-    perchAlert.classList.toggle("is-visible", perched);
-    heron.rotation.z = perched ? 0 : Math.max(-0.10, Math.min(0.10, horizontalVelocity * 0.11));
+    heron.rotation.z = Math.max(-0.10, Math.min(0.10, horizontalVelocity * 0.11));
 
     const flapSpeed = runMode && flightState === "attack" ? 0.009 : 0.0048;
     const flap = Math.sin(time * flapSpeed);
-    const wingScale = perched ? 0.54 : 1 + flap * (runMode ? 0.065 : 0.028);
+    const wingScale = 1 + flap * (runMode ? 0.065 : 0.028);
     if (leftWing) leftWing.scale.y = wingScale;
     if (rightWing) rightWing.scale.y = wingScale;
-    heron.position.y = perched ? -0.47 : -0.35 + Math.sin(time * 0.004) * 0.045;
+    heron.position.y = -0.35 + Math.sin(time * 0.004) * 0.045;
   }
+
+  rideButton?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    sceneElement.dispatchEvent(new CustomEvent("cheonho:setrunning", { detail: { running: true } }));
+    window.toggleCheonhoHeronRide();
+  });
 
   function frame(time) {
     resize();

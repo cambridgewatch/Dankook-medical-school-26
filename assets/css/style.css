@@ -732,36 +732,27 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-heron-canvas.is-hit {
   filter: drop-shadow(0 0 10px #ff493f) drop-shadow(0 7px 7px rgba(18, 37, 45, .22));
 }
-.cheonho-heron-perch-alert {
-  --cheonho-perch-alert-offset: 57px;
+.cheonho-heron-ride-button {
   position: absolute;
-  z-index: 12;
-  display: grid;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border: 3px solid #fff;
-  border-radius: 50%;
-  background: #ef4444;
-  color: #fff;
-  font-size: 19px;
-  font-weight: 900;
-  line-height: 1;
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset))) scale(.7);
-  box-shadow: 0 5px 14px rgba(127, 29, 29, .32);
-  transition: opacity .16s ease, transform .2s ease;
+  top: 14px;
+  left: 14px;
+  z-index: 14;
+  min-width: 98px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid rgba(35, 86, 120, .18);
+  border-radius: 999px;
+  background: rgba(255,255,255,.9);
+  color: #163d5a;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(22,61,90,.16);
+  backdrop-filter: blur(10px);
+  touch-action: manipulation;
 }
-.cheonho-heron-perch-alert.is-visible {
-  opacity: 1;
-  transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset))) scale(1);
-  animation: cheonho-heron-perch-alert 760ms ease-in-out infinite alternate;
-}
-@keyframes cheonho-heron-perch-alert {
-  from { transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset))) scale(.94); }
-  to { transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset) - 5px)) scale(1.06); }
-}
+.cheonho-heron-ride-button:hover { background:#fff; transform:translateY(-1px); }
+.cheonho-heron-ride-button.is-riding { background:#285f88; border-color:#285f88; color:#fff; }
+.cheonho-heron-ride-button[hidden] { display:none !important; }
 .cheonho-heron-warning {
   position: absolute;
   top: 31%;
@@ -900,6 +891,13 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-run-scene:fullscreen .cheonho-fullscreen-light,
 .cheonho-run-scene:-webkit-full-screen .cheonho-fullscreen-light,
 .cheonho-run-scene.is-fullscreen-fallback .cheonho-fullscreen-light { display: inline-flex; }
+.cheonho-run-scene:fullscreen .cheonho-heron-ride-button,
+.cheonho-run-scene:-webkit-full-screen .cheonho-heron-ride-button,
+.cheonho-run-scene.is-fullscreen-fallback .cheonho-heron-ride-button {
+  top: max(14px, env(safe-area-inset-top));
+  left: max(132px, calc(env(safe-area-inset-left) + 132px));
+  height: 42px;
+}
 .cheonho-run-scene:fullscreen .cheonho-game-hud,
 .cheonho-run-scene:-webkit-full-screen .cheonho-game-hud,
 .cheonho-run-scene.is-fullscreen-fallback .cheonho-game-hud {
@@ -1291,15 +1289,13 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-run-card.is-night .cheonho-fixed-walkway::before { background: radial-gradient(circle at 9px 10px, #ffd47c 0 2px, rgba(255, 204, 105, .28) 3px 6px, transparent 7px) 0 0 / 53px 100% repeat-x, linear-gradient(180deg, #1b2e3b 0 5px, transparent 5px 19px, #1b2e3b 19px 24px), repeating-linear-gradient(90deg, #152631 0 5px, transparent 5px 53px); }
   .cheonho-character-canvas { left: 11%; bottom:var(--cheonho-ground-bottom); width: 63px; height: 31%; }
   .cheonho-heron-canvas { width:124px; height:78px; }
-  .cheonho-heron-perch-alert {
-    --cheonho-perch-alert-offset: 45px;
-    width: 24px;
-    height: 24px;
-    font-size: 16px;
-    transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset))) scale(.7);
-  }
-  .cheonho-heron-perch-alert.is-visible {
-    transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset))) scale(1);
+  .cheonho-heron-ride-button { top:10px; left:10px; min-width:88px; height:36px; padding:0 13px; font-size:12px; }
+  .cheonho-run-scene:fullscreen .cheonho-heron-ride-button,
+  .cheonho-run-scene:-webkit-full-screen .cheonho-heron-ride-button,
+  .cheonho-run-scene.is-fullscreen-fallback .cheonho-heron-ride-button {
+    top:max(14px,env(safe-area-inset-top));
+    left:max(126px,calc(env(safe-area-inset-left) + 126px));
+    height:42px;
   }
   .cheonho-run-scene[data-character="turtle"] .cheonho-character-canvas {
     left: 11%;

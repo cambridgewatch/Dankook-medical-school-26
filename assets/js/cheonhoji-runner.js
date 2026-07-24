@@ -660,39 +660,6 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     return mask.data[(pixelY * mask.width + pixelX) * 4 + 3];
   }
 
-  function heronBoardingPixelsTouch() {
-    if (!heronCanvas || gameMode !== "walk" || !window.isCheonhoHeronBoardable?.()) return false;
-    const characterRect = character.getBoundingClientRect();
-    const heronRect = heronCanvas.getBoundingClientRect();
-    const characterMask = window.getCheonhoCharacterPixelMask?.();
-    const heronMask = window.getCheonhoHeronPixelMask?.();
-    if (!characterMask?.data?.length || !heronMask?.data?.length) return false;
-
-    const left = Math.max(characterRect.left, heronRect.left);
-    const right = Math.min(characterRect.right, heronRect.right);
-    if (left >= right) return false;
-
-    // Each screen column uses the character's actual lowest opaque pixel. A heron
-    // pixel must be directly beneath it, so touching a wing or body from the side
-    // never counts as boarding.
-    for (let screenX = Math.floor(left); screenX < Math.ceil(right); screenX += 1) {
-      let characterFootY = -1;
-      for (let screenY = Math.floor(characterRect.bottom) - 1; screenY >= Math.floor(characterRect.top); screenY -= 1) {
-        if (maskAlphaAtScreen(characterMask, characterRect, screenX + 0.5, screenY + 0.5) >= 96) {
-          characterFootY = screenY + 0.5;
-          break;
-        }
-      }
-      if (characterFootY < 0) continue;
-      for (let gap = 0; gap <= 4; gap += 1) {
-        if (maskAlphaAtScreen(heronMask, heronRect, screenX + 0.5, characterFootY + gap) >= 80) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
   function heronTopAtCharacterCenter() {
     if (!heronCanvas) return null;
     const heronRect = heronCanvas.getBoundingClientRect();
@@ -912,7 +879,6 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     distanceLaps += delta / baseLapDuration;
     setBackgroundSpeed(1);
     renderScore();
-    if (heronBoardingPixelsTouch()) window.boardCheonhoHeron?.();
     const rideState = window.getCheonhoHeronRideState?.();
     if (rideState?.active) {
       setCharacterX(rideState.x);

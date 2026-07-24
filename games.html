@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-  <link rel="stylesheet" href="assets/css/style.css?v=152" />
+  <link rel="stylesheet" href="assets/css/style.css?v=153" />
 </head>
 <body class="locked">
 
@@ -91,7 +91,7 @@
             <p><strong>달리기</strong> 화면을 누르거나 Space 키를 누르면 시작하고 점프합니다. 한 번 더 누르면 이중 점프합니다.</p>
             <p><strong>이동</strong> 모바일은 화면 아래의 좌우 버튼, PC는 ← · → 또는 A · D 키를 사용합니다.</p>
             <p><strong>빠른 착지</strong> 공중에서 오른쪽 위의 아래 삼각형을 누르거나 PC에서 ↓ · S 키를 누르면 빠르게 내려옵니다.</p>
-            <p><strong>산책</strong> 장애물 없이 풍경을 감상할 수 있으며 바퀴 수도 계속 표시됩니다.</p>
+            <p><strong>산책</strong> 장애물 없이 풍경을 감상할 수 있으며 바퀴 수도 계속 표시됩니다. 화면의 <strong>백로 타기·백로 내리기</strong> 버튼으로 활공 중인 백로에 자유롭게 타고 내릴 수 있습니다.</p>
           </div>
         </details>
 
@@ -117,6 +117,7 @@
           <div class="cheonho-obstacle-layer" id="cheonhoObstacleLayer" aria-hidden="true"></div>
           <div class="cheonho-fixed-walkway" aria-hidden="true"></div>
           <canvas class="cheonho-character-canvas" id="cheonhoCharacterCanvas" aria-hidden="true"></canvas>
+          <button type="button" class="cheonho-heron-ride-button" id="cheonhoHeronRideButton" hidden>백로 타기</button>
           <div class="cheonho-jump-hint" id="cheonhoJumpHint" aria-hidden="true">게임 화면을 터치하면 시작</div>
           <div class="cheonho-mobile-move-controls" aria-label="좌우 이동">
             <button type="button" data-cheonho-move="left" aria-label="왼쪽으로 이동">←</button>
@@ -180,7 +181,7 @@
   <script type="module" src="assets/js/alerts.js?v=33"></script>
   <script type="module" src="assets/js/gate.js?v=23"></script>
   <script type="module" src="assets/js/cheonhoji-game.js?v=26"></script>
-  <script type="module" src="assets/js/cheonhoji-heron-flight.js?v=9"></script>
-  <script type="module" src="assets/js/cheonhoji-runner.js?v=29"></script>
+  <script type="module" src="assets/js/cheonhoji-heron-flight.js?v=10"></script>
+  <script type="module" src="assets/js/cheonhoji-runner.js?v=30"></script>
 </body>
 </html>
