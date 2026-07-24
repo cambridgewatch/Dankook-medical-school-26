@@ -3,6 +3,7 @@ import { createHeron } from "./cheonhoji-heron.js";
 
 const sceneElement = document.querySelector("#cheonhoRunScene");
 const canvas = document.querySelector("#cheonhoHeronCanvas");
+const characterCanvas = document.querySelector("#cheonhoCharacterCanvas");
 
 if (sceneElement && canvas) {
   const renderer = new THREE.WebGLRenderer({
@@ -71,6 +72,7 @@ if (sceneElement && canvas) {
   let nextAttackIn = 6.5;
   let currentPattern = "straight";
   let direction = 1;
+  let attackTargetX = 50;
   let displayX = 10;
   let displayY = 16;
   let previousX = displayX;
@@ -112,10 +114,19 @@ if (sceneElement && canvas) {
     };
   }
 
-  function patternEntry(pattern, flightDirection) {
+  function currentPlayerX() {
+    if (!characterCanvas) return 50;
+    const sceneRect = sceneElement.getBoundingClientRect();
+    const characterRect = characterCanvas.getBoundingClientRect();
+    if (!sceneRect.width) return 50;
+    const center = characterRect.left + characterRect.width / 2;
+    return Math.max(7, Math.min(93, ((center - sceneRect.left) / sceneRect.width) * 100));
+  }
+
+  function patternEntry(pattern, flightDirection, targetX) {
     const sideX = flightDirection > 0 ? -12 : 112;
     if (pattern === "dive") return { x: sideX, y: 13 };
-    if (pattern === "figureEight") return { x: 50, y: 34 };
+    if (pattern === "figureEight") return { x: targetX, y: 34 };
     if (pattern === "returnPass") return { x: sideX, y: 23 };
     return { x: sideX, y: 44 };
   }
@@ -127,20 +138,24 @@ if (sceneElement && canvas) {
     return 3.5;
   }
 
-  function patternPosition(pattern, progress, flightDirection) {
+  function patternPosition(pattern, progress, flightDirection, targetX) {
     const t = clamp01(progress);
     const fromX = flightDirection > 0 ? -12 : 112;
     const toX = flightDirection > 0 ? 112 : -12;
     if (pattern === "dive") {
+      const x = t < 0.5
+        ? mix(fromX, targetX, smoothstep(t * 2))
+        : mix(targetX, toX, smoothstep((t - 0.5) * 2));
       return {
-        x: mix(fromX, toX, smoothstep(t)),
+        x,
         y: 13 + Math.pow(Math.sin(Math.PI * t), 1.28) * 42,
       };
     }
     if (pattern === "figureEight") {
       const angle = t * Math.PI * 2;
+      const radius = Math.max(12, Math.min(32, targetX - 5, 95 - targetX));
       return {
-        x: 50 + Math.sin(angle) * 35 * flightDirection,
+        x: Math.max(3, Math.min(97, targetX + Math.sin(angle) * radius * flightDirection)),
         y: 34 + Math.sin(angle * 2) * 19,
       };
     }
@@ -162,7 +177,8 @@ if (sceneElement && canvas) {
 
   function beginWarning() {
     currentPattern = nextPattern();
-    direction = Math.random() < 0.5 ? 1 : -1;
+    attackTargetX = currentPlayerX();
+    direction = attackTargetX >= 50 ? 1 : -1;
     flightState = "warning";
     stateElapsed = 0;
     stateDuration = 1.6;
@@ -214,7 +230,7 @@ if (sceneElement && canvas) {
       }
     } else if (flightState === "warning") {
       stateElapsed += delta;
-      const entry = patternEntry(currentPattern, direction);
+      const entry = patternEntry(currentPattern, direction, attackTargetX);
       const amount = smoothstep(stateElapsed / stateDuration);
       position = {
         x: mix(transitionStart.x, entry.x, amount),
@@ -224,7 +240,7 @@ if (sceneElement && canvas) {
       else if (stateElapsed >= stateDuration) beginAttack();
     } else if (flightState === "attack") {
       stateElapsed += delta;
-      position = patternPosition(currentPattern, stateElapsed / stateDuration, direction);
+      position = patternPosition(currentPattern, stateElapsed / stateDuration, direction, attackTargetX);
       hazardous = position.y >= 29;
       if (hasTallObstacle() || targetSafetyLift > 0) beginRecovery(0);
       else if (stateElapsed >= stateDuration) beginRecovery(0);
