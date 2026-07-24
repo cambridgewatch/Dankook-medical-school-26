@@ -222,8 +222,19 @@ if (sceneElement && canvas) {
     const centerPercentForBottom = (bottomY) => (
       ((bottomY - heronBottomOffset) / sceneHeight) * 100
     );
+    let horizontalBottomY = groundY - horizontalHeightReference * 1.5;
+    if (turtleSelected) {
+      const gravity = Math.max(0.1, Number.parseFloat(sceneElement.dataset.jumpGravity || "13.5") || 13.5);
+      const firstJumpVelocity = Math.max(0, Number.parseFloat(sceneElement.dataset.firstJumpVelocity || "6.2") || 6.2);
+      const jumpScale = Math.max(0.01, Number.parseFloat(sceneElement.dataset.jumpScale || "0.32") || 0.32);
+      const singleJumpHeight = (firstJumpVelocity ** 2 / (2 * gravity))
+        * characterHeightPixels
+        * jumpScale;
+      const singleJumpClearance = Math.max(3, characterHeight * 0.055);
+      horizontalBottomY = groundY - characterHeight - singleJumpHeight - singleJumpClearance;
+    }
     horizontalFlightY = Math.max(4, Math.min(58,
-      centerPercentForBottom(groundY - horizontalHeightReference * 1.5)
+      centerPercentForBottom(horizontalBottomY)
     ));
     diveBottomY = Math.max(30, Math.min(88, centerPercentForBottom(groundY)));
     targetMarker.style.left = `${attackTargetX}%`;
