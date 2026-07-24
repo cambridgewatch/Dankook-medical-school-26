@@ -22,6 +22,19 @@ service cloud.firestore {
         || get(/databases/$(database)/documents/initialPasswordSetup/$(request.auth.uid)).data.required != true;
     }
 
+    function validOptionalGameScore(data, field) {
+      return !data.keys().hasAny([field])
+        || (data[field] is number
+          && data[field] >= 0
+          && data[field] <= data.bestLaps);
+    }
+
+    function nondecreasingGameScore(nextData, previousData, field) {
+      return validOptionalGameScore(nextData, field)
+        && (!previousData.keys().hasAny([field])
+          || nextData[field] >= previousData[field]);
+    }
+
     match /users/{uid} {
       allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
       allow create, update, delete: if isAdmin();
@@ -173,7 +186,11 @@ service cloud.firestore {
       allow create: if canUseSite()
         && request.auth.uid == uid
         && request.resource.data.keys().hasOnly([
-          'uid', 'email', 'name', 'bestLaps', 'otterBestLaps', 'turtleBestLaps', 'updatedAt'
+          'uid', 'email', 'name', 'bestLaps',
+          'otterBestLaps', 'turtleBestLaps',
+          'otterMobileBestLaps', 'otterPcBestLaps',
+          'turtleMobileBestLaps', 'turtlePcBestLaps',
+          'updatedAt'
         ])
         && request.resource.data.keys().hasAll([
           'uid', 'email', 'name', 'bestLaps', 'updatedAt'
@@ -185,20 +202,25 @@ service cloud.firestore {
         && request.resource.data.bestLaps is number
         && request.resource.data.bestLaps >= 0
         && request.resource.data.bestLaps <= 10000
-        && request.resource.data.keys().hasAny(['otterBestLaps', 'turtleBestLaps'])
-        && (!request.resource.data.keys().hasAny(['otterBestLaps'])
-          || (request.resource.data.otterBestLaps is number
-            && request.resource.data.otterBestLaps >= 0
-            && request.resource.data.otterBestLaps <= request.resource.data.bestLaps))
-        && (!request.resource.data.keys().hasAny(['turtleBestLaps'])
-          || (request.resource.data.turtleBestLaps is number
-            && request.resource.data.turtleBestLaps >= 0
-            && request.resource.data.turtleBestLaps <= request.resource.data.bestLaps))
+        && request.resource.data.keys().hasAny([
+          'otterMobileBestLaps', 'otterPcBestLaps',
+          'turtleMobileBestLaps', 'turtlePcBestLaps'
+        ])
+        && validOptionalGameScore(request.resource.data, 'otterBestLaps')
+        && validOptionalGameScore(request.resource.data, 'turtleBestLaps')
+        && validOptionalGameScore(request.resource.data, 'otterMobileBestLaps')
+        && validOptionalGameScore(request.resource.data, 'otterPcBestLaps')
+        && validOptionalGameScore(request.resource.data, 'turtleMobileBestLaps')
+        && validOptionalGameScore(request.resource.data, 'turtlePcBestLaps')
         && request.resource.data.updatedAt == request.time;
       allow update: if canUseSite()
         && request.auth.uid == uid
         && request.resource.data.keys().hasOnly([
-          'uid', 'email', 'name', 'bestLaps', 'otterBestLaps', 'turtleBestLaps', 'updatedAt'
+          'uid', 'email', 'name', 'bestLaps',
+          'otterBestLaps', 'turtleBestLaps',
+          'otterMobileBestLaps', 'otterPcBestLaps',
+          'turtleMobileBestLaps', 'turtlePcBestLaps',
+          'updatedAt'
         ])
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.email == resource.data.email
@@ -206,18 +228,12 @@ service cloud.firestore {
         && request.resource.data.bestLaps is number
         && request.resource.data.bestLaps >= resource.data.bestLaps
         && request.resource.data.bestLaps <= 10000
-        && (!request.resource.data.keys().hasAny(['otterBestLaps'])
-          || (request.resource.data.otterBestLaps is number
-            && request.resource.data.otterBestLaps >= 0
-            && request.resource.data.otterBestLaps <= request.resource.data.bestLaps
-            && (!resource.data.keys().hasAny(['otterBestLaps'])
-              || request.resource.data.otterBestLaps >= resource.data.otterBestLaps)))
-        && (!request.resource.data.keys().hasAny(['turtleBestLaps'])
-          || (request.resource.data.turtleBestLaps is number
-            && request.resource.data.turtleBestLaps >= 0
-            && request.resource.data.turtleBestLaps <= request.resource.data.bestLaps
-            && (!resource.data.keys().hasAny(['turtleBestLaps'])
-              || request.resource.data.turtleBestLaps >= resource.data.turtleBestLaps)))
+        && nondecreasingGameScore(request.resource.data, resource.data, 'otterBestLaps')
+        && nondecreasingGameScore(request.resource.data, resource.data, 'turtleBestLaps')
+        && nondecreasingGameScore(request.resource.data, resource.data, 'otterMobileBestLaps')
+        && nondecreasingGameScore(request.resource.data, resource.data, 'otterPcBestLaps')
+        && nondecreasingGameScore(request.resource.data, resource.data, 'turtleMobileBestLaps')
+        && nondecreasingGameScore(request.resource.data, resource.data, 'turtlePcBestLaps')
         && request.resource.data.updatedAt == request.time;
       allow delete: if isAdmin();
     }
@@ -227,44 +243,45 @@ service cloud.firestore {
       allow create: if canUseSite()
         && request.auth.uid == uid
         && request.resource.data.keys().hasOnly([
-          'bestLaps', 'otterBestLaps', 'turtleBestLaps', 'isAdmin', 'updatedAt'
+          'bestLaps', 'otterBestLaps', 'turtleBestLaps',
+          'otterMobileBestLaps', 'otterPcBestLaps',
+          'turtleMobileBestLaps', 'turtlePcBestLaps',
+          'isAdmin', 'updatedAt'
         ])
         && request.resource.data.keys().hasAll(['bestLaps', 'isAdmin', 'updatedAt'])
         && request.resource.data.isAdmin == isAdmin()
         && request.resource.data.bestLaps is number
         && request.resource.data.bestLaps >= 0
         && request.resource.data.bestLaps <= 10000
-        && request.resource.data.keys().hasAny(['otterBestLaps', 'turtleBestLaps'])
-        && (!request.resource.data.keys().hasAny(['otterBestLaps'])
-          || (request.resource.data.otterBestLaps is number
-            && request.resource.data.otterBestLaps >= 0
-            && request.resource.data.otterBestLaps <= request.resource.data.bestLaps))
-        && (!request.resource.data.keys().hasAny(['turtleBestLaps'])
-          || (request.resource.data.turtleBestLaps is number
-            && request.resource.data.turtleBestLaps >= 0
-            && request.resource.data.turtleBestLaps <= request.resource.data.bestLaps))
+        && request.resource.data.keys().hasAny([
+          'otterMobileBestLaps', 'otterPcBestLaps',
+          'turtleMobileBestLaps', 'turtlePcBestLaps'
+        ])
+        && validOptionalGameScore(request.resource.data, 'otterBestLaps')
+        && validOptionalGameScore(request.resource.data, 'turtleBestLaps')
+        && validOptionalGameScore(request.resource.data, 'otterMobileBestLaps')
+        && validOptionalGameScore(request.resource.data, 'otterPcBestLaps')
+        && validOptionalGameScore(request.resource.data, 'turtleMobileBestLaps')
+        && validOptionalGameScore(request.resource.data, 'turtlePcBestLaps')
         && request.resource.data.updatedAt == request.time;
       allow update: if canUseSite()
         && request.auth.uid == uid
         && request.resource.data.keys().hasOnly([
-          'bestLaps', 'otterBestLaps', 'turtleBestLaps', 'isAdmin', 'updatedAt'
+          'bestLaps', 'otterBestLaps', 'turtleBestLaps',
+          'otterMobileBestLaps', 'otterPcBestLaps',
+          'turtleMobileBestLaps', 'turtlePcBestLaps',
+          'isAdmin', 'updatedAt'
         ])
         && request.resource.data.isAdmin == isAdmin()
         && request.resource.data.bestLaps is number
         && request.resource.data.bestLaps >= resource.data.bestLaps
         && request.resource.data.bestLaps <= 10000
-        && (!request.resource.data.keys().hasAny(['otterBestLaps'])
-          || (request.resource.data.otterBestLaps is number
-            && request.resource.data.otterBestLaps >= 0
-            && request.resource.data.otterBestLaps <= request.resource.data.bestLaps
-            && (!resource.data.keys().hasAny(['otterBestLaps'])
-              || request.resource.data.otterBestLaps >= resource.data.otterBestLaps)))
-        && (!request.resource.data.keys().hasAny(['turtleBestLaps'])
-          || (request.resource.data.turtleBestLaps is number
-            && request.resource.data.turtleBestLaps >= 0
-            && request.resource.data.turtleBestLaps <= request.resource.data.bestLaps
-            && (!resource.data.keys().hasAny(['turtleBestLaps'])
-              || request.resource.data.turtleBestLaps >= resource.data.turtleBestLaps)))
+        && nondecreasingGameScore(request.resource.data, resource.data, 'otterBestLaps')
+        && nondecreasingGameScore(request.resource.data, resource.data, 'turtleBestLaps')
+        && nondecreasingGameScore(request.resource.data, resource.data, 'otterMobileBestLaps')
+        && nondecreasingGameScore(request.resource.data, resource.data, 'otterPcBestLaps')
+        && nondecreasingGameScore(request.resource.data, resource.data, 'turtleMobileBestLaps')
+        && nondecreasingGameScore(request.resource.data, resource.data, 'turtlePcBestLaps')
         && request.resource.data.updatedAt == request.time;
       allow delete: if isAdmin();
     }

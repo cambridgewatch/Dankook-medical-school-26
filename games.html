@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>미니게임 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-  <link rel="stylesheet" href="assets/css/style.css?v=143" />
+  <link rel="stylesheet" href="assets/css/style.css?v=144" />
 </head>
 <body class="locked">
 
@@ -135,9 +135,11 @@
           <header>
             <div><span>RANKING</span><h3 id="cheonhoRankingTitle">천호지 달리기 기록</h3></div>
           </header>
-          <div class="cheonho-ranking-character-tabs" role="group" aria-label="캐릭터별 기록 선택">
-            <button type="button" class="is-active" data-cheonho-ranking-character="otter" aria-pressed="true">수달</button>
-            <button type="button" data-cheonho-ranking-character="turtle" aria-pressed="false">거북이</button>
+          <div class="cheonho-ranking-character-tabs" role="group" aria-label="캐릭터와 기기별 기록 선택">
+            <button type="button" class="is-active" data-cheonho-ranking-key="otter-mobile" aria-pressed="true">수달 · 모바일</button>
+            <button type="button" data-cheonho-ranking-key="otter-pc" aria-pressed="false">수달 · PC</button>
+            <button type="button" data-cheonho-ranking-key="turtle-mobile" aria-pressed="false">거북이 · 모바일</button>
+            <button type="button" data-cheonho-ranking-key="turtle-pc" aria-pressed="false">거북이 · PC</button>
           </div>
           <div class="cheonho-ranking-summary" id="cheonhoRankingSummary">
             <article><span>내 최고 기록</span><strong id="cheonhoMyBest">불러오는 중</strong></article>
@@ -173,6 +175,6 @@
   <script type="module" src="assets/js/alerts.js?v=33"></script>
   <script type="module" src="assets/js/gate.js?v=23"></script>
   <script type="module" src="assets/js/cheonhoji-game.js?v=25"></script>
-  <script type="module" src="assets/js/cheonhoji-runner.js?v=22"></script>
+  <script type="module" src="assets/js/cheonhoji-runner.js?v=23"></script>
 </body>
 </html>
