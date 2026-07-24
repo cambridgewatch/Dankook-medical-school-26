@@ -367,8 +367,37 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     return 3;
   }
 
+  function safeRegularObstacleType(laps) {
+    const tier = laps < 0.25 ? 0 : laps < 0.65 ? 1 : 2;
+    const choices = OBSTACLE_TIERS
+      .slice(0, Math.min(tier, 2) + 1)
+      .flat()
+      .filter((type) => !DOUBLE_JUMP_TYPES.has(type));
+    const alternatives = choices.filter((type) => type !== lastObstacleType);
+    const pool = alternatives.length ? alternatives : choices;
+    const type = pool[Math.floor(Math.random() * pool.length)] || "puddle";
+    consecutiveDoubleJumps = 0;
+    lastObstacleType = type;
+    return type;
+  }
+
+  function doubleObstacleWouldMeetLowHeron() {
+    const forecast = window.getCheonhoHeronForecast;
+    if (typeof forecast !== "function") return false;
+    const speedPercentPerSecond = Math.max(9.5 * difficultyFor(currentLaps()), 0.1);
+    const secondsToCharacter = Math.max(0, (108 - characterX) / speedPercentPerSecond);
+    const futureHeron = forecast(secondsToCharacter);
+    if (!futureHeron) return false;
+    const nearCharacterLane = Math.abs(futureHeron.x - characterX) <= 24;
+    const lowEnoughToBlockJump = futureHeron.y >= 43;
+    return nearCharacterLane && lowEnoughToBlockJump;
+  }
+
   function spawnObstacle() {
-    const firstType = obstacleTypeForProgress(currentLaps());
+    let firstType = obstacleTypeForProgress(currentLaps());
+    if (DOUBLE_JUMP_TYPES.has(firstType) && doubleObstacleWouldMeetLowHeron()) {
+      firstType = safeRegularObstacleType(currentLaps());
+    }
     const clusterCount = LOW_CLUSTER_TYPES.has(firstType) ? lowClusterCount() : 1;
     const availableLowTypes = OBSTACLE_TIERS
       .slice(0, Math.min(obstacleTier, 2) + 1)
@@ -662,6 +691,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   function finishGame(obstacle) {
     if (gameOver) return;
     gameOver = true;
+    window.setCheonhoHeronSafetyLift?.(false);
     gameOverAt = performance.now();
     scene.dataset.gameOver = "true";
     scene.dispatchEvent(new CustomEvent("cheonho:setrunning", { detail: { running: false } }));
@@ -745,6 +775,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function restartGame() {
+    window.setCheonhoHeronSafetyLift?.(false);
     clearObstacles();
     elapsedSeconds = 0;
     distanceLaps = 0;
@@ -791,6 +822,13 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       scheduleNextSpawn(laps);
     }
 
+    const tallObstacleApproaching = obstacles.some((obstacle) => (
+      DOUBLE_JUMP_TYPES.has(obstacle.type)
+      && obstacle.x >= characterX - 8
+      && obstacle.x <= characterX + 44
+    ));
+    window.setCheonhoHeronSafetyLift?.(tallObstacleApproaching);
+
     for (let index = obstacles.length - 1; index >= 0; index -= 1) {
       const obstacle = obstacles[index];
       sizeObstacle(obstacle);
@@ -808,6 +846,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function updateWalking(delta) {
+    window.setCheonhoHeronSafetyLift?.(false);
     elapsedSeconds += delta;
     distanceLaps += delta / baseLapDuration;
     setBackgroundSpeed(1);
@@ -900,6 +939,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     running = Boolean(event.detail?.running) && !gameOver;
   });
   scene.addEventListener("cheonho:modechange", (event) => {
+    window.setCheonhoHeronSafetyLift?.(false);
     gameMode = event.detail?.mode === "walk" ? "walk" : "run";
     clearObstacles();
     elapsedSeconds = 0;

@@ -55,6 +55,22 @@ if (sceneElement && canvas) {
 
   let orbitPhase = -Math.PI * 0.38;
   let previousTime = 0;
+  let safetyLift = 0;
+  let targetSafetyLift = 0;
+
+  window.getCheonhoHeronForecast = (seconds = 0) => {
+    const moving = sceneElement.classList.contains("is-running");
+    const futurePhase = orbitPhase + Math.max(0, Number(seconds) || 0) * (moving ? 0.47 : 0.30);
+    return {
+      x: 50 + Math.cos(futurePhase) * 42,
+      y: 37 + Math.sin(futurePhase) * 27,
+      phase: futurePhase,
+    };
+  };
+
+  window.setCheonhoHeronSafetyLift = (active) => {
+    targetSafetyLift = active ? 26 : 0;
+  };
 
   function resize() {
     const width = Math.max(1, canvas.clientWidth);
@@ -71,9 +87,10 @@ if (sceneElement && canvas) {
     previousTime = time;
     const moving = sceneElement.classList.contains("is-running");
     orbitPhase += delta * (moving ? 0.47 : 0.30);
+    safetyLift += (targetSafetyLift - safetyLift) * Math.min(1, delta * 3.8);
 
     const x = 50 + Math.cos(orbitPhase) * 42;
-    const y = 37 + Math.sin(orbitPhase) * 27;
+    const y = 37 + Math.sin(orbitPhase) * 27 - safetyLift;
     canvas.style.left = `${x}%`;
     canvas.style.top = `${y}%`;
 
