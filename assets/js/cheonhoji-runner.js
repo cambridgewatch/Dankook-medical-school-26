@@ -32,7 +32,8 @@ const myBestElement = document.querySelector("#cheonhoMyBest");
 const myRankElement = document.querySelector("#cheonhoMyRank");
 const topScoreElement = document.querySelector("#cheonhoTopScore");
 const adminRanking = document.querySelector("#cheonhoAdminRanking");
-const rankingCategoryButtons = [...document.querySelectorAll("[data-cheonho-ranking-key]")];
+const rankingCharacterButtons = [...document.querySelectorAll("[data-cheonho-ranking-character]")];
+const rankingPlatformButtons = [...document.querySelectorAll("[data-cheonho-ranking-platform]")];
 
 if (scene && track && character && obstacleLayer && scoreElement) {
   const obstacles = [];
@@ -77,9 +78,15 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     return `${characterName === "turtle" ? "거북이" : "수달"} · ${platformName === "mobile" ? "모바일" : "PC"}`;
   }
 
-  function syncRankingCategoryButtons() {
-    rankingCategoryButtons.forEach((button) => {
-      const active = button.dataset.cheonhoRankingKey === rankingKey;
+  function syncRankingFilterButtons() {
+    const [characterName, platformName] = rankingKey.split("-");
+    rankingCharacterButtons.forEach((button) => {
+      const active = button.dataset.cheonhoRankingCharacter === characterName;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    rankingPlatformButtons.forEach((button) => {
+      const active = button.dataset.cheonhoRankingPlatform === platformName;
       button.classList.toggle("is-active", active);
       button.setAttribute("aria-pressed", active ? "true" : "false");
     });
@@ -880,13 +887,26 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     subscribeRankings(user);
   });
 
-  rankingCategoryButtons.forEach((button) => {
+  rankingCharacterButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      const nextKey = button.dataset.cheonhoRankingKey;
+      const [, platformName] = rankingKey.split("-");
+      const nextKey = `${button.dataset.cheonhoRankingCharacter}-${platformName}`;
       if (!validRankingKeys.has(nextKey)) return;
       rankingKey = nextKey;
       localStorage.setItem("cheonhojiRankingKey", rankingKey);
-      syncRankingCategoryButtons();
+      syncRankingFilterButtons();
+      if (currentUser) subscribeRankings(currentUser);
+    });
+  });
+
+  rankingPlatformButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const [characterName] = rankingKey.split("-");
+      const nextKey = `${characterName}-${button.dataset.cheonhoRankingPlatform}`;
+      if (!validRankingKeys.has(nextKey)) return;
+      rankingKey = nextKey;
+      localStorage.setItem("cheonhojiRankingKey", rankingKey);
+      syncRankingFilterButtons();
       if (currentUser) subscribeRankings(currentUser);
     });
   });
@@ -894,11 +914,11 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   scene.addEventListener("cheonho:characterchange", () => {
     rankingKey = `${scene.dataset.character === "turtle" ? "turtle" : "otter"}-${currentPlatform()}`;
     localStorage.setItem("cheonhojiRankingKey", rankingKey);
-    syncRankingCategoryButtons();
+    syncRankingFilterButtons();
     if (currentUser) subscribeRankings(currentUser);
   });
 
-  syncRankingCategoryButtons();
+  syncRankingFilterButtons();
   renderScore();
   setCharacterX(initialCharacterX());
   requestAnimationFrame(frame);

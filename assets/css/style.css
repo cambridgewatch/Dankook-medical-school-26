@@ -1050,9 +1050,10 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
 .cheonho-ranking-summary article { padding:15px 16px; border:1px solid #e0e9ef; border-radius:13px; background:#f7fafc; }
 .cheonho-ranking-summary article span { display:block; margin-bottom:6px; color:#758793; font-size:11px; }
 .cheonho-ranking-summary article strong { color:#143f5d; font-size:21px; font-variant-numeric:tabular-nums; }
-.cheonho-ranking-character-tabs { display:grid; grid-template-columns:repeat(4,minmax(112px,1fr)); gap:5px; margin:0 0 12px; padding:4px; border:1px solid #dbe6ed; border-radius:12px; background:#f4f8fa; }
-.cheonho-ranking-character-tabs button { min-width:0; height:36px; padding:0 12px; border:0; border-radius:9px; background:transparent; color:#71828e; font:inherit; font-size:12px; font-weight:850; white-space:nowrap; cursor:pointer; }
-.cheonho-ranking-character-tabs button.is-active { background:#fff; color:#20577a; box-shadow:0 3px 10px rgba(28,61,87,.12); }
+.cheonho-ranking-filters { display:grid; grid-template-columns:minmax(190px,1fr) minmax(190px,1fr); gap:10px; margin:0 0 12px; }
+.cheonho-ranking-filter-group { display:grid; grid-template-columns:1fr 1fr; gap:5px; padding:4px; border:1px solid #dbe6ed; border-radius:12px; background:#f4f8fa; }
+.cheonho-ranking-filter-group button { min-width:0; height:36px; padding:0 12px; border:0; border-radius:9px; background:transparent; color:#71828e; font:inherit; font-size:12px; font-weight:850; white-space:nowrap; cursor:pointer; }
+.cheonho-ranking-filter-group button.is-active { background:#fff; color:#20577a; box-shadow:0 3px 10px rgba(28,61,87,.12); }
 .cheonho-admin-ranking { margin-top:12px; overflow:hidden; border:1px solid #e0e9ef; border-radius:13px; }
 .cheonho-ranking-row { display:grid; grid-template-columns:50px 1fr auto; align-items:center; gap:10px; padding:11px 14px; border-bottom:1px solid #e8eef2; font-size:13px; }
 .cheonho-ranking-row:last-child { border-bottom:0; }
@@ -1189,7 +1190,8 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-ranking-panel > header { align-items:flex-start; flex-direction:column; gap:5px; }
   .cheonho-ranking-summary { grid-template-columns:1fr 1fr; }
   .cheonho-ranking-summary article:last-child { grid-column:1/-1; }
-  .cheonho-ranking-character-tabs { grid-template-columns:1fr 1fr; }
+  .cheonho-ranking-filters { grid-template-columns:1fr 1fr; gap:7px; }
+  .cheonho-ranking-filter-group button { height:34px; padding-inline:6px; font-size:11px; }
   .cheonho-ranking-row { grid-template-columns:36px 1fr auto; padding:10px; }
 }
 
