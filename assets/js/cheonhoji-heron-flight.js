@@ -42,6 +42,10 @@ if (sceneElement && canvas) {
   warning.className = "cheonho-heron-warning";
   warning.setAttribute("aria-hidden", "true");
   sceneElement.appendChild(warning);
+  const targetMarker = document.createElement("div");
+  targetMarker.className = "cheonho-heron-target";
+  targetMarker.setAttribute("aria-hidden", "true");
+  sceneElement.appendChild(targetMarker);
 
   let pixelBuffer = new Uint8Array(0);
   window.getCheonhoHeronPixelMask = () => {
@@ -62,17 +66,19 @@ if (sceneElement && canvas) {
   const TALL_OBSTACLE_SELECTOR = ["barrier", "fence", "gate", "kiosk", "mapboard"]
     .map((type) => `[data-obstacle-type="${type}"]`)
     .join(",");
-  const ATTACK_PATTERNS = ["straight", "dive", "figureEight", "returnPass"];
-  let patternBag = [];
+  const ATTACK_PATTERNS = ["horizontal", "vDive"];
+  let patternIndex = 0;
   let patrolPhase = -Math.PI * 0.38;
   let previousTime = 0;
   let flightState = "patrol";
   let stateElapsed = 0;
   let stateDuration = 0;
   let nextAttackIn = 6.5;
-  let currentPattern = "straight";
+  let currentPattern = "horizontal";
   let direction = 1;
   let attackTargetX = 50;
+  let horizontalFlightY = 28;
+  let diveBottomY = 58;
   let displayX = 10;
   let displayY = 16;
   let previousX = displayX;
@@ -89,18 +95,10 @@ if (sceneElement && canvas) {
   };
   const mix = (from, to, amount) => from + (to - from) * amount;
 
-  function shuffle(items) {
-    const result = [...items];
-    for (let index = result.length - 1; index > 0; index -= 1) {
-      const swapIndex = Math.floor(Math.random() * (index + 1));
-      [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
-    }
-    return result;
-  }
-
   function nextPattern() {
-    if (!patternBag.length) patternBag = shuffle(ATTACK_PATTERNS);
-    return patternBag.shift() || "straight";
+    const pattern = ATTACK_PATTERNS[patternIndex % ATTACK_PATTERNS.length];
+    patternIndex += 1;
+    return pattern;
   }
 
   function hasTallObstacle() {
@@ -123,69 +121,100 @@ if (sceneElement && canvas) {
     return Math.max(7, Math.min(93, ((center - sceneRect.left) / sceneRect.width) * 100));
   }
 
+  function visibleVerticalBounds(mask, fallbackTop = 0.08, fallbackBottom = 0.92) {
+    if (!mask?.data?.length || !mask.width || !mask.height) {
+      return { top: fallbackTop, bottom: fallbackBottom };
+    }
+    let lowestBufferY = mask.height;
+    let highestBufferY = -1;
+    for (let y = 0; y < mask.height; y += 1) {
+      for (let x = 0; x < mask.width; x += 1) {
+        if (mask.data[(y * mask.width + x) * 4 + 3] < 72) continue;
+        lowestBufferY = Math.min(lowestBufferY, y);
+        highestBufferY = Math.max(highestBufferY, y);
+      }
+    }
+    if (highestBufferY < 0) return { top: fallbackTop, bottom: fallbackBottom };
+    return {
+      top: 1 - highestBufferY / Math.max(mask.height - 1, 1),
+      bottom: 1 - lowestBufferY / Math.max(mask.height - 1, 1),
+    };
+  }
+
+  function measureAttackHeights() {
+    if (!characterCanvas) return;
+    const sceneRect = sceneElement.getBoundingClientRect();
+    const characterRect = characterCanvas.getBoundingClientRect();
+    const heronRect = canvas.getBoundingClientRect();
+    if (!sceneRect.height || !characterRect.height || !heronRect.height) return;
+    const characterBounds = visibleVerticalBounds(window.getCheonhoCharacterPixelMask?.());
+    const heronBounds = visibleVerticalBounds(window.getCheonhoHeronPixelMask?.());
+    const characterHeight = Math.max(1, (characterBounds.bottom - characterBounds.top) * characterRect.height);
+    const groundBottomValue = Number.parseFloat(
+      getComputedStyle(sceneElement).getPropertyValue("--cheonho-ground-bottom")
+    ) || 12;
+    const groundY = sceneRect.bottom - sceneRect.height * (groundBottomValue / 100);
+    const heronBottomOffset = (heronBounds.bottom - 0.5) * heronRect.height;
+    const centerPercentForBottom = (bottomY) => (
+      ((bottomY - heronBottomOffset - sceneRect.top) / sceneRect.height) * 100
+    );
+    horizontalFlightY = Math.max(4, Math.min(58,
+      centerPercentForBottom(groundY - characterHeight * 1.5)
+    ));
+    diveBottomY = Math.max(30, Math.min(88, centerPercentForBottom(groundY)));
+    targetMarker.style.left = `${attackTargetX}%`;
+    targetMarker.style.top = `${((groundY - sceneRect.top) / sceneRect.height) * 100}%`;
+  }
+
   function patternEntry(pattern, flightDirection, targetX) {
     const sideX = flightDirection > 0 ? -12 : 112;
-    if (pattern === "dive") return { x: sideX, y: 13 };
-    if (pattern === "figureEight") return { x: targetX, y: 34 };
-    if (pattern === "returnPass") return { x: sideX, y: 23 };
-    return { x: sideX, y: 44 };
+    if (pattern === "vDive") {
+      const offset = targetX >= 50 ? 30 : -30;
+      return { x: Math.max(6, Math.min(94, targetX + offset)), y: 6 };
+    }
+    return { x: sideX, y: horizontalFlightY };
   }
 
   function patternDuration(pattern) {
-    if (pattern === "dive") return 4.2;
-    if (pattern === "figureEight") return 5.8;
-    if (pattern === "returnPass") return 5.6;
-    return 3.5;
+    return pattern === "vDive" ? 3.8 : 3.6;
   }
 
   function patternPosition(pattern, progress, flightDirection, targetX) {
     const t = clamp01(progress);
     const fromX = flightDirection > 0 ? -12 : 112;
     const toX = flightDirection > 0 ? 112 : -12;
-    if (pattern === "dive") {
-      const x = t < 0.5
-        ? mix(fromX, targetX, smoothstep(t * 2))
-        : mix(targetX, toX, smoothstep((t - 0.5) * 2));
-      return {
-        x,
-        y: 13 + Math.pow(Math.sin(Math.PI * t), 1.28) * 42,
-      };
-    }
-    if (pattern === "figureEight") {
-      const angle = t * Math.PI * 2;
-      const radius = Math.max(12, Math.min(32, targetX - 5, 95 - targetX));
-      return {
-        x: Math.max(3, Math.min(97, targetX + Math.sin(angle) * radius * flightDirection)),
-        y: 34 + Math.sin(angle * 2) * 19,
-      };
-    }
-    if (pattern === "returnPass") {
-      if (t < 0.42) {
-        return { x: mix(fromX, toX, smoothstep(t / 0.42)), y: 23 };
+    if (pattern === "vDive") {
+      const offset = targetX >= 50 ? 30 : -30;
+      const startX = Math.max(6, Math.min(94, targetX + offset));
+      const endX = Math.max(6, Math.min(94, targetX - offset));
+      if (t < 0.5) {
+        const amount = smoothstep(t * 2);
+        return { x: mix(startX, targetX, amount), y: mix(6, diveBottomY, amount) };
       }
-      if (t < 0.58) {
-        const turn = smoothstep((t - 0.42) / 0.16);
-        return { x: toX + Math.sin(turn * Math.PI) * 5 * flightDirection, y: mix(23, 46, turn) };
-      }
-      return { x: mix(toX, fromX, smoothstep((t - 0.58) / 0.42)), y: 46 };
+      const amount = smoothstep((t - 0.5) * 2);
+      return { x: mix(targetX, endX, amount), y: mix(diveBottomY, 6, amount) };
     }
     return {
       x: mix(fromX, toX, smoothstep(t)),
-      y: 44 - Math.sin(Math.PI * t) * 4,
+      y: horizontalFlightY,
     };
   }
 
   function beginWarning() {
     currentPattern = nextPattern();
     attackTargetX = currentPlayerX();
-    direction = attackTargetX >= 50 ? 1 : -1;
+    direction = attackTargetX >= 50 ? -1 : 1;
+    measureAttackHeights();
     flightState = "warning";
     stateElapsed = 0;
     stateDuration = 1.6;
     transitionStart = { x: displayX, y: displayY };
     warning.dataset.direction = direction > 0 ? "right" : "left";
-    warning.innerHTML = `<b>${direction > 0 ? "→" : "←"}</b><span>백로 접근</span>`;
+    warning.innerHTML = currentPattern === "vDive"
+      ? "<b>▼</b><span>백로 급강하 · 붉은 지점 주의</span>"
+      : `<b>${direction > 0 ? "→" : "←"}</b><span>백로 수평 접근</span>`;
     warning.classList.add("is-visible");
+    targetMarker.classList.toggle("is-visible", currentPattern === "vDive");
   }
 
   function beginAttack() {
@@ -206,6 +235,7 @@ if (sceneElement && canvas) {
     transitionStart = { x: displayX, y: displayY };
     recoveryTarget = patrolPosition();
     warning.classList.remove("is-visible");
+    targetMarker.classList.remove("is-visible");
     hazardous = false;
   }
 
@@ -241,7 +271,7 @@ if (sceneElement && canvas) {
     } else if (flightState === "attack") {
       stateElapsed += delta;
       position = patternPosition(currentPattern, stateElapsed / stateDuration, direction, attackTargetX);
-      hazardous = position.y >= 29;
+      hazardous = true;
       if (hasTallObstacle() || targetSafetyLift > 0) beginRecovery(0);
       else if (stateElapsed >= stateDuration) beginRecovery(0);
     } else {

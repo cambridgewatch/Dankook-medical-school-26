@@ -758,9 +758,42 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   transform: translateY(-50%) scale(1);
   animation: cheonho-heron-warning-pulse .72s ease-in-out infinite alternate;
 }
+.cheonho-heron-target {
+  position: absolute;
+  z-index: 8;
+  width: clamp(34px, 4.2vw, 58px);
+  aspect-ratio: 1;
+  border: 3px solid rgba(232, 52, 45, .92);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.45);
+  transition: opacity .2s ease, transform .24s ease;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, .50), 0 0 20px rgba(226, 42, 35, .50);
+}
+.cheonho-heron-target::before,
+.cheonho-heron-target::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  border-radius: 999px;
+  background: rgba(230, 47, 40, .95);
+  transform: translate(-50%, -50%);
+}
+.cheonho-heron-target::before { width: 64%; height: 3px; }
+.cheonho-heron-target::after { width: 3px; height: 64%; }
+.cheonho-heron-target.is-visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  animation: cheonho-heron-target-pulse .72s ease-in-out infinite alternate;
+}
 @keyframes cheonho-heron-warning-pulse {
   from { box-shadow: 0 6px 18px rgba(52, 24, 18, .20); }
   to { box-shadow: 0 6px 22px rgba(200, 67, 45, .43), 0 0 0 4px rgba(255, 255, 255, .12); }
+}
+@keyframes cheonho-heron-target-pulse {
+  from { box-shadow: 0 0 0 4px rgba(255, 255, 255, .42), 0 0 12px rgba(226, 42, 35, .34); }
+  to { box-shadow: 0 0 0 8px rgba(255, 255, 255, .14), 0 0 27px rgba(226, 42, 35, .72); }
 }
 .cheonho-fullscreen-exit {
   position: absolute;
