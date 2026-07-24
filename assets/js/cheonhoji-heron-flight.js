@@ -46,6 +46,11 @@ if (sceneElement && canvas) {
   targetMarker.className = "cheonho-heron-target";
   targetMarker.setAttribute("aria-hidden", "true");
   sceneElement.appendChild(targetMarker);
+  const perchAlert = document.createElement("div");
+  perchAlert.className = "cheonho-heron-perch-alert";
+  perchAlert.textContent = "!";
+  perchAlert.setAttribute("aria-hidden", "true");
+  sceneElement.appendChild(perchAlert);
 
   let pixelBuffer = new Uint8Array(0);
   window.getCheonhoHeronPixelMask = () => {
@@ -253,6 +258,8 @@ if (sceneElement && canvas) {
         walkElapsed = 0;
         walkDuration = 3.5 + Math.random() * 4;
         if (riderActive && riderHasTakenOff) setRiderActive(false);
+      } else if (riderActive && riderHasTakenOff) {
+        beginWalkPerch();
       } else if (Math.random() < 0.28) {
         beginWalkPerch();
       } else {
@@ -463,6 +470,8 @@ if (sceneElement && canvas) {
     updateFlight(delta, moving, runMode);
     canvas.style.left = `${displayX}%`;
     canvas.style.top = `${displayY}%`;
+    perchAlert.style.left = `${displayX}%`;
+    perchAlert.style.top = `${displayY}%`;
 
     const horizontalVelocity = displayX - previousX;
     if (Math.abs(horizontalVelocity) > 0.01) {
@@ -472,6 +481,7 @@ if (sceneElement && canvas) {
     }
     previousX = displayX;
     const perched = !runMode && walkState === "perched";
+    perchAlert.classList.toggle("is-visible", perched);
     heron.rotation.z = perched ? 0 : Math.max(-0.10, Math.min(0.10, horizontalVelocity * 0.11));
 
     const flapSpeed = runMode && flightState === "attack" ? 0.009 : 0.0048;

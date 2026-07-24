@@ -732,6 +732,36 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 .cheonho-heron-canvas.is-hit {
   filter: drop-shadow(0 0 10px #ff493f) drop-shadow(0 7px 7px rgba(18, 37, 45, .22));
 }
+.cheonho-heron-perch-alert {
+  --cheonho-perch-alert-offset: 57px;
+  position: absolute;
+  z-index: 12;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  font-size: 19px;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset))) scale(.7);
+  box-shadow: 0 5px 14px rgba(127, 29, 29, .32);
+  transition: opacity .16s ease, transform .2s ease;
+}
+.cheonho-heron-perch-alert.is-visible {
+  opacity: 1;
+  transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset))) scale(1);
+  animation: cheonho-heron-perch-alert 760ms ease-in-out infinite alternate;
+}
+@keyframes cheonho-heron-perch-alert {
+  from { transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset))) scale(.94); }
+  to { transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset) - 5px)) scale(1.06); }
+}
 .cheonho-heron-warning {
   position: absolute;
   top: 31%;
@@ -1261,6 +1291,16 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-run-card.is-night .cheonho-fixed-walkway::before { background: radial-gradient(circle at 9px 10px, #ffd47c 0 2px, rgba(255, 204, 105, .28) 3px 6px, transparent 7px) 0 0 / 53px 100% repeat-x, linear-gradient(180deg, #1b2e3b 0 5px, transparent 5px 19px, #1b2e3b 19px 24px), repeating-linear-gradient(90deg, #152631 0 5px, transparent 5px 53px); }
   .cheonho-character-canvas { left: 11%; bottom:var(--cheonho-ground-bottom); width: 63px; height: 31%; }
   .cheonho-heron-canvas { width:124px; height:78px; }
+  .cheonho-heron-perch-alert {
+    --cheonho-perch-alert-offset: 45px;
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset))) scale(.7);
+  }
+  .cheonho-heron-perch-alert.is-visible {
+    transform: translate(-50%, calc(-50% - var(--cheonho-perch-alert-offset))) scale(1);
+  }
   .cheonho-run-scene[data-character="turtle"] .cheonho-character-canvas {
     left: 11%;
     width: min(24.67vw, 103px);
