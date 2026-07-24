@@ -110,6 +110,7 @@ if (sceneElement && canvas) {
   function applyCharacter(value) {
     selectedCharacter = value === "turtle" ? "turtle" : "otter";
     sceneElement.dataset.character = selectedCharacter;
+    syncJumpScale();
     syncJumpPhysics();
     localStorage.setItem("cheonhojiGameCharacter", selectedCharacter);
     setButtonState(characterButtons, selectedCharacter, "cheonhoCharacter");
@@ -275,8 +276,7 @@ if (sceneElement && canvas) {
 
   function syncFullscreenState() {
     const active = fullscreenActive();
-    const desktopFullscreen = active && !window.matchMedia("(max-width: 900px)").matches;
-    sceneElement.dataset.jumpScale = desktopFullscreen ? "0.25" : "0.32";
+    syncJumpScale();
     syncJumpPhysics();
     sceneElement.classList.toggle("is-native-fullscreen", active && !sceneElement.classList.contains("is-fullscreen-fallback"));
     document.body.classList.toggle("cheonho-fullscreen-open", active);
@@ -286,6 +286,17 @@ if (sceneElement && canvas) {
     }
     fitCameraToCharacter();
     sceneElement.dispatchEvent(new CustomEvent("cheonho:layoutchange"));
+  }
+
+  function syncJumpScale() {
+    const active = fullscreenActive();
+    const mobileLayout = window.matchMedia("(max-width: 900px)").matches;
+    const desktopFullscreen = active && !mobileLayout;
+    const baseScale = desktopFullscreen ? 0.25 : 0.32;
+    const scaledMobileTurtle = mobileLayout
+      && window.matchMedia("(pointer: coarse)").matches
+      && selectedCharacter === "turtle";
+    sceneElement.dataset.jumpScale = String(scaledMobileTurtle ? baseScale / 0.66 : baseScale);
   }
 
   async function enterFullscreen() {

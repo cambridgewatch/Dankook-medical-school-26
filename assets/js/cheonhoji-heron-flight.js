@@ -322,7 +322,10 @@ if (sceneElement && canvas) {
     measureAttackHeights();
     flightState = "warning";
     stateElapsed = 0;
-    stateDuration = 1.6;
+    const mobileTurtleDive = currentPattern === "vDive"
+      && window.matchMedia("(pointer: coarse)").matches
+      && sceneElement.dataset.character === "turtle";
+    stateDuration = mobileTurtleDive ? 2.4 : 1.6;
     transitionStart = { x: displayX, y: displayY };
     warning.dataset.direction = direction > 0 ? "right" : "left";
     warning.innerHTML = currentPattern === "vDive"

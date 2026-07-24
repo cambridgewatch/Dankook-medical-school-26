@@ -1304,8 +1304,8 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   }
   .cheonho-run-scene[data-character="turtle"] .cheonho-character-canvas {
     left: 11%;
-    width: min(24.67vw, 103px);
-    height: 20.67%;
+    width: min(16.28vw, 68px);
+    height: 13.64%;
   }
   .cheonho-run-scene:fullscreen .cheonho-character-canvas,
   .cheonho-run-scene:-webkit-full-screen .cheonho-character-canvas,
@@ -1322,8 +1322,8 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-run-scene[data-character="turtle"]:-webkit-full-screen .cheonho-character-canvas,
   .cheonho-run-scene[data-character="turtle"].is-fullscreen-fallback .cheonho-character-canvas {
     left: 11%;
-    width: 25.75%;
-    height: 20.67%;
+    width: 17%;
+    height: 13.64%;
   }
   .cheonho-run-foot { align-items: flex-start; flex-direction: column; gap: 5px; padding: 12px 16px; }
   .cheonho-game-hud { top:8px; right:8px; padding:6px 9px; }
