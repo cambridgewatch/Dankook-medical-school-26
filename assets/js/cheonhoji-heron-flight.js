@@ -152,11 +152,12 @@ if (sceneElement && canvas) {
 
   function currentPlayerX() {
     if (!characterCanvas) return 50;
-    const sceneRect = sceneElement.getBoundingClientRect();
-    const characterRect = characterCanvas.getBoundingClientRect();
-    if (!sceneRect.width) return 50;
-    const center = characterRect.left + characterRect.width / 2;
-    return Math.max(0, Math.min(100, ((center - sceneRect.left) / sceneRect.width) * 100));
+    const sceneWidth = Math.max(sceneElement.clientWidth, 1);
+    const inlineLeft = Number.parseFloat(characterCanvas.style.left);
+    const localCenterX = Number.isFinite(inlineLeft)
+      ? inlineLeft
+      : (characterCanvas.offsetLeft / sceneWidth) * 100;
+    return Math.max(0, Math.min(100, localCenterX));
   }
 
   function visibleVerticalBounds(mask, fallbackTop = 0.08, fallbackBottom = 0.92) {
@@ -181,34 +182,33 @@ if (sceneElement && canvas) {
 
   function measureAttackHeights() {
     if (!characterCanvas) return;
-    const sceneRect = sceneElement.getBoundingClientRect();
-    const characterRect = characterCanvas.getBoundingClientRect();
-    const heronRect = canvas.getBoundingClientRect();
-    if (!sceneRect.height || !characterRect.height || !heronRect.height) return;
+    const sceneHeight = Math.max(sceneElement.clientHeight, 1);
+    const characterHeightPixels = Math.max(characterCanvas.offsetHeight, 1);
+    const heronHeightPixels = Math.max(canvas.offsetHeight, 1);
     const characterBounds = visibleVerticalBounds(window.getCheonhoCharacterPixelMask?.());
     const heronBounds = visibleVerticalBounds(window.getCheonhoHeronPixelMask?.());
-    const characterHeight = Math.max(1, (characterBounds.bottom - characterBounds.top) * characterRect.height);
+    const characterHeight = Math.max(1, (characterBounds.bottom - characterBounds.top) * characterHeightPixels);
     const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
     if (coarsePointer && sceneElement.dataset.character !== "turtle") {
-      mobileOtterVisibleHeightRatio = Math.max(0.18, Math.min(0.34, characterHeight / sceneRect.height));
+      mobileOtterVisibleHeightRatio = Math.max(0.18, Math.min(0.34, characterHeight / sceneHeight));
     }
     const horizontalHeightReference = coarsePointer
-      ? sceneRect.height * mobileOtterVisibleHeightRatio
+      ? sceneHeight * mobileOtterVisibleHeightRatio
       : characterHeight;
     const groundBottomValue = Number.parseFloat(
       getComputedStyle(sceneElement).getPropertyValue("--cheonho-ground-bottom")
     ) || 12;
-    const groundY = sceneRect.bottom - sceneRect.height * (groundBottomValue / 100);
-    const heronBottomOffset = (heronBounds.bottom - 0.5) * heronRect.height;
+    const groundY = sceneHeight * (1 - groundBottomValue / 100);
+    const heronBottomOffset = (heronBounds.bottom - 0.5) * heronHeightPixels;
     const centerPercentForBottom = (bottomY) => (
-      ((bottomY - heronBottomOffset - sceneRect.top) / sceneRect.height) * 100
+      ((bottomY - heronBottomOffset) / sceneHeight) * 100
     );
     horizontalFlightY = Math.max(4, Math.min(58,
       centerPercentForBottom(groundY - horizontalHeightReference * 1.5)
     ));
     diveBottomY = Math.max(30, Math.min(88, centerPercentForBottom(groundY)));
     targetMarker.style.left = `${attackTargetX}%`;
-    targetMarker.style.top = `${((groundY - sceneRect.top) / sceneRect.height) * 100}%`;
+    targetMarker.style.top = `${(groundY / sceneHeight) * 100}%`;
   }
 
   function beginWalkGlide() {

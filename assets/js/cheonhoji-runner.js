@@ -41,7 +41,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   const movement = { left: false, right: false };
   let running = false;
   let gameOver = false;
-  let gameMode = "run";
+  let gameMode = scene.dataset.mode === "walk" ? "walk" : "run";
   let elapsedSeconds = 0;
   let distanceLaps = 0;
   let characterX = 11;
@@ -707,16 +707,60 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     return mask.data[(pixelY * mask.width + pixelX) * 4 + 3];
   }
 
+  function elementSceneLocalRect(element) {
+    const transformValue = getComputedStyle(element).transform;
+    const matrix = transformValue && transformValue !== "none"
+      ? new DOMMatrixReadOnly(transformValue)
+      : new DOMMatrixReadOnly();
+    return {
+      left: element.offsetLeft + matrix.e,
+      top: element.offsetTop + matrix.f,
+      width: element.offsetWidth,
+      height: element.offsetHeight,
+      right: element.offsetLeft + matrix.e + element.offsetWidth,
+      bottom: element.offsetTop + matrix.f + element.offsetHeight,
+    };
+  }
+
+  function maskAlphaAtLocal(mask, rect, localX, localY) {
+    if (localX < rect.left || localX >= rect.right || localY < rect.top || localY >= rect.bottom) return 0;
+    const pixelX = Math.min(mask.width - 1, Math.max(0,
+      Math.floor(((localX - rect.left) / rect.width) * mask.width)
+    ));
+    const pixelY = Math.min(mask.height - 1, Math.max(0,
+      mask.height - 1 - Math.floor(((localY - rect.top) / rect.height) * mask.height)
+    ));
+    return mask.data[(pixelY * mask.width + pixelX) * 4 + 3];
+  }
+
   function heronTopAtCharacterCenter() {
     if (!heronCanvas) return null;
-    const heronRect = heronCanvas.getBoundingClientRect();
+    const heronRect = elementSceneLocalRect(heronCanvas);
     const heronMask = window.getCheonhoHeronPixelMask?.();
     if (!heronMask?.data?.length) return null;
     const centerX = Math.max(heronRect.left + 1, Math.min(heronRect.right - 1,
-      character.getBoundingClientRect().left + character.getBoundingClientRect().width / 2
+      elementSceneLocalRect(character).left + elementSceneLocalRect(character).width / 2
     ));
-    for (let screenY = Math.floor(heronRect.top); screenY < Math.ceil(heronRect.bottom); screenY += 1) {
-      if (maskAlphaAtScreen(heronMask, heronRect, centerX, screenY + 0.5) >= 80) return screenY + 0.5;
+    const bandRadius = Math.max(2, heronRect.width * 0.09);
+    const startY = Math.floor(heronRect.top + heronRect.height * 0.28);
+    for (let screenY = startY; screenY < Math.ceil(heronRect.bottom); screenY += 1) {
+      for (let screenX = centerX - bandRadius; screenX <= centerX + bandRadius; screenX += 2) {
+        if (maskAlphaAtLocal(heronMask, heronRect, screenX, screenY + 0.5) >= 80) return screenY + 0.5;
+      }
+    }
+    return null;
+  }
+
+  function characterLowestVisibleY() {
+    const characterRect = elementSceneLocalRect(character);
+    const characterMask = window.getCheonhoCharacterPixelMask?.();
+    if (!characterMask?.data?.length) return null;
+    const startX = characterRect.left + characterRect.width * 0.08;
+    const endX = characterRect.right - characterRect.width * 0.08;
+    for (let screenY = Math.ceil(characterRect.bottom) - 1; screenY >= Math.floor(characterRect.top); screenY -= 1) {
+      for (let screenX = startX; screenX <= endX; screenX += 2) {
+        if (maskAlphaAtLocal(characterMask, characterRect, screenX, screenY + 0.5) >= 96) return screenY + 0.5;
+      }
     }
     return null;
   }
@@ -929,11 +973,12 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const rideState = window.getCheonhoHeronRideState?.();
     if (rideState?.active) {
       setCharacterX(rideState.x);
-      const sceneRect = scene.getBoundingClientRect();
-      const groundBottom = Number.parseFloat(getComputedStyle(scene).getPropertyValue("--cheonho-ground-bottom")) || 12;
-      const groundY = sceneRect.bottom - sceneRect.height * (groundBottom / 100);
       const heronTop = heronTopAtCharacterCenter();
-      if (Number.isFinite(heronTop)) heronRideLift = Math.max(0, groundY - heronTop + 2);
+      const currentFoot = characterLowestVisibleY();
+      if (Number.isFinite(heronTop) && Number.isFinite(currentFoot)) {
+        const restFoot = currentFoot + heronRideLift;
+        heronRideLift = Math.max(0, restFoot - heronTop + 2);
+      }
     } else {
       heronRideLift = Math.max(0, heronRideLift - scene.clientHeight * 1.75 * delta);
       const characterPercentPerSecond = 8;
@@ -948,6 +993,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   function frame(time) {
     const delta = lastFrame ? Math.min((time - lastFrame) / 1000, 0.05) : 0;
     lastFrame = time;
+    gameMode = scene.dataset.mode === "walk" ? "walk" : "run";
     if (running && !gameOver && delta > 0) {
       if (gameMode === "walk") updateWalking(delta);
       else updateGame(delta);
