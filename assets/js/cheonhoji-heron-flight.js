@@ -230,8 +230,17 @@ if (sceneElement && canvas) {
       const singleJumpHeight = (firstJumpVelocity ** 2 / (2 * gravity))
         * characterHeightPixels
         * jumpScale;
-      const singleJumpClearance = Math.max(3, characterHeight * 0.055);
-      horizontalBottomY = groundY - characterHeight - singleJumpHeight - singleJumpClearance;
+      const sceneRect = sceneElement.getBoundingClientRect();
+      const characterRect = characterCanvas.getBoundingClientRect();
+      const currentJumpHeight = Math.max(0, Number.parseFloat(
+        getComputedStyle(characterCanvas).getPropertyValue("--cheonho-jump-y") || "0"
+      ) || 0);
+      const currentVisibleTop = characterRect.top - sceneRect.top
+        + characterBounds.top * characterRect.height;
+      const restingVisibleTop = currentVisibleTop + currentJumpHeight;
+      const singleJumpApexTop = restingVisibleTop - singleJumpHeight;
+      const singleJumpClearance = Math.max(2, characterHeight * 0.015);
+      horizontalBottomY = singleJumpApexTop - singleJumpClearance;
     }
     horizontalFlightY = Math.max(4, Math.min(58,
       centerPercentForBottom(horizontalBottomY)
