@@ -1002,6 +1002,33 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
 .cheonho-obstacle-rainboot { border:3px solid #5b4774; border-radius:10px 10px 18px 8px; background:linear-gradient(90deg,#886cab,#b798d1 55%,#684e8c); box-shadow:inset 0 -10px rgba(55,36,80,.22); }
 .cheonho-obstacle-skateboard { border:3px solid #3b4650; border-radius:999px; background:linear-gradient(90deg,#f09c45,#e15d62 48%,#5a8bc6); box-shadow:-13px 7px 0 -6px #27343b,13px 7px 0 -6px #27343b; }
 .cheonho-obstacle-mapboard { border:5px solid #365865; border-radius:10px; background:linear-gradient(135deg,rgba(255,255,255,.48) 0 4%,transparent 5%),repeating-linear-gradient(45deg,#7fc6b3 0 12px,#cbe7c8 12px 24px); box-shadow:inset 0 0 0 5px #f0e2bb; }
+.cheonho-obstacle-acorn { border:2px solid #70401f; border-radius:48% 48% 52% 52%; background:linear-gradient(180deg,#76502b 0 28%,#bd7940 29% 100%); transform:translateX(-50%) rotate(-8deg); }
+.cheonho-obstacle-acorn::before { content:""; position:absolute; left:43%; top:-18%; width:15%; height:28%; border-radius:999px; background:#5a371f; transform:rotate(18deg); }
+.cheonho-obstacle-pinecone { border:2px solid #684326; border-radius:46% 46% 42% 42%; background:repeating-radial-gradient(ellipse at 50% 0,#c28b53 0 12%,#7d4f2a 13% 22%); }
+.cheonho-obstacle-frisbee { border:2px solid #2d7592; border-radius:50%; background:radial-gradient(ellipse,#bcecff 0 34%,#57badc 36% 65%,#247d9e 67%); box-shadow:inset 0 2px rgba(255,255,255,.55); }
+.cheonho-obstacle-paperboat { clip-path:polygon(5% 35%,48% 4%,54% 35%,96% 35%,76% 100%,24% 100%); background:linear-gradient(135deg,#fff 0 48%,#bfe0eb 49% 52%,#eef8fb 53%); filter:drop-shadow(0 3px 2px rgba(31,73,88,.28)); }
+.cheonho-obstacle-tennisball { border:2px solid #718f21; border-radius:50%; background:radial-gradient(circle at 35% 28%,#eaff8c 0 10%,#b8dd42 42%,#769e1f 100%); box-shadow:inset 0 0 0 2px rgba(255,255,255,.28); }
+.cheonho-obstacle-glove { border:2px solid #7b3f2d; border-radius:45% 48% 32% 38%; background:radial-gradient(circle at 24% 25%,#ec986d 0 13%,transparent 14%),linear-gradient(145deg,#dd7654,#a84d38); transform:translateX(-50%) rotate(9deg); }
+.cheonho-obstacle-cap { border:2px solid #315b78; border-radius:50% 50% 22% 22%; background:linear-gradient(180deg,#78a9ca 0 67%,#3f7699 68%); }
+.cheonho-obstacle-cap::after { content:""; position:absolute; left:48%; right:-24%; bottom:-3%; height:28%; border:2px solid #315b78; border-radius:0 999px 999px 0; background:#5b91b4; }
+.cheonho-obstacle-towel { border:2px solid #8b668e; border-radius:5px; background:repeating-linear-gradient(90deg,#ead9ee 0 8px,#c69ecc 8px 16px); box-shadow:inset 0 3px rgba(255,255,255,.45); }
+.cheonho-obstacle-thermos { border:3px solid #405c68; border-radius:18px 18px 9px 9px; background:linear-gradient(90deg,#6f96a5,#d8eaef 43% 57%,#5d8392); }
+.cheonho-obstacle-thermos::before { content:""; position:absolute; left:18%; right:18%; top:-5%; height:18%; border-radius:6px; background:#2f4d59; }
+.cheonho-obstacle-lunchbox { border:3px solid #805632; border-radius:9px; background:linear-gradient(180deg,#f4c67d 0 24%,#c98345 25%); box-shadow:inset 0 4px rgba(255,255,255,.32); }
+.cheonho-obstacle-soccerball { border:3px solid #495257; border-radius:50%; background:radial-gradient(circle at 50% 42%,#384248 0 17%,transparent 18%),radial-gradient(circle at 17% 28%,#384248 0 10%,transparent 11%),radial-gradient(circle at 80% 70%,#384248 0 11%,transparent 12%),#f1f2eb; }
+.cheonho-obstacle-helmet { border:3px solid #315d79; border-radius:55% 55% 18% 18%; background:linear-gradient(145deg,#9bd0ea,#438aae 70%); box-shadow:inset 5px 3px rgba(255,255,255,.35); }
+.cheonho-obstacle-wateringcan { border:3px solid #3f7663; border-radius:32% 25% 18% 18%; background:linear-gradient(135deg,#a7d7bd,#4f9a79); box-shadow:inset 5px 0 rgba(255,255,255,.28); }
+.cheonho-obstacle-wateringcan::after { content:""; position:absolute; left:-30%; top:18%; width:42%; height:25%; border-radius:999px 0 0 999px; background:#5b9e82; transform:rotate(-12deg); }
+.cheonho-obstacle-boots { border:3px solid #5c456e; border-radius:12px 12px 18px 8px; background:linear-gradient(90deg,#9577ae 0 44%,#6d5184 45% 54%,#a486ba 55%); box-shadow:inset 0 -10px rgba(55,36,80,.18); }
+.cheonho-obstacle-toolbox { border:3px solid #693938; border-radius:8px; background:linear-gradient(180deg,#e27662 0 28%,#a7433f 29%); box-shadow:inset 0 4px rgba(255,255,255,.22); }
+.cheonho-obstacle-toolbox::before { content:""; position:absolute; left:25%; right:25%; top:-22%; height:30%; border:3px solid #693938; border-bottom:0; border-radius:999px 999px 0 0; }
+.cheonho-obstacle-stroller { border:3px solid #344f5b; border-radius:50% 50% 18% 18%; background:linear-gradient(145deg,#9ac9d8 0 52%,#477b8e 53%); box-shadow:-16px 12px 0 -9px #223b46,16px 12px 0 -9px #223b46; }
+.cheonho-obstacle-suitcase { border:3px solid #674733; border-radius:10px; background:repeating-linear-gradient(90deg,#b98258 0 13%,#9b6745 13% 26%); box-shadow:inset 0 0 0 4px rgba(255,255,255,.14); }
+.cheonho-obstacle-suitcase::before { content:""; position:absolute; left:31%; right:31%; top:-18%; height:22%; border:3px solid #674733; border-bottom:0; border-radius:7px 7px 0 0; }
+.cheonho-obstacle-parasol { border:3px solid #815065; border-radius:60% 60% 8% 8%; background:repeating-linear-gradient(90deg,#efbad1 0 17%,#ca7da3 17% 34%); }
+.cheonho-obstacle-parasol::after { content:""; position:absolute; left:47%; top:45%; bottom:-2%; width:6%; border-radius:999px; background:#68525c; }
+.cheonho-obstacle-wagon { border:3px solid #69452d; border-radius:10px 10px 18px 18px; background:repeating-linear-gradient(0deg,#bd7950 0 20%,#8e5637 20% 30%); box-shadow:-18px 12px 0 -10px #28363c,18px 12px 0 -10px #28363c; }
+.cheonho-obstacle-foldingtable { border:3px solid #5d4935; border-radius:7px; background:linear-gradient(180deg,#d3a96d 0 25%,transparent 26%),linear-gradient(72deg,transparent 0 43%,#66513c 44% 53%,transparent 54%),linear-gradient(-72deg,transparent 0 43%,#66513c 44% 53%,transparent 54%); }
 .cheonho-obstacle-fence,
 .cheonho-obstacle-gate,
 .cheonho-obstacle-kiosk,

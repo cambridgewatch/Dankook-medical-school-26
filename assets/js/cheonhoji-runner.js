@@ -56,6 +56,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   let consecutiveDoubleJumps = 0;
   let obstacleTier = -1;
   let obstacleRateTier = -1;
+  let lastSpawnClusterCount = 1;
   const currentPlatform = () => window.matchMedia("(pointer: coarse)").matches ? "mobile" : "pc";
   const validRankingKeys = new Set(["otter-mobile", "otter-pc", "turtle-mobile", "turtle-pc"]);
   const defaultRankingKey = `${localStorage.getItem("cheonhojiGameCharacter") === "turtle" ? "turtle" : "otter"}-${currentPlatform()}`;
@@ -115,10 +116,25 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   const DOUBLE_JUMP_TYPES = new Set(["barrier", "fence", "gate", "kiosk", "mapboard"]);
+  const LOW_CLUSTER_TYPES = new Set([
+    "puddle", "rock", "curb", "leaves", "picnicmat", "ducktoy", "skateboard",
+    "acorn", "pinecone", "frisbee", "paperboat", "tennisball", "glove", "cap", "towel",
+  ]);
   const OBSTACLE_TIERS = [
-    ["puddle", "rock", "curb", "bottle", "leaves", "picnicmat", "ducktoy", "rainboot"],
-    ["cooler", "planter", "basket", "bollard", "chair", "stump", "sandbag", "flowerpot", "backpack", "umbrella", "bucket", "crate"],
-    ["cone", "bin", "sign", "scooter", "lifebuoy", "lantern", "hydrant", "bench", "cart", "bike", "tire", "flowerbox", "camera", "tripod", "skateboard"],
+    [
+      "puddle", "rock", "curb", "bottle", "leaves", "picnicmat", "ducktoy", "rainboot",
+      "acorn", "pinecone", "frisbee", "paperboat", "tennisball", "glove", "cap", "towel",
+    ],
+    [
+      "cooler", "planter", "basket", "bollard", "chair", "stump", "sandbag", "flowerpot",
+      "backpack", "umbrella", "bucket", "crate", "thermos", "lunchbox", "soccerball",
+      "helmet", "wateringcan", "boots", "toolbox",
+    ],
+    [
+      "cone", "bin", "sign", "scooter", "lifebuoy", "lantern", "hydrant", "bench", "cart",
+      "bike", "tire", "flowerbox", "camera", "tripod", "skateboard", "stroller", "suitcase",
+      "parasol", "wagon", "foldingtable",
+    ],
     ["barrier", "fence", "gate", "kiosk", "mapboard"],
   ];
 
@@ -259,6 +275,26 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       rainboot: { width: 0.035, height: 0.070 },
       skateboard: { width: 0.075, height: 0.035 },
       mapboard: { width: 0.060, height: 0.180 },
+      acorn: { width: 0.018, height: 0.026 },
+      pinecone: { width: 0.025, height: 0.040 },
+      frisbee: { width: 0.045, height: 0.018 },
+      paperboat: { width: 0.040, height: 0.032 },
+      tennisball: { width: 0.025, height: 0.035 },
+      glove: { width: 0.035, height: 0.032 },
+      cap: { width: 0.040, height: 0.035 },
+      towel: { width: 0.055, height: 0.018 },
+      thermos: { width: 0.025, height: 0.080 },
+      lunchbox: { width: 0.048, height: 0.065 },
+      soccerball: { width: 0.038, height: 0.065 },
+      helmet: { width: 0.045, height: 0.065 },
+      wateringcan: { width: 0.055, height: 0.075 },
+      boots: { width: 0.045, height: 0.075 },
+      toolbox: { width: 0.055, height: 0.070 },
+      stroller: { width: 0.070, height: 0.100 },
+      suitcase: { width: 0.048, height: 0.100 },
+      parasol: { width: 0.070, height: 0.095 },
+      wagon: { width: 0.075, height: 0.090 },
+      foldingtable: { width: 0.070, height: 0.090 },
     };
     const ratio = ratios[obstacle.type] || ratios.curb;
     const mobileScale = coarsePointer ? 0.94 : 1;
@@ -304,8 +340,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     obstacle.element.style.setProperty("--obstacle-h", `${obstacleHeight}px`);
   }
 
-  function spawnObstacle() {
-    const type = obstacleTypeForProgress(currentLaps());
+  function createObstacle(type, x) {
     const element = document.createElement("div");
     element.className = `cheonho-obstacle cheonho-obstacle-${type}`;
     element.dataset.obstacleType = type;
@@ -317,15 +352,56 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       `);
     }
     obstacleLayer.appendChild(element);
-    const obstacle = { element, x: 108, type };
+    const obstacle = { element, x, type };
     sizeObstacle(obstacle);
+    element.style.setProperty("--obstacle-x", `${x}%`);
     obstacles.push(obstacle);
+    return obstacle;
+  }
+
+  function lowClusterCount() {
+    const roll = Math.random();
+    if (roll < 0.48) return 1;
+    if (roll < 0.80) return 2;
+    return 3;
+  }
+
+  function spawnObstacle() {
+    const firstType = obstacleTypeForProgress(currentLaps());
+    const clusterCount = LOW_CLUSTER_TYPES.has(firstType) ? lowClusterCount() : 1;
+    const availableLowTypes = OBSTACLE_TIERS
+      .slice(0, Math.min(obstacleTier, 2) + 1)
+      .flat()
+      .filter((type) => LOW_CLUSTER_TYPES.has(type));
+    const clusterTypes = [firstType];
+    while (clusterTypes.length < clusterCount) {
+      const previousType = clusterTypes[clusterTypes.length - 1];
+      const alternatives = availableLowTypes.filter((type) => type !== previousType);
+      const choices = alternatives.length ? alternatives : availableLowTypes;
+      clusterTypes.push(choices[Math.floor(Math.random() * choices.length)] || firstType);
+    }
+
+    const sceneWidth = Math.max(scene.clientWidth, 1);
+    const clusterObstacles = clusterTypes.map((type) => createObstacle(type, 108));
+    const nearGap = Math.max(4, sceneWidth * 0.004);
+    let spawnX = 108;
+    clusterObstacles.forEach((obstacle, index) => {
+      if (index > 0) {
+        const previous = clusterObstacles[index - 1];
+        const centerDistance = previous.element.offsetWidth / 2 + obstacle.element.offsetWidth / 2 + nearGap;
+        spawnX += (centerDistance / sceneWidth) * 100;
+      }
+      obstacle.x = spawnX;
+      obstacle.element.style.setProperty("--obstacle-x", `${spawnX}%`);
+    });
+    lastSpawnClusterCount = clusterTypes.length;
   }
 
   function scheduleNextSpawn(laps) {
     const difficulty = difficultyFor(laps);
     const base = 2.9 + Math.random() * 1.5;
-    const recoveryMinimum = DOUBLE_JUMP_TYPES.has(lastObstacleType) ? 2.25 : 1.42;
+    const clusterRecovery = (lastSpawnClusterCount - 1) * 0.32;
+    const recoveryMinimum = (DOUBLE_JUMP_TYPES.has(lastObstacleType) ? 2.25 : 1.42) + clusterRecovery;
     const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
     const turtle = scene.dataset.character === "turtle";
     const spacingScale = coarsePointer ? (turtle ? 1.32 : 1.14) : 1;
@@ -375,8 +451,18 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function obstaclePixelIsOpaque(type, localX, localY, width, height) {
-    if (type === "puddle" || type === "rock") {
+    if (["puddle", "rock", "acorn", "pinecone", "frisbee", "tennisball", "soccerball", "helmet"].includes(type)) {
       return ellipseContains(localX, localY, width / 2, height / 2, width / 2, height / 2);
+    }
+    if (type === "paperboat") {
+      const upperSail = localY >= height * 0.04
+        && localY <= height * 0.38
+        && localX >= width * (0.48 - (localY / height) * 1.25)
+        && localX <= width * (0.54 + (localY / height) * 1.20);
+      const lowerHull = localY >= height * 0.34
+        && localX >= width * (0.05 + (localY / height - 0.34) * 0.29)
+        && localX <= width * (0.96 - (localY / height - 0.34) * 0.31);
+      return upperSail || lowerHull;
     }
     if (type === "bottle") {
       const body = roundedRectContains(localX, localY, width * 0.18, height * 0.20, width * 0.82, height, width * 0.16);
@@ -592,6 +678,26 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       rainboot: "장화",
       skateboard: "스케이트보드",
       mapboard: "대형 호수 안내판",
+      acorn: "도토리",
+      pinecone: "솔방울",
+      frisbee: "프리스비",
+      paperboat: "종이배",
+      tennisball: "테니스공",
+      glove: "운동 장갑",
+      cap: "모자",
+      towel: "접힌 수건",
+      thermos: "보온병",
+      lunchbox: "도시락 가방",
+      soccerball: "축구공",
+      helmet: "자전거 헬멧",
+      wateringcan: "물뿌리개",
+      boots: "장화 한 켤레",
+      toolbox: "공구 상자",
+      stroller: "유모차",
+      suitcase: "여행 가방",
+      parasol: "접이식 파라솔",
+      wagon: "캠핑 웨건",
+      foldingtable: "접이식 테이블",
     };
     if (crashReasonElement) crashReasonElement.textContent = `${names[obstacle?.type] || "장애물"}에 부딪혔어요.`;
     if (finalScoreElement) finalScoreElement.textContent = formattedLaps(score);
@@ -611,6 +717,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     consecutiveDoubleJumps = 0;
     obstacleTier = -1;
     obstacleRateTier = -1;
+    lastSpawnClusterCount = 1;
     gameOver = false;
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-jumped", "is-jumping");
@@ -764,6 +871,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     consecutiveDoubleJumps = 0;
     obstacleTier = -1;
     obstacleRateTier = -1;
+    lastSpawnClusterCount = 1;
     gameOver = false;
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-collision", "has-jumped", "is-jumping");
