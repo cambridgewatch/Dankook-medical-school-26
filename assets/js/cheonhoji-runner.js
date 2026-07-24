@@ -562,6 +562,53 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     return roundedRectContains(localX, localY, 0, 0, width, height, radius);
   }
 
+  function pcLowObstacleFootContact(type, characterRect, obstacleRect, mask) {
+    if (window.matchMedia("(pointer: coarse)").matches
+      || !LOW_CLUSTER_TYPES.has(type)
+      || scene.classList.contains("is-jumping")) return false;
+
+    const left = Math.max(characterRect.left, obstacleRect.left);
+    const right = Math.min(characterRect.right, obstacleRect.right);
+    if (left >= right) return false;
+
+    // The rendered feet can finish a few screen pixels above the canvas edge on PC.
+    // Compare the lowest opaque foot pixel with the uppermost opaque obstacle pixel,
+    // instead of extending the whole character hit box.
+    const maximumFootGap = Math.max(6, Math.min(12, characterRect.height * 0.065));
+    for (let screenX = Math.floor(left); screenX < Math.ceil(right); screenX += 1) {
+      const characterX = Math.min(mask.width - 1, Math.max(0,
+        Math.floor(((screenX + 0.5 - characterRect.left) / characterRect.width) * mask.width)
+      ));
+
+      let footY = null;
+      for (let screenY = Math.ceil(characterRect.bottom) - 1; screenY >= Math.floor(characterRect.top); screenY -= 1) {
+        const characterY = Math.min(mask.height - 1, Math.max(0,
+          mask.height - 1 - Math.floor(((screenY + 0.5 - characterRect.top) / characterRect.height) * mask.height)
+        ));
+        if (mask.data[(characterY * mask.width + characterX) * 4 + 3] >= 96) {
+          footY = screenY + 0.5;
+          break;
+        }
+      }
+      if (footY === null) continue;
+
+      const obstacleX = screenX + 0.5 - obstacleRect.left;
+      let obstacleTopY = null;
+      for (let screenY = Math.floor(obstacleRect.top); screenY < Math.ceil(obstacleRect.bottom); screenY += 1) {
+        const obstacleY = screenY + 0.5 - obstacleRect.top;
+        if (obstaclePixelIsOpaque(type, obstacleX, obstacleY, obstacleRect.width, obstacleRect.height)) {
+          obstacleTopY = screenY + 0.5;
+          break;
+        }
+      }
+      if (obstacleTopY === null) continue;
+
+      const groundGap = obstacleRect.bottom - footY;
+      if (groundGap >= -2 && groundGap <= maximumFootGap) return true;
+    }
+    return false;
+  }
+
   function pixelsOverlap(obstacleElement, type) {
     function sceneLocalRect(element) {
       const transformValue = getComputedStyle(element).transform;
@@ -580,14 +627,14 @@ if (scene && track && character && obstacleLayer && scoreElement) {
 
     const characterRect = sceneLocalRect(character);
     const obstacleRect = sceneLocalRect(obstacleElement);
+    const mask = window.getCheonhoCharacterPixelMask?.();
+    if (!mask?.data?.length || !mask.width || !mask.height) return false;
     const left = Math.max(characterRect.left, obstacleRect.left);
     const right = Math.min(characterRect.right, obstacleRect.right);
     const top = Math.max(characterRect.top, obstacleRect.top);
     const bottom = Math.min(characterRect.bottom, obstacleRect.bottom);
-    if (left >= right || top >= bottom) return false;
-
-    const mask = window.getCheonhoCharacterPixelMask?.();
-    if (!mask?.data?.length || !mask.width || !mask.height) return false;
+    if (left >= right) return false;
+    if (top >= bottom) return pcLowObstacleFootContact(type, characterRect, obstacleRect, mask);
     const startX = Math.floor(left);
     const endX = Math.ceil(right);
     const startY = Math.floor(top);
@@ -608,7 +655,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
         if (alpha >= 96) return true;
       }
     }
-    return false;
+    return pcLowObstacleFootContact(type, characterRect, obstacleRect, mask);
   }
 
   function heronPixelsOverlap() {

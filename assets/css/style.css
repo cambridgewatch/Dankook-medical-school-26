@@ -925,6 +925,11 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   .cheonho-run-scene.is-fullscreen-fallback .cheonho-character-canvas {
     --cheonho-character-ground-trim: 24.5%;
   }
+  .cheonho-run-scene[data-character="otter"]:fullscreen .cheonho-character-canvas,
+  .cheonho-run-scene[data-character="otter"]:-webkit-full-screen .cheonho-character-canvas,
+  .cheonho-run-scene[data-character="otter"].is-fullscreen-fallback .cheonho-character-canvas {
+    --cheonho-character-ground-trim: 27%;
+  }
   .cheonho-run-scene[data-character="turtle"]:fullscreen .cheonho-character-canvas,
   .cheonho-run-scene[data-character="turtle"]:-webkit-full-screen .cheonho-character-canvas,
   .cheonho-run-scene[data-character="turtle"].is-fullscreen-fallback .cheonho-character-canvas {
