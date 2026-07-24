@@ -609,6 +609,7 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   border-top: 1px solid #d9e4ec;
   border-bottom: 1px solid #d9e4ec;
   background: #b9dceb;
+  touch-action: manipulation;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;

@@ -368,15 +368,15 @@ if (sceneElement && canvas) {
   });
   fastLandButton?.addEventListener("contextmenu", (event) => event.preventDefault());
 
-  let lastFullscreenTouchEnd = 0;
+  let lastSceneTouchEnd = 0;
   sceneElement.addEventListener("touchend", (event) => {
-    if (!fullscreenActive() || !window.matchMedia("(pointer: coarse)").matches) return;
+    if (!window.matchMedia("(pointer: coarse)").matches || event.target.closest("button")) return;
     const now = Date.now();
-    if (now - lastFullscreenTouchEnd < 360) event.preventDefault();
-    lastFullscreenTouchEnd = now;
+    if (now - lastSceneTouchEnd < 360) event.preventDefault();
+    lastSceneTouchEnd = now;
   }, { passive: false });
   sceneElement.addEventListener("dblclick", (event) => {
-    if (fullscreenActive() && window.matchMedia("(pointer: coarse)").matches) event.preventDefault();
+    if (window.matchMedia("(pointer: coarse)").matches) event.preventDefault();
   });
 
   function resize() {
