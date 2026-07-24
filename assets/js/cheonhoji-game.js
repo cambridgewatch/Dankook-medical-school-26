@@ -199,7 +199,7 @@ if (sceneElement && canvas) {
   }
 
   function startJump() {
-    if (!running || jumpCount >= 2 || fastFalling) return false;
+    if (!running || jumpCount >= 2 || fastFalling || sceneElement.classList.contains("has-heron-rider")) return false;
     jumping = true;
     fastFalling = false;
     if (fastLandButton) fastLandButton.disabled = false;
@@ -262,6 +262,9 @@ if (sceneElement && canvas) {
   }));
   sceneElement.addEventListener("cheonho:setrunning", (event) => {
     setRunning(Boolean(event.detail?.running));
+  });
+  sceneElement.addEventListener("cheonho:heronridechange", (event) => {
+    if (event.detail?.active) resetJump();
   });
 
   function fullscreenActive() {

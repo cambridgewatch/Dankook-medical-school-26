@@ -701,9 +701,13 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   z-index: 6;
   width: clamp(45px, 4.67vw, 68px);
   height: 22.67%;
-  transform: translate(-50%, calc(var(--cheonho-character-ground-trim) - var(--cheonho-jump-y, 0px)));
+  transform: translate(-50%, calc(var(--cheonho-character-ground-trim) - var(--cheonho-jump-y, 0px) - var(--cheonho-ride-y, 0px)));
   pointer-events: none;
   filter: drop-shadow(0 8px 8px rgba(20, 34, 39, .25));
+}
+.cheonho-run-scene.has-heron-rider .cheonho-character-canvas {
+  --cheonho-jump-y: 0px !important;
+  z-index: 8;
 }
 .cheonho-run-scene[data-character="turtle"] .cheonho-character-canvas {
   --cheonho-character-ground-trim: 20%;

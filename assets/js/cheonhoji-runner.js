@@ -58,6 +58,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   let obstacleTier = -1;
   let obstacleRateTier = -1;
   let lastSpawnClusterCount = 1;
+  let heronRideLift = 0;
   const currentPlatform = () => window.matchMedia("(pointer: coarse)").matches ? "mobile" : "pc";
   const validRankingKeys = new Set(["otter-mobile", "otter-pc", "turtle-mobile", "turtle-pc"]);
   const defaultRankingKey = `${localStorage.getItem("cheonhojiGameCharacter") === "turtle" ? "turtle" : "otter"}-${currentPlatform()}`;
@@ -648,6 +649,64 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     return false;
   }
 
+  function maskAlphaAtScreen(mask, rect, screenX, screenY) {
+    if (screenX < rect.left || screenX >= rect.right || screenY < rect.top || screenY >= rect.bottom) return 0;
+    const pixelX = Math.min(mask.width - 1, Math.max(0,
+      Math.floor(((screenX - rect.left) / rect.width) * mask.width)
+    ));
+    const pixelY = Math.min(mask.height - 1, Math.max(0,
+      mask.height - 1 - Math.floor(((screenY - rect.top) / rect.height) * mask.height)
+    ));
+    return mask.data[(pixelY * mask.width + pixelX) * 4 + 3];
+  }
+
+  function heronBoardingPixelsTouch() {
+    if (!heronCanvas || gameMode !== "walk" || !window.isCheonhoHeronBoardable?.()) return false;
+    const characterRect = character.getBoundingClientRect();
+    const heronRect = heronCanvas.getBoundingClientRect();
+    const characterMask = window.getCheonhoCharacterPixelMask?.();
+    const heronMask = window.getCheonhoHeronPixelMask?.();
+    if (!characterMask?.data?.length || !heronMask?.data?.length) return false;
+
+    const left = Math.max(characterRect.left, heronRect.left);
+    const right = Math.min(characterRect.right, heronRect.right);
+    if (left >= right) return false;
+
+    // Each screen column uses the character's actual lowest opaque pixel. A heron
+    // pixel must be directly beneath it, so touching a wing or body from the side
+    // never counts as boarding.
+    for (let screenX = Math.floor(left); screenX < Math.ceil(right); screenX += 1) {
+      let characterFootY = -1;
+      for (let screenY = Math.floor(characterRect.bottom) - 1; screenY >= Math.floor(characterRect.top); screenY -= 1) {
+        if (maskAlphaAtScreen(characterMask, characterRect, screenX + 0.5, screenY + 0.5) >= 96) {
+          characterFootY = screenY + 0.5;
+          break;
+        }
+      }
+      if (characterFootY < 0) continue;
+      for (let gap = 0; gap <= 4; gap += 1) {
+        if (maskAlphaAtScreen(heronMask, heronRect, screenX + 0.5, characterFootY + gap) >= 80) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function heronTopAtCharacterCenter() {
+    if (!heronCanvas) return null;
+    const heronRect = heronCanvas.getBoundingClientRect();
+    const heronMask = window.getCheonhoHeronPixelMask?.();
+    if (!heronMask?.data?.length) return null;
+    const centerX = Math.max(heronRect.left + 1, Math.min(heronRect.right - 1,
+      character.getBoundingClientRect().left + character.getBoundingClientRect().width / 2
+    ));
+    for (let screenY = Math.floor(heronRect.top); screenY < Math.ceil(heronRect.bottom); screenY += 1) {
+      if (maskAlphaAtScreen(heronMask, heronRect, centerX, screenY + 0.5) >= 80) return screenY + 0.5;
+    }
+    return null;
+  }
+
   async function saveBestScore(score) {
     if (!currentUser || !Number.isFinite(score)) return;
     const uid = currentUser.uid;
@@ -853,10 +912,24 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     distanceLaps += delta / baseLapDuration;
     setBackgroundSpeed(1);
     renderScore();
-    const characterPercentPerSecond = 8;
-    if (movement.left !== movement.right) {
-      setCharacterX(characterX + (movement.right ? 1 : -1) * characterPercentPerSecond * delta);
+    if (heronBoardingPixelsTouch()) window.boardCheonhoHeron?.();
+    const rideState = window.getCheonhoHeronRideState?.();
+    if (rideState?.active) {
+      setCharacterX(rideState.x);
+      const sceneRect = scene.getBoundingClientRect();
+      const groundBottom = Number.parseFloat(getComputedStyle(scene).getPropertyValue("--cheonho-ground-bottom")) || 12;
+      const groundY = sceneRect.bottom - sceneRect.height * (groundBottom / 100);
+      const heronTop = heronTopAtCharacterCenter();
+      if (Number.isFinite(heronTop)) heronRideLift = Math.max(0, groundY - heronTop + 2);
+    } else {
+      heronRideLift = Math.max(0, heronRideLift - scene.clientHeight * 1.75 * delta);
+      const characterPercentPerSecond = 8;
+      if (heronRideLift <= 0.5 && movement.left !== movement.right) {
+        setCharacterX(characterX + (movement.right ? 1 : -1) * characterPercentPerSecond * delta);
+      }
     }
+    character.style.setProperty("--cheonho-ride-y", `${heronRideLift}px`);
+    scene.classList.toggle("has-heron-rider", Boolean(rideState?.active));
   }
 
   function frame(time) {
@@ -956,6 +1029,9 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     obstacleRateTier = -1;
     lastSpawnClusterCount = 1;
     gameOver = false;
+    heronRideLift = 0;
+    character.style.setProperty("--cheonho-ride-y", "0px");
+    scene.classList.remove("has-heron-rider");
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-collision", "has-jumped", "is-jumping");
     heronCanvas?.classList.remove("is-hit");

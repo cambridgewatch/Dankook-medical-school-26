@@ -93,6 +93,8 @@ if (sceneElement && canvas) {
   let walkDuration = 6;
   let walkStart = { x: displayX, y: displayY };
   let walkEnd = { x: displayX, y: displayY };
+  let riderActive = false;
+  let riderHasTakenOff = false;
 
   const clamp01 = (value) => Math.max(0, Math.min(1, value));
   const smoothstep = (value) => {
@@ -210,6 +212,17 @@ if (sceneElement && canvas) {
       x: endX,
       y: bounds.minY + 5 + Math.random() * Math.min(13, bounds.maxY - bounds.minY - 7),
     };
+    if (riderActive) riderHasTakenOff = true;
+  }
+
+  function setRiderActive(active) {
+    const nextActive = Boolean(active);
+    if (riderActive === nextActive) return;
+    riderActive = nextActive;
+    if (riderActive) riderHasTakenOff = false;
+    sceneElement.dispatchEvent(new CustomEvent("cheonho:heronridechange", {
+      detail: { active: riderActive },
+    }));
   }
 
   function beginWalkPerch() {
@@ -239,6 +252,7 @@ if (sceneElement && canvas) {
         walkState = "perched";
         walkElapsed = 0;
         walkDuration = 3.5 + Math.random() * 4;
+        if (riderActive && riderHasTakenOff) setRiderActive(false);
       } else if (Math.random() < 0.28) {
         beginWalkPerch();
       } else {
@@ -258,6 +272,7 @@ if (sceneElement && canvas) {
   }
 
   function leaveWalkMode() {
+    setRiderActive(false);
     flightState = "patrol";
     nextAttackIn = 4.5 + Math.random() * 2.5;
     hazardous = false;
@@ -421,6 +436,16 @@ if (sceneElement && canvas) {
   };
   window.isCheonhoHeronAttackActive = () => flightState === "warning" || flightState === "attack";
   window.isCheonhoHeronHazardous = () => hazardous && flightState === "attack";
+  window.isCheonhoHeronBoardable = () => !lastRunMode && walkState === "perched" && !riderActive;
+  window.boardCheonhoHeron = () => {
+    if (!window.isCheonhoHeronBoardable()) return false;
+    setRiderActive(true);
+    return true;
+  };
+  window.getCheonhoHeronRideState = () => ({
+    active: riderActive,
+    x: displayX,
+  });
 
   function resize() {
     const width = Math.max(1, canvas.clientWidth);
