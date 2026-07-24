@@ -1,4 +1,4 @@
-const CACHE_NAME = "dku-med26-app-v152";
+const CACHE_NAME = "dku-med26-app-v153";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -41,6 +41,7 @@ const APP_SHELL = [
   "./assets/img/cheonhoji-night-09-gymnasium-v2.jpg",
   "./assets/img/cheonhoji-night-10-lakeside-building-v2.jpg",
   "./assets/js/main.js",
+  "./assets/js/mascot-progress-reset-20260724.js",
   "./assets/js/session-hint.js",
   "./assets/js/password-visibility.js",
   "./assets/js/firebase-init.js",
