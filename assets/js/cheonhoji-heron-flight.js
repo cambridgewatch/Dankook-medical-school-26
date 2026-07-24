@@ -38,6 +38,12 @@ if (sceneElement && canvas) {
   stage.add(heron);
   const leftWing = heron.getObjectByName("left_Wing");
   const rightWing = heron.getObjectByName("right_Wing");
+  const mobileCollisionExcludedParts = [];
+  heron.traverse((object) => {
+    if (object.name.startsWith("Leg_") || object.name.startsWith("Toe_")) {
+      mobileCollisionExcludedParts.push(object);
+    }
+  });
 
   const warning = document.createElement("div");
   warning.className = "cheonho-heron-warning";
@@ -49,7 +55,8 @@ if (sceneElement && canvas) {
   sceneElement.appendChild(targetMarker);
 
   let pixelBuffer = new Uint8Array(0);
-  window.getCheonhoHeronPixelMask = () => {
+  let mobileCollisionMaskReady = false;
+  function readHeronPixels() {
     const gl = renderer.getContext();
     const width = gl.drawingBufferWidth;
     const height = gl.drawingBufferHeight;
@@ -62,6 +69,17 @@ if (sceneElement && canvas) {
     } catch (error) {
       return null;
     }
+  }
+  window.getCheonhoHeronPixelMask = () => {
+    if (window.matchMedia("(pointer: coarse)").matches && mobileCollisionMaskReady) {
+      const gl = renderer.getContext();
+      return {
+        data: pixelBuffer,
+        width: gl.drawingBufferWidth,
+        height: gl.drawingBufferHeight,
+      };
+    }
+    return readHeronPixels();
   };
 
   const TALL_OBSTACLE_SELECTOR = ["barrier", "fence", "gate", "kiosk", "mapboard"]
@@ -203,8 +221,16 @@ if (sceneElement && canvas) {
     const centerPercentForBottom = (bottomY) => (
       ((bottomY - heronBottomOffset) / sceneHeight) * 100
     );
+    const pcFullscreenTurtle = !coarsePointer
+      && sceneElement.dataset.character === "turtle"
+      && (
+        document.fullscreenElement === sceneElement
+        || document.webkitFullscreenElement === sceneElement
+        || sceneElement.classList.contains("is-fullscreen-fallback")
+      );
+    const horizontalClearanceRatio = pcFullscreenTurtle ? 1.7 : 1.5;
     horizontalFlightY = Math.max(4, Math.min(58,
-      centerPercentForBottom(groundY - horizontalHeightReference * 1.5)
+      centerPercentForBottom(groundY - horizontalHeightReference * horizontalClearanceRatio)
     ));
     diveBottomY = Math.max(30, Math.min(88, centerPercentForBottom(groundY)));
     targetMarker.style.left = `${attackTargetX}%`;
@@ -513,6 +539,15 @@ if (sceneElement && canvas) {
     const delta = previousTime ? Math.min((time - previousTime) / 1000, 0.05) : 0;
     previousTime = time;
     updateVisuals(time, delta);
+    const mobileCollisionMask = window.matchMedia("(pointer: coarse)").matches;
+    if (mobileCollisionMask) {
+      mobileCollisionExcludedParts.forEach((part) => { part.visible = false; });
+      renderer.render(stage, camera);
+      mobileCollisionMaskReady = Boolean(readHeronPixels());
+      mobileCollisionExcludedParts.forEach((part) => { part.visible = true; });
+    } else {
+      mobileCollisionMaskReady = false;
+    }
     renderer.render(stage, camera);
     requestAnimationFrame(frame);
   }

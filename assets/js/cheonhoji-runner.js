@@ -672,6 +672,20 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const characterMask = window.getCheonhoCharacterPixelMask?.();
     const heronMask = window.getCheonhoHeronPixelMask?.();
     if (!characterMask?.data?.length || !heronMask?.data?.length) return false;
+    const mobileCollision = window.matchMedia("(pointer: coarse)").matches;
+
+    function opaqueMaskPixel(mask, pixelX, pixelY, threshold, radius = 0) {
+      for (let offsetY = -radius; offsetY <= radius; offsetY += 1) {
+        const sampleY = Math.max(0, Math.min(mask.height - 1, pixelY + offsetY));
+        for (let offsetX = -radius; offsetX <= radius; offsetX += 1) {
+          const sampleX = Math.max(0, Math.min(mask.width - 1, pixelX + offsetX));
+          const index = (sampleY * mask.width + sampleX) * 4;
+          if (mask.data[index + 3] < threshold) continue;
+          return true;
+        }
+      }
+      return false;
+    }
 
     for (let screenY = Math.floor(top); screenY < Math.ceil(bottom); screenY += 1) {
       const characterY = Math.min(characterMask.height - 1, Math.max(0,
@@ -687,10 +701,20 @@ if (scene && track && character && obstacleLayer && scoreElement) {
         const heronX = Math.min(heronMask.width - 1, Math.max(0,
           Math.floor(((screenX + 0.5 - heronRect.left) / heronRect.width) * heronMask.width)
         ));
-        const characterAlpha = characterMask.data[(characterY * characterMask.width + characterXPixel) * 4 + 3];
-        if (characterAlpha < 96) continue;
-        const heronAlpha = heronMask.data[(heronY * heronMask.width + heronX) * 4 + 3];
-        if (heronAlpha >= 80) return true;
+        if (!opaqueMaskPixel(
+          characterMask,
+          characterXPixel,
+          characterY,
+          88,
+          mobileCollision ? 1 : 0
+        )) continue;
+        if (opaqueMaskPixel(
+          heronMask,
+          heronX,
+          heronY,
+          72,
+          mobileCollision ? 1 : 0
+        )) return true;
       }
     }
     return false;
