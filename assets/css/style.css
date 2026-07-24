@@ -1293,7 +1293,7 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-fixed-walkway::before { top: -25px; height: 25px; background: linear-gradient(180deg, #754326 0 5px, transparent 5px 19px, #754326 19px 24px), repeating-linear-gradient(90deg, #6b3b22 0 5px, transparent 5px 53px); }
   .cheonho-run-card.is-night .cheonho-fixed-walkway::before { background: radial-gradient(circle at 9px 10px, #ffd47c 0 2px, rgba(255, 204, 105, .28) 3px 6px, transparent 7px) 0 0 / 53px 100% repeat-x, linear-gradient(180deg, #1b2e3b 0 5px, transparent 5px 19px, #1b2e3b 19px 24px), repeating-linear-gradient(90deg, #152631 0 5px, transparent 5px 53px); }
   .cheonho-character-canvas { left: 11%; bottom:var(--cheonho-ground-bottom); width: 63px; height: 31%; }
-  .cheonho-heron-canvas { width:124px; height:78px; }
+  .cheonho-heron-canvas { width:112px; height:70px; }
   .cheonho-heron-ride-button { top:10px; left:10px; min-width:88px; height:36px; padding:0 13px; font-size:12px; }
   .cheonho-run-scene:fullscreen .cheonho-heron-ride-button,
   .cheonho-run-scene:-webkit-full-screen .cheonho-heron-ride-button,
@@ -1317,7 +1317,7 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   }
   .cheonho-run-scene:fullscreen .cheonho-heron-canvas,
   .cheonho-run-scene:-webkit-full-screen .cheonho-heron-canvas,
-  .cheonho-run-scene.is-fullscreen-fallback .cheonho-heron-canvas { width:168px; height:104px; }
+  .cheonho-run-scene.is-fullscreen-fallback .cheonho-heron-canvas { z-index:5; width:150px; height:93px; }
   .cheonho-run-scene[data-character="turtle"]:fullscreen .cheonho-character-canvas,
   .cheonho-run-scene[data-character="turtle"]:-webkit-full-screen .cheonho-character-canvas,
   .cheonho-run-scene[data-character="turtle"].is-fullscreen-fallback .cheonho-character-canvas {

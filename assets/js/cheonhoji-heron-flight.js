@@ -94,6 +94,8 @@ if (sceneElement && canvas) {
   let walkStart = { x: displayX, y: displayY };
   let walkEnd = { x: displayX, y: displayY };
   let riderActive = false;
+  let mobileOtterVisibleHeightRatio = 0.245;
+  let lastRidePointerToggle = -Infinity;
 
   const clamp01 = (value) => Math.max(0, Math.min(1, value));
   const smoothstep = (value) => {
@@ -154,8 +156,7 @@ if (sceneElement && canvas) {
     const characterRect = characterCanvas.getBoundingClientRect();
     if (!sceneRect.width) return 50;
     const center = characterRect.left + characterRect.width / 2;
-    const bounds = safeCanvasBounds();
-    return Math.max(bounds.minX, Math.min(bounds.maxX, ((center - sceneRect.left) / sceneRect.width) * 100));
+    return Math.max(0, Math.min(100, ((center - sceneRect.left) / sceneRect.width) * 100));
   }
 
   function visibleVerticalBounds(mask, fallbackTop = 0.08, fallbackBottom = 0.92) {
@@ -187,6 +188,13 @@ if (sceneElement && canvas) {
     const characterBounds = visibleVerticalBounds(window.getCheonhoCharacterPixelMask?.());
     const heronBounds = visibleVerticalBounds(window.getCheonhoHeronPixelMask?.());
     const characterHeight = Math.max(1, (characterBounds.bottom - characterBounds.top) * characterRect.height);
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    if (coarsePointer && sceneElement.dataset.character !== "turtle") {
+      mobileOtterVisibleHeightRatio = Math.max(0.18, Math.min(0.34, characterHeight / sceneRect.height));
+    }
+    const horizontalHeightReference = coarsePointer
+      ? sceneRect.height * mobileOtterVisibleHeightRatio
+      : characterHeight;
     const groundBottomValue = Number.parseFloat(
       getComputedStyle(sceneElement).getPropertyValue("--cheonho-ground-bottom")
     ) || 12;
@@ -196,7 +204,7 @@ if (sceneElement && canvas) {
       ((bottomY - heronBottomOffset - sceneRect.top) / sceneRect.height) * 100
     );
     horizontalFlightY = Math.max(4, Math.min(58,
-      centerPercentForBottom(groundY - characterHeight * 1.5)
+      centerPercentForBottom(groundY - horizontalHeightReference * 1.5)
     ));
     diveBottomY = Math.max(30, Math.min(88, centerPercentForBottom(groundY)));
     targetMarker.style.left = `${attackTargetX}%`;
@@ -231,6 +239,7 @@ if (sceneElement && canvas) {
     const nextActive = Boolean(active);
     if (riderActive === nextActive) return;
     riderActive = nextActive;
+    sceneElement.classList.toggle("has-heron-rider", riderActive);
     syncRideButton();
     sceneElement.dispatchEvent(new CustomEvent("cheonho:heronridechange", {
       detail: { active: riderActive },
@@ -424,14 +433,14 @@ if (sceneElement && canvas) {
   };
   window.isCheonhoHeronAttackActive = () => flightState === "warning" || flightState === "attack";
   window.isCheonhoHeronHazardous = () => hazardous && flightState === "attack";
-  window.isCheonhoHeronBoardable = () => !lastRunMode && !riderActive;
+  window.isCheonhoHeronBoardable = () => sceneElement.dataset.mode === "walk" && !riderActive;
   window.boardCheonhoHeron = () => {
     if (!window.isCheonhoHeronBoardable()) return false;
     setRiderActive(true);
     return true;
   };
   window.toggleCheonhoHeronRide = () => {
-    if (lastRunMode) return false;
+    if (sceneElement.dataset.mode !== "walk") return false;
     setRiderActive(!riderActive);
     return riderActive;
   };
@@ -474,11 +483,26 @@ if (sceneElement && canvas) {
     heron.position.y = -0.35 + Math.sin(time * 0.004) * 0.045;
   }
 
-  rideButton?.addEventListener("click", (event) => {
+  function toggleRideFromControl(event) {
     event.preventDefault();
     event.stopPropagation();
     sceneElement.dispatchEvent(new CustomEvent("cheonho:setrunning", { detail: { running: true } }));
     window.toggleCheonhoHeronRide();
+  }
+
+  rideButton?.addEventListener("pointerdown", (event) => {
+    if (!window.matchMedia("(pointer: coarse)").matches) return;
+    lastRidePointerToggle = performance.now();
+    toggleRideFromControl(event);
+  });
+  rideButton?.addEventListener("click", (event) => {
+    if (window.matchMedia("(pointer: coarse)").matches
+      && performance.now() - lastRidePointerToggle < 700) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    toggleRideFromControl(event);
   });
 
   function frame(time) {
