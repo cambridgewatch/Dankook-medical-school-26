@@ -597,29 +597,6 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   font-weight: 850;
   letter-spacing: 1.2px;
 }
-.cheonho-story-card {
-  display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
-  align-items: center;
-  gap: 18px;
-  margin: 0 28px 20px;
-  padding: 15px 18px;
-  border: 1px solid #dce7ee;
-  border-radius: 15px;
-  background: linear-gradient(135deg, #f7fbfd 0%, #eef6fa 100%);
-}
-.cheonho-story-card span {
-  color: #294f68;
-  font-size: 13px;
-  font-weight: 850;
-  letter-spacing: -.15px;
-}
-.cheonho-story-card p {
-  margin: 0;
-  color: #627583;
-  font-size: 12px;
-  line-height: 1.65;
-}
 .cheonho-run-scene {
   --cheonho-walkway-height: 24%;
   --cheonho-ground-bottom: 12%;
@@ -1214,15 +1191,6 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-run-head h2 { font-size: 22px; }
   .cheonho-run-head p { font-size: 13px; line-height: 1.55; }
   .cheonho-run-head > span { display: none; }
-  .cheonho-story-card {
-    grid-template-columns: 1fr;
-    gap: 6px;
-    margin: 0 16px 16px;
-    padding: 13px 14px;
-    border-radius: 13px;
-  }
-  .cheonho-story-card span { font-size: 12px; }
-  .cheonho-story-card p { font-size: 11px; line-height: 1.6; }
   .cheonho-game-controls { grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 17px; }
   .cheonho-choice-block > span { font-size: 10px; }
   .cheonho-segmented,
