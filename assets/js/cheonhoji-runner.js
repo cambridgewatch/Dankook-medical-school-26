@@ -19,6 +19,7 @@ const scene = document.querySelector("#cheonhoRunScene");
 const track = scene?.querySelector(".cheonho-background-track");
 const character = document.querySelector("#cheonhoCharacterCanvas");
 const obstacleLayer = document.querySelector("#cheonhoObstacleLayer");
+const heronCanvas = document.querySelector("#cheonhoHeronCanvas");
 const moveControls = scene?.querySelector(".cheonho-mobile-move-controls");
 const scoreElement = document.querySelector("#cheonhoLapScore");
 const finalScoreElement = document.querySelector("#cheonhoFinalScore");
@@ -579,6 +580,43 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     return false;
   }
 
+  function heronPixelsOverlap() {
+    if (!heronCanvas || gameMode !== "run" || elapsedSeconds < 1.5) return false;
+    const characterRect = character.getBoundingClientRect();
+    const heronRect = heronCanvas.getBoundingClientRect();
+    const left = Math.max(characterRect.left, heronRect.left);
+    const right = Math.min(characterRect.right, heronRect.right);
+    const top = Math.max(characterRect.top, heronRect.top);
+    const bottom = Math.min(characterRect.bottom, heronRect.bottom);
+    if (left >= right || top >= bottom) return false;
+
+    const characterMask = window.getCheonhoCharacterPixelMask?.();
+    const heronMask = window.getCheonhoHeronPixelMask?.();
+    if (!characterMask?.data?.length || !heronMask?.data?.length) return false;
+
+    for (let screenY = Math.floor(top); screenY < Math.ceil(bottom); screenY += 1) {
+      const characterY = Math.min(characterMask.height - 1, Math.max(0,
+        characterMask.height - 1 - Math.floor(((screenY + 0.5 - characterRect.top) / characterRect.height) * characterMask.height)
+      ));
+      const heronY = Math.min(heronMask.height - 1, Math.max(0,
+        heronMask.height - 1 - Math.floor(((screenY + 0.5 - heronRect.top) / heronRect.height) * heronMask.height)
+      ));
+      for (let screenX = Math.floor(left); screenX < Math.ceil(right); screenX += 1) {
+        const characterXPixel = Math.min(characterMask.width - 1, Math.max(0,
+          Math.floor(((screenX + 0.5 - characterRect.left) / characterRect.width) * characterMask.width)
+        ));
+        const heronX = Math.min(heronMask.width - 1, Math.max(0,
+          Math.floor(((screenX + 0.5 - heronRect.left) / heronRect.width) * heronMask.width)
+        ));
+        const characterAlpha = characterMask.data[(characterY * characterMask.width + characterXPixel) * 4 + 3];
+        if (characterAlpha < 96) continue;
+        const heronAlpha = heronMask.data[(heronY * heronMask.width + heronX) * 4 + 3];
+        if (heronAlpha >= 80) return true;
+      }
+    }
+    return false;
+  }
+
   async function saveBestScore(score) {
     if (!currentUser || !Number.isFinite(score)) return;
     const uid = currentUser.uid;
@@ -631,7 +669,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     movement.right = false;
     scene.classList.add("has-collision");
     obstacle?.element.classList.add("is-hit");
-    if (obstacle?.element && !obstacle.element.querySelector(".cheonho-impact-mark")) {
+    if (obstacle?.element && obstacle.element.tagName !== "CANVAS" && !obstacle.element.querySelector(".cheonho-impact-mark")) {
       obstacle.element.insertAdjacentHTML("beforeend", '<span class="cheonho-impact-mark">!</span>');
     }
     moveButtons.forEach((button) => button.classList.remove("is-pressed"));
@@ -698,6 +736,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       parasol: "접이식 파라솔",
       wagon: "캠핑 웨건",
       foldingtable: "접이식 테이블",
+      heron: "날아가는 백로",
     };
     if (crashReasonElement) crashReasonElement.textContent = `${names[obstacle?.type] || "장애물"}에 부딪혔어요.`;
     if (finalScoreElement) finalScoreElement.textContent = formattedLaps(score);
@@ -722,6 +761,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-jumped", "is-jumping");
     scene.classList.remove("has-collision");
+    heronCanvas?.classList.remove("is-hit");
     setCharacterX(initialCharacterX());
     renderScore();
     if (gameOverElement) gameOverElement.hidden = true;
@@ -764,6 +804,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
         break;
       }
     }
+    if (!gameOver && heronPixelsOverlap()) finishGame({ element: heronCanvas, type: "heron" });
   }
 
   function updateWalking(delta) {
@@ -875,6 +916,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     gameOver = false;
     scene.dataset.gameOver = "false";
     scene.classList.remove("has-collision", "has-jumped", "is-jumping");
+    heronCanvas?.classList.remove("is-hit");
     if (gameOverElement) gameOverElement.hidden = true;
     setCharacterX(initialCharacterX());
     renderScore();
