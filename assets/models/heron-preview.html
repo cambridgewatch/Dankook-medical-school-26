@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>백로 3D 모델 미리보기</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;padding:24px;background:linear-gradient(145deg,#eef7fb,#dceaf0);color:#17364a;font-family:Pretendard,"Noto Sans KR",sans-serif}
+    main{width:min(1080px,100%);margin:auto}
+    header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:14px}
+    h1{margin:0;font-size:clamp(24px,4vw,40px)}
+    p{margin:6px 0 0;color:#657b89;font-size:14px}
+    .buttons{display:flex;flex-wrap:wrap;gap:7px}
+    button{height:38px;padding:0 16px;border:1px solid #c8d8e1;border-radius:999px;background:#fff;color:#284c62;font:inherit;font-weight:800;cursor:pointer}
+    button:hover,button.is-active{border-color:#4d8fae;background:#e5f4fb;color:#12577a}
+    .viewer{position:relative;overflow:hidden;aspect-ratio:16/9;border:1px solid rgba(94,129,146,.2);border-radius:24px;background:radial-gradient(circle at 50% 35%,#fff 0 18%,#edf7fa 52%,#d4e6ec 100%);box-shadow:0 24px 70px rgba(32,76,98,.18)}
+    canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+    canvas:active{cursor:grabbing}
+    .hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.82);color:#5c7482;font-size:12px;font-weight:750;backdrop-filter:blur(8px);pointer-events:none}
+    @media(max-width:640px){body{padding:14px}header{align-items:flex-start;flex-direction:column}.viewer{aspect-ratio:4/5;border-radius:18px}.buttons{width:100%}.buttons button{flex:1;padding-inline:10px}}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><h1>천호지 백로</h1><p>긴 S자 목과 검은 다리, 겹쳐진 비행 깃을 분리한 3D 비행 모델</p></div>
+      <div class="buttons">
+        <button type="button" data-angle="0.55" class="is-active">3/4</button>
+        <button type="button" data-angle="0">측면</button>
+        <button type="button" data-angle="1.5708">정면</button>
+        <button type="button" data-angle="3.1416">반대편</button>
+      </div>
+    </header>
+    <section class="viewer">
+      <canvas id="viewer"></canvas>
+      <div class="hint">드래그하거나 터치해서 360° 회전</div>
+    </section>
+  </main>
+  <script type="module">
+    import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js";
+    import { createHeron } from "../js/cheonhoji-heron.js";
+
+    const canvas=document.querySelector("#viewer");
+    const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.outputColorSpace=THREE.SRGBColorSpace;
+    renderer.toneMapping=THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure=1.04;
+    renderer.shadowMap.enabled=true;
+    renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+    const scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(30,16/9,.1,50);
+    camera.position.set(0,2.05,9.4);
+    camera.lookAt(-.15,1.8,0);
+    scene.add(new THREE.HemisphereLight(0xffffff,0x7892a0,2.8));
+    const key=new THREE.DirectionalLight(0xfffdf5,3.5);key.position.set(-4,7,6);key.castShadow=true;scene.add(key);
+    const fill=new THREE.DirectionalLight(0xc4e8f8,1.25);fill.position.set(5,3,5);scene.add(fill);
+    const rim=new THREE.DirectionalLight(0xffd59d,1.0);rim.position.set(4,5,-5);scene.add(rim);
+
+    const model=createHeron();
+    model.rotation.y=.55;
+    model.position.y=-.45;
+    scene.add(model);
+    const shadow=new THREE.Mesh(new THREE.CircleGeometry(2.25,64),new THREE.ShadowMaterial({color:0x17394b,opacity:.16}));
+    shadow.rotation.x=-Math.PI/2;shadow.position.set(-.15,.02,0);shadow.scale.set(1.8,.52,1);shadow.receiveShadow=true;scene.add(shadow);
+
+    let dragging=false,lastX=0,lastY=0,targetY=.55,targetX=0;
+    const start=(event)=>{dragging=true;lastX=event.clientX;lastY=event.clientY;canvas.setPointerCapture?.(event.pointerId)};
+    const move=(event)=>{if(!dragging)return;targetY+=(event.clientX-lastX)*.009;targetX=Math.max(-.28,Math.min(.28,targetX+(event.clientY-lastY)*.005));lastX=event.clientX;lastY=event.clientY};
+    const end=()=>{dragging=false};
+    canvas.addEventListener("pointerdown",start);
+    canvas.addEventListener("pointermove",move);
+    canvas.addEventListener("pointerup",end);
+    canvas.addEventListener("pointercancel",end);
+    document.querySelectorAll("[data-angle]").forEach(button=>button.addEventListener("click",()=>{
+      targetY=Number(button.dataset.angle)||0;
+      targetX=0;
+      document.querySelectorAll("[data-angle]").forEach(item=>item.classList.toggle("is-active",item===button));
+    }));
+
+    function resize(){
+      const width=canvas.clientWidth,height=canvas.clientHeight;
+      if(canvas.width!==Math.floor(width*renderer.getPixelRatio())||canvas.height!==Math.floor(height*renderer.getPixelRatio()))renderer.setSize(width,height,false);
+      camera.aspect=width/Math.max(height,1);
+      camera.position.z=width<640?10.7:9.4;
+      camera.updateProjectionMatrix();
+    }
+    function frame(){
+      resize();
+      model.rotation.y+=(targetY-model.rotation.y)*.09;
+      model.rotation.x+=(targetX-model.rotation.x)*.09;
+      renderer.render(scene,camera);
+      requestAnimationFrame(frame);
+    }
+    frame();
+  </script>
+</body>
+</html>
