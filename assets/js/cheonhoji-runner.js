@@ -382,6 +382,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function doubleObstacleWouldMeetLowHeron() {
+    if (window.isCheonhoHeronAttackActive?.()) return true;
     const forecast = window.getCheonhoHeronForecast;
     if (typeof forecast !== "function") return false;
     const speedPercentPerSecond = Math.max(9.5 * difficultyFor(currentLaps()), 0.1);
@@ -611,6 +612,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
 
   function heronPixelsOverlap() {
     if (!heronCanvas || gameMode !== "run" || elapsedSeconds < 1.5) return false;
+    if (!window.isCheonhoHeronHazardous?.()) return false;
     const characterRect = character.getBoundingClientRect();
     const heronRect = heronCanvas.getBoundingClientRect();
     const left = Math.max(characterRect.left, heronRect.left);

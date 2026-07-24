@@ -597,6 +597,29 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   font-weight: 850;
   letter-spacing: 1.2px;
 }
+.cheonho-story-card {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  margin: 0 28px 20px;
+  padding: 15px 18px;
+  border: 1px solid #dce7ee;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #f7fbfd 0%, #eef6fa 100%);
+}
+.cheonho-story-card span {
+  color: #294f68;
+  font-size: 13px;
+  font-weight: 850;
+  letter-spacing: -.15px;
+}
+.cheonho-story-card p {
+  margin: 0;
+  color: #627583;
+  font-size: 12px;
+  line-height: 1.65;
+}
 .cheonho-run-scene {
   --cheonho-walkway-height: 24%;
   --cheonho-ground-bottom: 12%;
@@ -727,6 +750,40 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
 }
 .cheonho-heron-canvas.is-hit {
   filter: drop-shadow(0 0 10px #ff493f) drop-shadow(0 7px 7px rgba(18, 37, 45, .22));
+}
+.cheonho-heron-warning {
+  position: absolute;
+  top: 31%;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, .55);
+  border-radius: 999px;
+  background: rgba(154, 55, 42, .84);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .2px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) scale(.92);
+  transition: opacity .22s ease, transform .22s ease;
+  box-shadow: 0 6px 18px rgba(52, 24, 18, .22);
+  backdrop-filter: blur(7px);
+}
+.cheonho-heron-warning[data-direction="right"] { left: 13px; }
+.cheonho-heron-warning[data-direction="left"] { right: 13px; flex-direction: row-reverse; }
+.cheonho-heron-warning b { font-size: 17px; line-height: 1; }
+.cheonho-heron-warning.is-visible {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+  animation: cheonho-heron-warning-pulse .72s ease-in-out infinite alternate;
+}
+@keyframes cheonho-heron-warning-pulse {
+  from { box-shadow: 0 6px 18px rgba(52, 24, 18, .20); }
+  to { box-shadow: 0 6px 22px rgba(200, 67, 45, .43), 0 0 0 4px rgba(255, 255, 255, .12); }
 }
 .cheonho-fullscreen-exit {
   position: absolute;
@@ -1157,6 +1214,15 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-run-head h2 { font-size: 22px; }
   .cheonho-run-head p { font-size: 13px; line-height: 1.55; }
   .cheonho-run-head > span { display: none; }
+  .cheonho-story-card {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin: 0 16px 16px;
+    padding: 13px 14px;
+    border-radius: 13px;
+  }
+  .cheonho-story-card span { font-size: 12px; }
+  .cheonho-story-card p { font-size: 11px; line-height: 1.6; }
   .cheonho-game-controls { grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 17px; }
   .cheonho-choice-block > span { font-size: 10px; }
   .cheonho-segmented,
@@ -1182,6 +1248,7 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .cheonho-play-guide summary { padding:12px 40px 12px 14px; font-size:12px; }
   .cheonho-play-guide > div { padding:0 14px 13px; }
   .cheonho-run-scene { --cheonho-walkway-height:26%; --cheonho-ground-bottom:13%; aspect-ratio: 16 / 10; min-height: 0; }
+  .cheonho-heron-warning { top: 28%; padding: 6px 9px; font-size: 9px; }
   .cheonho-background-track { animation-duration: 100s; }
   .cheonho-fixed-walkway { height:var(--cheonho-walkway-height); border-top-width: 5px; }
   .cheonho-jump-hint { bottom: calc(26% + 9px); font-size: 10px; }

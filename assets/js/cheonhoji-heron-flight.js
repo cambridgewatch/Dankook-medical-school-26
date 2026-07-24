@@ -37,6 +37,11 @@ if (sceneElement && canvas) {
   const leftWing = heron.getObjectByName("left_Wing");
   const rightWing = heron.getObjectByName("right_Wing");
 
+  const warning = document.createElement("div");
+  warning.className = "cheonho-heron-warning";
+  warning.setAttribute("aria-hidden", "true");
+  sceneElement.appendChild(warning);
+
   let pixelBuffer = new Uint8Array(0);
   window.getCheonhoHeronPixelMask = () => {
     const gl = renderer.getContext();
@@ -53,24 +58,209 @@ if (sceneElement && canvas) {
     }
   };
 
-  let orbitPhase = -Math.PI * 0.38;
+  const TALL_OBSTACLE_SELECTOR = ["barrier", "fence", "gate", "kiosk", "mapboard"]
+    .map((type) => `[data-obstacle-type="${type}"]`)
+    .join(",");
+  const ATTACK_PATTERNS = ["straight", "dive", "figureEight", "returnPass"];
+  let patternBag = [];
+  let patrolPhase = -Math.PI * 0.38;
   let previousTime = 0;
+  let flightState = "patrol";
+  let stateElapsed = 0;
+  let stateDuration = 0;
+  let nextAttackIn = 6.5;
+  let currentPattern = "straight";
+  let direction = 1;
+  let displayX = 10;
+  let displayY = 16;
+  let previousX = displayX;
+  let transitionStart = { x: displayX, y: displayY };
+  let recoveryTarget = { x: displayX, y: displayY };
   let safetyLift = 0;
   let targetSafetyLift = 0;
+  let hazardous = false;
+
+  const clamp01 = (value) => Math.max(0, Math.min(1, value));
+  const smoothstep = (value) => {
+    const t = clamp01(value);
+    return t * t * (3 - 2 * t);
+  };
+  const mix = (from, to, amount) => from + (to - from) * amount;
+
+  function shuffle(items) {
+    const result = [...items];
+    for (let index = result.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+    }
+    return result;
+  }
+
+  function nextPattern() {
+    if (!patternBag.length) patternBag = shuffle(ATTACK_PATTERNS);
+    return patternBag.shift() || "straight";
+  }
+
+  function hasTallObstacle() {
+    return Boolean(sceneElement.querySelector(TALL_OBSTACLE_SELECTOR));
+  }
+
+  function patrolPosition(phase = patrolPhase) {
+    return {
+      x: 50 + Math.cos(phase) * 42,
+      y: 15 + Math.sin(phase) * 7,
+    };
+  }
+
+  function patternEntry(pattern, flightDirection) {
+    const sideX = flightDirection > 0 ? -12 : 112;
+    if (pattern === "dive") return { x: sideX, y: 13 };
+    if (pattern === "figureEight") return { x: 50, y: 34 };
+    if (pattern === "returnPass") return { x: sideX, y: 23 };
+    return { x: sideX, y: 44 };
+  }
+
+  function patternDuration(pattern) {
+    if (pattern === "dive") return 4.2;
+    if (pattern === "figureEight") return 5.8;
+    if (pattern === "returnPass") return 5.6;
+    return 3.5;
+  }
+
+  function patternPosition(pattern, progress, flightDirection) {
+    const t = clamp01(progress);
+    const fromX = flightDirection > 0 ? -12 : 112;
+    const toX = flightDirection > 0 ? 112 : -12;
+    if (pattern === "dive") {
+      return {
+        x: mix(fromX, toX, smoothstep(t)),
+        y: 13 + Math.pow(Math.sin(Math.PI * t), 1.28) * 42,
+      };
+    }
+    if (pattern === "figureEight") {
+      const angle = t * Math.PI * 2;
+      return {
+        x: 50 + Math.sin(angle) * 35 * flightDirection,
+        y: 34 + Math.sin(angle * 2) * 19,
+      };
+    }
+    if (pattern === "returnPass") {
+      if (t < 0.42) {
+        return { x: mix(fromX, toX, smoothstep(t / 0.42)), y: 23 };
+      }
+      if (t < 0.58) {
+        const turn = smoothstep((t - 0.42) / 0.16);
+        return { x: toX + Math.sin(turn * Math.PI) * 5 * flightDirection, y: mix(23, 46, turn) };
+      }
+      return { x: mix(toX, fromX, smoothstep((t - 0.58) / 0.42)), y: 46 };
+    }
+    return {
+      x: mix(fromX, toX, smoothstep(t)),
+      y: 44 - Math.sin(Math.PI * t) * 4,
+    };
+  }
+
+  function beginWarning() {
+    currentPattern = nextPattern();
+    direction = Math.random() < 0.5 ? 1 : -1;
+    flightState = "warning";
+    stateElapsed = 0;
+    stateDuration = 1.6;
+    transitionStart = { x: displayX, y: displayY };
+    warning.dataset.direction = direction > 0 ? "right" : "left";
+    warning.innerHTML = `<b>${direction > 0 ? "→" : "←"}</b><span>백로 접근</span>`;
+    warning.classList.add("is-visible");
+  }
+
+  function beginAttack() {
+    if (hasTallObstacle() || targetSafetyLift > 0) {
+      beginRecovery(2.2);
+      return;
+    }
+    flightState = "attack";
+    stateElapsed = 0;
+    stateDuration = patternDuration(currentPattern);
+    warning.classList.remove("is-visible");
+  }
+
+  function beginRecovery(delay = 0) {
+    flightState = "recovery";
+    stateElapsed = -delay;
+    stateDuration = 1.8;
+    transitionStart = { x: displayX, y: displayY };
+    recoveryTarget = patrolPosition();
+    warning.classList.remove("is-visible");
+    hazardous = false;
+  }
+
+  function updateFlight(delta, moving, runMode) {
+    patrolPhase += delta * (moving ? 0.24 : 0.15);
+    safetyLift += (targetSafetyLift - safetyLift) * Math.min(1, delta * 1.25);
+
+    if (!moving || !runMode) {
+      if (flightState !== "patrol" && flightState !== "recovery") beginRecovery(0);
+      nextAttackIn = Math.max(nextAttackIn, 3.5);
+    }
+
+    let position = patrolPosition();
+    hazardous = false;
+
+    if (flightState === "patrol") {
+      position = patrolPosition();
+      if (moving && runMode) {
+        nextAttackIn -= delta;
+        if (nextAttackIn <= 0 && !hasTallObstacle() && targetSafetyLift <= 0) beginWarning();
+        else if (nextAttackIn <= 0) nextAttackIn = 1.1;
+      }
+    } else if (flightState === "warning") {
+      stateElapsed += delta;
+      const entry = patternEntry(currentPattern, direction);
+      const amount = smoothstep(stateElapsed / stateDuration);
+      position = {
+        x: mix(transitionStart.x, entry.x, amount),
+        y: mix(transitionStart.y, entry.y, amount),
+      };
+      if (hasTallObstacle() || targetSafetyLift > 0) beginRecovery(0.5);
+      else if (stateElapsed >= stateDuration) beginAttack();
+    } else if (flightState === "attack") {
+      stateElapsed += delta;
+      position = patternPosition(currentPattern, stateElapsed / stateDuration, direction);
+      hazardous = position.y >= 29;
+      if (hasTallObstacle() || targetSafetyLift > 0) beginRecovery(0);
+      else if (stateElapsed >= stateDuration) beginRecovery(0);
+    } else {
+      stateElapsed += delta;
+      if (stateElapsed < 0) {
+        position = transitionStart;
+      } else {
+        const amount = smoothstep(stateElapsed / stateDuration);
+        const movingTarget = patrolPosition();
+        position = {
+          x: mix(transitionStart.x, mix(recoveryTarget.x, movingTarget.x, amount), amount),
+          y: mix(transitionStart.y, mix(recoveryTarget.y, movingTarget.y, amount), amount),
+        };
+        if (stateElapsed >= stateDuration) {
+          flightState = "patrol";
+          nextAttackIn = 5.5 + Math.random() * 4.5;
+          position = patrolPosition();
+        }
+      }
+    }
+
+    displayX = position.x;
+    displayY = position.y - safetyLift;
+  }
 
   window.getCheonhoHeronForecast = (seconds = 0) => {
-    const moving = sceneElement.classList.contains("is-running");
-    const futurePhase = orbitPhase + Math.max(0, Number(seconds) || 0) * (moving ? 0.47 : 0.30);
-    return {
-      x: 50 + Math.cos(futurePhase) * 42,
-      y: 37 + Math.sin(futurePhase) * 27,
-      phase: futurePhase,
-    };
+    if (flightState !== "patrol") return { x: displayX, y: displayY, attacking: true };
+    const futurePhase = patrolPhase + Math.max(0, Number(seconds) || 0) * 0.24;
+    return { ...patrolPosition(futurePhase), attacking: false };
   };
-
   window.setCheonhoHeronSafetyLift = (active) => {
-    targetSafetyLift = active ? 26 : 0;
+    targetSafetyLift = active ? 11 : 0;
   };
+  window.isCheonhoHeronAttackActive = () => flightState === "warning" || flightState === "attack";
+  window.isCheonhoHeronHazardous = () => hazardous && flightState === "attack";
 
   function resize() {
     const width = Math.max(1, canvas.clientWidth);
@@ -82,33 +272,34 @@ if (sceneElement && canvas) {
     camera.updateProjectionMatrix();
   }
 
-  function updateOrbit(time) {
-    const delta = previousTime ? Math.min((time - previousTime) / 1000, 0.05) : 0;
-    previousTime = time;
+  function updateVisuals(time, delta) {
     const moving = sceneElement.classList.contains("is-running");
-    orbitPhase += delta * (moving ? 0.47 : 0.30);
-    safetyLift += (targetSafetyLift - safetyLift) * Math.min(1, delta * 3.8);
+    const runMode = sceneElement.dataset.mode !== "walk";
+    updateFlight(delta, moving, runMode);
+    canvas.style.left = `${displayX}%`;
+    canvas.style.top = `${displayY}%`;
 
-    const x = 50 + Math.cos(orbitPhase) * 42;
-    const y = 37 + Math.sin(orbitPhase) * 27 - safetyLift;
-    canvas.style.left = `${x}%`;
-    canvas.style.top = `${y}%`;
+    const horizontalVelocity = displayX - previousX;
+    if (Math.abs(horizontalVelocity) > 0.01) {
+      const targetFacing = horizontalVelocity >= 0 ? Math.PI : 0;
+      const facingDelta = Math.atan2(Math.sin(targetFacing - heron.rotation.y), Math.cos(targetFacing - heron.rotation.y));
+      heron.rotation.y += facingDelta * Math.min(1, delta * 7.5);
+    }
+    previousX = displayX;
+    heron.rotation.z = Math.max(-0.10, Math.min(0.10, horizontalVelocity * 0.11));
 
-    const horizontalVelocity = -Math.sin(orbitPhase);
-    const targetFacing = horizontalVelocity >= 0 ? Math.PI : 0;
-    const facingDelta = Math.atan2(Math.sin(targetFacing - heron.rotation.y), Math.cos(targetFacing - heron.rotation.y));
-    heron.rotation.y += facingDelta * 0.13;
-    heron.rotation.z = Math.cos(orbitPhase) * 0.035;
-
-    const flap = Math.sin(time * 0.0065);
-    if (leftWing) leftWing.scale.y = 1 + flap * 0.055;
-    if (rightWing) rightWing.scale.y = 1 + flap * 0.055;
+    const flapSpeed = flightState === "attack" ? 0.009 : 0.0065;
+    const flap = Math.sin(time * flapSpeed);
+    if (leftWing) leftWing.scale.y = 1 + flap * 0.065;
+    if (rightWing) rightWing.scale.y = 1 + flap * 0.065;
     heron.position.y = -0.35 + Math.sin(time * 0.004) * 0.045;
   }
 
   function frame(time) {
     resize();
-    updateOrbit(time);
+    const delta = previousTime ? Math.min((time - previousTime) / 1000, 0.05) : 0;
+    previousTime = time;
+    updateVisuals(time, delta);
     renderer.render(stage, camera);
     requestAnimationFrame(frame);
   }
