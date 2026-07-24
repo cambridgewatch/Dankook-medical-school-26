@@ -108,6 +108,7 @@ if (sceneElement && canvas) {
   }
 
   function applyCharacter(value) {
+    if (running && selectedMode === "run") return;
     selectedCharacter = value === "turtle" ? "turtle" : "otter";
     sceneElement.dataset.character = selectedCharacter;
     syncJumpScale();
@@ -242,6 +243,11 @@ if (sceneElement && canvas) {
     if (!running) resetJump();
     sceneElement.classList.toggle("is-running", running);
     sceneElement.classList.toggle("is-paused", !running);
+    const characterLocked = running && selectedMode === "run";
+    characterButtons.forEach((button) => {
+      button.disabled = characterLocked;
+      button.setAttribute("aria-disabled", characterLocked ? "true" : "false");
+    });
     if (jumpHint) {
       jumpHint.textContent = running
         ? (selectedMode === "walk" ? "산책 중 · 화면을 터치하면 점프" : "터치·클릭하여 점프 · 공중에서 한 번 더 누르면 더블 점프")

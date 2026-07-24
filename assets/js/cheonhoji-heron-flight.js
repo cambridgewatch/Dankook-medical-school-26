@@ -210,7 +210,8 @@ if (sceneElement && canvas) {
     if (coarsePointer && sceneElement.dataset.character !== "turtle") {
       mobileOtterVisibleHeightRatio = Math.max(0.18, Math.min(0.34, characterHeight / sceneHeight));
     }
-    const horizontalHeightReference = coarsePointer
+    const turtleSelected = sceneElement.dataset.character === "turtle";
+    const horizontalHeightReference = coarsePointer && !turtleSelected
       ? sceneHeight * mobileOtterVisibleHeightRatio
       : characterHeight;
     const groundBottomValue = Number.parseFloat(
@@ -221,16 +222,8 @@ if (sceneElement && canvas) {
     const centerPercentForBottom = (bottomY) => (
       ((bottomY - heronBottomOffset) / sceneHeight) * 100
     );
-    const pcFullscreenTurtle = !coarsePointer
-      && sceneElement.dataset.character === "turtle"
-      && (
-        document.fullscreenElement === sceneElement
-        || document.webkitFullscreenElement === sceneElement
-        || sceneElement.classList.contains("is-fullscreen-fallback")
-      );
-    const horizontalClearanceRatio = pcFullscreenTurtle ? 1.7 : 1.5;
     horizontalFlightY = Math.max(4, Math.min(58,
-      centerPercentForBottom(groundY - horizontalHeightReference * horizontalClearanceRatio)
+      centerPercentForBottom(groundY - horizontalHeightReference * 1.5)
     ));
     diveBottomY = Math.max(30, Math.min(88, centerPercentForBottom(groundY)));
     targetMarker.style.left = `${attackTargetX}%`;

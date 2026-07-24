@@ -1,4 +1,4 @@
-const CACHE_NAME = "dku-med26-app-v154";
+const CACHE_NAME = "dku-med26-app-v155";
 const APP_SHELL = [
   "./",
   "./index.html",

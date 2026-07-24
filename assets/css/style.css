@@ -453,6 +453,10 @@ html[data-mascots="hide"] .danwoong-pose-trigger { display: none !important; }
   color: var(--navy);
   box-shadow: 0 4px 13px rgba(28, 61, 87, .13);
 }
+.cheonho-character-options button:disabled {
+  cursor: not-allowed;
+  opacity: .58;
+}
 .otter-mark,
 .turtle-mark { position: relative; display: inline-block; width: 28px; height: 23px; flex: 0 0 28px; }
 .otter-mark::before {
