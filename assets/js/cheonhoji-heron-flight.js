@@ -55,7 +55,8 @@ if (sceneElement && canvas) {
   sceneElement.appendChild(targetMarker);
 
   let pixelBuffer = new Uint8Array(0);
-  let mobileCollisionMaskReady = false;
+  let bodyPixelBuffer = new Uint8Array(0);
+  let bodyPixelMaskReady = false;
   function readHeronPixels() {
     const gl = renderer.getContext();
     const width = gl.drawingBufferWidth;
@@ -70,16 +71,39 @@ if (sceneElement && canvas) {
       return null;
     }
   }
+  function readHeronBodyPixels() {
+    const gl = renderer.getContext();
+    const width = gl.drawingBufferWidth;
+    const height = gl.drawingBufferHeight;
+    const requiredLength = width * height * 4;
+    if (!width || !height) return null;
+    if (bodyPixelBuffer.length !== requiredLength) bodyPixelBuffer = new Uint8Array(requiredLength);
+    try {
+      gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, bodyPixelBuffer);
+      return { data: bodyPixelBuffer, width, height };
+    } catch (error) {
+      return null;
+    }
+  }
   window.getCheonhoHeronPixelMask = () => {
-    if (window.matchMedia("(pointer: coarse)").matches && mobileCollisionMaskReady) {
+    if (window.matchMedia("(pointer: coarse)").matches && bodyPixelMaskReady) {
       const gl = renderer.getContext();
       return {
-        data: pixelBuffer,
+        data: bodyPixelBuffer,
         width: gl.drawingBufferWidth,
         height: gl.drawingBufferHeight,
       };
     }
     return readHeronPixels();
+  };
+  window.getCheonhoHeronBodyPixelMask = () => {
+    if (!bodyPixelMaskReady) return window.getCheonhoHeronPixelMask?.() || null;
+    const gl = renderer.getContext();
+    return {
+      data: bodyPixelBuffer,
+      width: gl.drawingBufferWidth,
+      height: gl.drawingBufferHeight,
+    };
   };
 
   const TALL_OBSTACLE_SELECTOR = ["barrier", "fence", "gate", "kiosk", "mapboard"]
@@ -203,14 +227,16 @@ if (sceneElement && canvas) {
     const sceneHeight = Math.max(sceneElement.clientHeight, 1);
     const characterHeightPixels = Math.max(characterCanvas.offsetHeight, 1);
     const heronHeightPixels = Math.max(canvas.offsetHeight, 1);
+    const turtleSelected = sceneElement.dataset.character === "turtle";
     const characterBounds = visibleVerticalBounds(window.getCheonhoCharacterPixelMask?.());
-    const heronBounds = visibleVerticalBounds(window.getCheonhoHeronPixelMask?.());
+    const heronBounds = visibleVerticalBounds(turtleSelected
+      ? window.getCheonhoHeronBodyPixelMask?.()
+      : window.getCheonhoHeronPixelMask?.());
     const characterHeight = Math.max(1, (characterBounds.bottom - characterBounds.top) * characterHeightPixels);
     const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
     if (coarsePointer && sceneElement.dataset.character !== "turtle") {
       mobileOtterVisibleHeightRatio = Math.max(0.18, Math.min(0.34, characterHeight / sceneHeight));
     }
-    const turtleSelected = sceneElement.dataset.character === "turtle";
     const horizontalHeightReference = coarsePointer && !turtleSelected
       ? sceneHeight * mobileOtterVisibleHeightRatio
       : characterHeight;
@@ -553,13 +579,14 @@ if (sceneElement && canvas) {
     previousTime = time;
     updateVisuals(time, delta);
     const mobileCollisionMask = window.matchMedia("(pointer: coarse)").matches;
-    if (mobileCollisionMask) {
+    const needsBodyPixelMask = mobileCollisionMask || sceneElement.dataset.character === "turtle";
+    if (needsBodyPixelMask) {
       mobileCollisionExcludedParts.forEach((part) => { part.visible = false; });
       renderer.render(stage, camera);
-      mobileCollisionMaskReady = Boolean(readHeronPixels());
+      bodyPixelMaskReady = Boolean(readHeronBodyPixels());
       mobileCollisionExcludedParts.forEach((part) => { part.visible = true; });
     } else {
-      mobileCollisionMaskReady = false;
+      bodyPixelMaskReady = false;
     }
     renderer.render(stage, camera);
     requestAnimationFrame(frame);
