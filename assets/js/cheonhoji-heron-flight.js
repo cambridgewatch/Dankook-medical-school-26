@@ -95,6 +95,27 @@ if (sceneElement && canvas) {
   };
   const mix = (from, to, amount) => from + (to - from) * amount;
 
+  function safeCanvasBounds() {
+    const sceneWidth = Math.max(sceneElement.clientWidth, 1);
+    const sceneHeight = Math.max(sceneElement.clientHeight, 1);
+    const horizontalPadding = Math.min(32, Math.max(5, (canvas.clientWidth / sceneWidth) * 50 + 1));
+    const verticalPadding = Math.min(32, Math.max(5, (canvas.clientHeight / sceneHeight) * 50 + 1));
+    return {
+      minX: horizontalPadding,
+      maxX: 100 - horizontalPadding,
+      minY: verticalPadding,
+      maxY: 100 - verticalPadding,
+    };
+  }
+
+  function containPosition(position) {
+    const bounds = safeCanvasBounds();
+    return {
+      x: Math.max(bounds.minX, Math.min(bounds.maxX, position.x)),
+      y: Math.max(bounds.minY, Math.min(bounds.maxY, position.y)),
+    };
+  }
+
   function nextPattern() {
     const pattern = ATTACK_PATTERNS[patternIndex % ATTACK_PATTERNS.length];
     patternIndex += 1;
@@ -106,10 +127,11 @@ if (sceneElement && canvas) {
   }
 
   function patrolPosition(phase = patrolPhase) {
-    return {
-      x: 50 + Math.cos(phase) * 42,
-      y: 15 + Math.sin(phase) * 7,
-    };
+    const bounds = safeCanvasBounds();
+    return containPosition({
+      x: 50 + Math.cos(phase) * ((bounds.maxX - bounds.minX) / 2),
+      y: bounds.minY + 7 + Math.sin(phase) * 5,
+    });
   }
 
   function currentPlayerX() {
@@ -118,7 +140,8 @@ if (sceneElement && canvas) {
     const characterRect = characterCanvas.getBoundingClientRect();
     if (!sceneRect.width) return 50;
     const center = characterRect.left + characterRect.width / 2;
-    return Math.max(7, Math.min(93, ((center - sceneRect.left) / sceneRect.width) * 100));
+    const bounds = safeCanvasBounds();
+    return Math.max(bounds.minX, Math.min(bounds.maxX, ((center - sceneRect.left) / sceneRect.width) * 100));
   }
 
   function visibleVerticalBounds(mask, fallbackTop = 0.08, fallbackBottom = 0.92) {
@@ -167,12 +190,13 @@ if (sceneElement && canvas) {
   }
 
   function patternEntry(pattern, flightDirection, targetX) {
-    const sideX = flightDirection > 0 ? -12 : 112;
+    const bounds = safeCanvasBounds();
+    const sideX = flightDirection > 0 ? bounds.minX : bounds.maxX;
     if (pattern === "vDive") {
       const offset = targetX >= 50 ? 30 : -30;
-      return { x: Math.max(6, Math.min(94, targetX + offset)), y: 6 };
+      return containPosition({ x: targetX + offset, y: bounds.minY });
     }
-    return { x: sideX, y: horizontalFlightY };
+    return containPosition({ x: sideX, y: horizontalFlightY });
   }
 
   function patternDuration(pattern) {
@@ -181,23 +205,24 @@ if (sceneElement && canvas) {
 
   function patternPosition(pattern, progress, flightDirection, targetX) {
     const t = clamp01(progress);
-    const fromX = flightDirection > 0 ? -12 : 112;
-    const toX = flightDirection > 0 ? 112 : -12;
+    const bounds = safeCanvasBounds();
+    const fromX = flightDirection > 0 ? bounds.minX : bounds.maxX;
+    const toX = flightDirection > 0 ? bounds.maxX : bounds.minX;
     if (pattern === "vDive") {
       const offset = targetX >= 50 ? 30 : -30;
-      const startX = Math.max(6, Math.min(94, targetX + offset));
-      const endX = Math.max(6, Math.min(94, targetX - offset));
+      const startX = Math.max(bounds.minX, Math.min(bounds.maxX, targetX + offset));
+      const endX = Math.max(bounds.minX, Math.min(bounds.maxX, targetX - offset));
       if (t < 0.5) {
         const amount = smoothstep(t * 2);
-        return { x: mix(startX, targetX, amount), y: mix(6, diveBottomY, amount) };
+        return containPosition({ x: mix(startX, targetX, amount), y: mix(bounds.minY, diveBottomY, amount) });
       }
       const amount = smoothstep((t - 0.5) * 2);
-      return { x: mix(targetX, endX, amount), y: mix(diveBottomY, 6, amount) };
+      return containPosition({ x: mix(targetX, endX, amount), y: mix(diveBottomY, bounds.minY, amount) });
     }
-    return {
+    return containPosition({
       x: mix(fromX, toX, smoothstep(t)),
       y: horizontalFlightY,
-    };
+    });
   }
 
   function beginWarning() {
@@ -293,8 +318,9 @@ if (sceneElement && canvas) {
       }
     }
 
-    displayX = position.x;
-    displayY = position.y - safetyLift;
+    const containedPosition = containPosition({ x: position.x, y: position.y - safetyLift });
+    displayX = containedPosition.x;
+    displayY = containedPosition.y;
   }
 
   window.getCheonhoHeronForecast = (seconds = 0) => {
