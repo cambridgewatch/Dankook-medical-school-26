@@ -129,7 +129,7 @@ export function mountDanwoongWalk() {
 
   function loadAccountSequence(user) {
     const accountId = user?.uid || "guest";
-    sequenceStorageKey = `dkuMascotPoseProgressV1:${accountId}`;
+    sequenceStorageKey = `dkuMascotPoseProgressV2:${accountId}`;
     sequenceCursor = 0;
     poseRequestCount = 0;
     try {
