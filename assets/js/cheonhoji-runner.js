@@ -59,6 +59,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   let obstacleRateTier = -1;
   let lastSpawnClusterCount = 1;
   let heronRideLift = 0;
+  let previousHeronCollisionRect = null;
   const currentPlatform = () => window.matchMedia("(pointer: coarse)").matches ? "mobile" : "pc";
   const validRankingKeys = new Set(["otter-mobile", "otter-pc", "turtle-mobile", "turtle-pc"]);
   const defaultRankingKey = `${localStorage.getItem("cheonhojiGameCharacter") === "turtle" ? "turtle" : "otter"}-${currentPlatform()}`;
@@ -659,15 +660,18 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   }
 
   function heronPixelsOverlap() {
-    if (!heronCanvas || gameMode !== "run" || elapsedSeconds < 1.5) return false;
-    if (!window.isCheonhoHeronHazardous?.()) return false;
+    if (!heronCanvas) return false;
     const characterRect = character.getBoundingClientRect();
-    const heronRect = heronCanvas.getBoundingClientRect();
-    const left = Math.max(characterRect.left, heronRect.left);
-    const right = Math.min(characterRect.right, heronRect.right);
-    const top = Math.max(characterRect.top, heronRect.top);
-    const bottom = Math.min(characterRect.bottom, heronRect.bottom);
-    if (left >= right || top >= bottom) return false;
+    const currentHeronRect = heronCanvas.getBoundingClientRect();
+    const previousRect = previousHeronCollisionRect;
+    previousHeronCollisionRect = {
+      left: currentHeronRect.left,
+      top: currentHeronRect.top,
+      width: currentHeronRect.width,
+      height: currentHeronRect.height,
+    };
+    if (gameMode !== "run" || elapsedSeconds < 1.5) return false;
+    if (!window.isCheonhoHeronHazardous?.()) return false;
 
     const characterMask = window.getCheonhoCharacterPixelMask?.();
     const heronMask = window.getCheonhoHeronPixelMask?.();
@@ -687,35 +691,59 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       return false;
     }
 
-    for (let screenY = Math.floor(top); screenY < Math.ceil(bottom); screenY += 1) {
-      const characterY = Math.min(characterMask.height - 1, Math.max(0,
-        characterMask.height - 1 - Math.floor(((screenY + 0.5 - characterRect.top) / characterRect.height) * characterMask.height)
-      ));
-      const heronY = Math.min(heronMask.height - 1, Math.max(0,
-        heronMask.height - 1 - Math.floor(((screenY + 0.5 - heronRect.top) / heronRect.height) * heronMask.height)
-      ));
-      for (let screenX = Math.floor(left); screenX < Math.ceil(right); screenX += 1) {
-        const characterXPixel = Math.min(characterMask.width - 1, Math.max(0,
-          Math.floor(((screenX + 0.5 - characterRect.left) / characterRect.width) * characterMask.width)
+    function overlapsAt(heronRect) {
+      const left = Math.max(characterRect.left, heronRect.left);
+      const right = Math.min(characterRect.right, heronRect.left + heronRect.width);
+      const top = Math.max(characterRect.top, heronRect.top);
+      const bottom = Math.min(characterRect.bottom, heronRect.top + heronRect.height);
+      if (left >= right || top >= bottom) return false;
+
+      for (let screenY = Math.floor(top); screenY < Math.ceil(bottom); screenY += 1) {
+        const characterY = Math.min(characterMask.height - 1, Math.max(0,
+          characterMask.height - 1 - Math.floor(((screenY + 0.5 - characterRect.top) / characterRect.height) * characterMask.height)
         ));
-        const heronX = Math.min(heronMask.width - 1, Math.max(0,
-          Math.floor(((screenX + 0.5 - heronRect.left) / heronRect.width) * heronMask.width)
+        const heronY = Math.min(heronMask.height - 1, Math.max(0,
+          heronMask.height - 1 - Math.floor(((screenY + 0.5 - heronRect.top) / heronRect.height) * heronMask.height)
         ));
-        if (!opaqueMaskPixel(
-          characterMask,
-          characterXPixel,
-          characterY,
-          88,
-          mobileCollision ? 1 : 0
-        )) continue;
-        if (opaqueMaskPixel(
-          heronMask,
-          heronX,
-          heronY,
-          72,
-          mobileCollision ? 1 : 0
-        )) return true;
+        for (let screenX = Math.floor(left); screenX < Math.ceil(right); screenX += 1) {
+          const characterXPixel = Math.min(characterMask.width - 1, Math.max(0,
+            Math.floor(((screenX + 0.5 - characterRect.left) / characterRect.width) * characterMask.width)
+          ));
+          const heronX = Math.min(heronMask.width - 1, Math.max(0,
+            Math.floor(((screenX + 0.5 - heronRect.left) / heronRect.width) * heronMask.width)
+          ));
+          if (!opaqueMaskPixel(
+            characterMask,
+            characterXPixel,
+            characterY,
+            88,
+            mobileCollision ? 1 : 0
+          )) continue;
+          if (opaqueMaskPixel(
+            heronMask,
+            heronX,
+            heronY,
+            72,
+            mobileCollision ? 1 : 0
+          )) return true;
+        }
       }
+      return false;
+    }
+
+    const currentRect = previousHeronCollisionRect;
+    if (mobileCollision || !previousRect) return overlapsAt(currentRect);
+    const deltaX = currentRect.left - previousRect.left;
+    const deltaY = currentRect.top - previousRect.top;
+    const sweepSteps = Math.max(1, Math.min(10, Math.ceil(Math.max(Math.abs(deltaX), Math.abs(deltaY)) / 2)));
+    for (let step = 0; step <= sweepSteps; step += 1) {
+      const amount = step / sweepSteps;
+      if (overlapsAt({
+        left: previousRect.left + deltaX * amount,
+        top: previousRect.top + deltaY * amount,
+        width: currentRect.width,
+        height: currentRect.height,
+      })) return true;
     }
     return false;
   }
