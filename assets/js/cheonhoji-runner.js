@@ -151,10 +151,13 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     ],
     ["barrier", "fence", "gate", "kiosk", "mapboard"],
   ];
+  const PC_TURTLE_EXCLUDED_TYPES = new Set([
+    "kiosk", "sign", "cart", "tripod", "stroller", "parasol", "wagon", "foldingtable",
+  ]);
   const obstacleAllowedForCurrentCharacter = (type) => !(
     currentPlatform() === "pc"
     && scene.dataset.character === "turtle"
-    && (type === "kiosk" || type === "sign" || type === "cart")
+    && PC_TURTLE_EXCLUDED_TYPES.has(type)
   );
 
   const baseLapDuration = Math.max(animationDurationSeconds(), 1);
