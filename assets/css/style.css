@@ -1676,7 +1676,7 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
 /* ---------- 수업 정보: 시간표 ---------- */
 .timetable-section { background: #f5f7fb; border-top: 1px solid var(--line); }
 .timetable-tools {
-  display: grid; grid-template-columns: minmax(180px, 1fr) 100px minmax(230px, auto);
+  display: grid; grid-template-columns: minmax(180px, 1fr) minmax(130px, .65fr) 90px minmax(190px, auto);
   gap: 12px; max-width: 940px; margin: 0 auto 14px; padding: 18px;
   border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: var(--shadow-sm);
 }
@@ -1729,6 +1729,7 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
 }
 .tt-block.personal { border: 2px dashed rgba(255,255,255,.9); }
 .tt-block strong { display: block; font-size: 12px; overflow-wrap: anywhere; }
+.tt-block .tt-professor { display: block; margin-top: 1px; font-size: 10px; color: rgba(255,255,255,.92); overflow-wrap: anywhere; }
 .tt-block small { display: block; margin-top: 3px; color: rgba(255,255,255,.85); }
 .tt-block button { position: absolute; right: 5px; top: 4px; width: 18px; height: 18px; border: 0; border-radius: 50%; background: rgba(0,0,0,.2); color: #fff; cursor: pointer; line-height: 1; }
 .timetable-status { min-height: 22px; max-width: 940px; margin: 10px auto 0; color: var(--gray); font-size: 13px; text-align: center; }
@@ -1737,6 +1738,7 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .timetable-section .container { padding-inline: 12px; }
   .timetable-section .section-title { margin-bottom: 24px; }
   .timetable-tools { grid-template-columns: 1fr 76px; gap: 9px; margin-bottom: 10px; padding: 12px; }
+  .tt-subject-label { grid-column: 1 / -1; }
   .tt-tool-actions { grid-column: 1 / -1; }
   .tt-tool-actions button { flex: 1; padding-inline: 10px; }
   .tt-quick-help { font-size: 10px; }
@@ -1753,6 +1755,7 @@ body.cheonho-fullscreen-open { overflow: hidden; overscroll-behavior: none; touc
   .tt-block { margin: 1px; padding: 3px 16px 2px 4px; border-radius: 5px; font-size: 9px; line-height: 1.1; box-shadow: 0 2px 5px rgba(20,40,70,.14); }
   .tt-block.personal { border-width: 1px; }
   .tt-block strong { font-size: 9px; line-height: 1.15; }
+  .tt-block .tt-professor { margin-top: 1px; font-size: 8px; line-height: 1.05; }
   .tt-block small { display: none; }
   .tt-block button { right: 2px; top: 2px; width: 14px; height: 14px; padding: 0; font-size: 10px; }
   .timetable-status { margin-top: 7px; font-size: 11px; }

@@ -13,6 +13,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const grid = $("#ttGrid");
   const status = $("#ttStatus");
   const subjectInput = $("#ttSubject");
+  const professorInput = $("#ttProfessor");
   const colorInput = $("#ttColor");
   const confirmButton = $("#ttConfirm");
   const applyAllButton = $("#ttApplyAll");
@@ -62,6 +63,10 @@ window.addEventListener("DOMContentLoaded", () => {
   subjectInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") confirmButton.click();
   });
+  professorInput.addEventListener("input", resetPreparedCourse);
+  professorInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") confirmButton.click();
+  });
   colorInput.addEventListener("input", resetPreparedCourse);
 
   applyAllButton.addEventListener("click", () => {
@@ -81,6 +86,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const applyToAll = isAdmin && applyAllButton.getAttribute("aria-pressed") === "true";
     preparedCourse = {
       subject,
+      professor: professorInput.value.trim(),
       color: colorInput.value,
       scope: applyToAll ? "global" : "personal",
     };
@@ -149,12 +155,12 @@ window.addEventListener("DOMContentLoaded", () => {
     const startSlot = Math.min(Number(startCell.dataset.slot), Number(currentCell.dataset.slot));
     const endSlot = Math.max(Number(startCell.dataset.slot), Number(currentCell.dataset.slot)) + 1;
     clearSelection();
-    const { subject, color, scope } = preparedCourse;
+    const { subject, professor, color, scope } = preparedCourse;
     try {
       const target = scope === "global"
         ? collection(db, "timetableGlobal")
         : collection(db, "timetablePersonal", user.uid, "entries");
-      await addDoc(target, { subject, color, day, startSlot, endSlot, createdAt: serverTimestamp() });
+      await addDoc(target, { subject, professor, color, day, startSlot, endSlot, createdAt: serverTimestamp() });
       status.textContent = scope === "global"
         ? `${DAYS[day]}요일 ${timeText(startSlot)}–${timeText(endSlot)}에 ${subject}을(를) 모든 학생에게 추가했습니다. 같은 과목은 계속 드래그할 수 있습니다.`
         : `${DAYS[day]}요일 ${timeText(startSlot)}–${timeText(endSlot)}에 ${subject}을(를) 내 시간표에 추가했습니다. 같은 과목은 계속 드래그할 수 있습니다.`;
@@ -186,7 +192,12 @@ window.addEventListener("DOMContentLoaded", () => {
       block.style.gridRow = `${entry.startSlot + 1} / ${entry.endSlot + 1}`;
       block.style.background = entry.color || "#4267a9";
       const canDelete = entry.scope === "personal" || isAdmin;
-      block.innerHTML = `<strong>${escapeHtml(entry.subject)}</strong><small>${timeText(entry.startSlot)}–${timeText(entry.endSlot)}</small>${canDelete ? '<button type="button" aria-label="수업 삭제">×</button>' : ""}`;
+      const professor = String(entry.professor || "").trim();
+      const professorLabel = professor
+        ? (/교수(?:님)?$/.test(professor) ? professor : `${professor} 교수님`)
+        : "";
+      block.title = `${entry.subject}${professorLabel ? ` · ${professorLabel}` : ""}`;
+      block.innerHTML = `<strong>${escapeHtml(entry.subject)}</strong>${professorLabel ? `<span class="tt-professor">${escapeHtml(professorLabel)}</span>` : ""}<small>${timeText(entry.startSlot)}–${timeText(entry.endSlot)}</small>${canDelete ? '<button type="button" aria-label="수업 삭제">×</button>' : ""}`;
       block.querySelector("button")?.addEventListener("click", async (event) => {
         event.stopPropagation();
         if (!(await window.dkuConfirm(`${entry.subject} 수업을 삭제할까요?`, {

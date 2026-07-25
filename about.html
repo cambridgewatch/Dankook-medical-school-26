@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="assets/img/icon-192.png" />
   <title>시간표 · 단국대 의대 26학번</title>
   <script src="assets/js/session-hint.js?v=2"></script>
-<link rel="stylesheet" href="assets/css/style.css?v=102" />
+<link rel="stylesheet" href="assets/css/style.css?v=103" />
 </head>
 <body class="locked">
 
@@ -61,11 +61,14 @@
             <button type="button" class="tt-confirm-btn" id="ttConfirm"><span>확인</span><b aria-hidden="true">→</b></button>
           </span>
         </label>
+        <label class="tt-professor-label">교수님
+          <input type="text" id="ttProfessor" maxlength="30" placeholder="예: 홍길동" />
+        </label>
         <label>색상<input type="color" id="ttColor" value="#4267a9" /></label>
         <div class="tt-tool-actions" id="ttAdminActions" hidden>
           <button type="button" class="tt-all-btn" id="ttApplyAll" aria-pressed="false">전체 학생에게 반영</button>
         </div>
-        <p class="tt-quick-help">과목명과 색상 선택 → <strong>확인</strong> → 원하는 요일의 시간대를 드래그하세요.</p>
+        <p class="tt-quick-help">과목명과 교수님 이름을 입력하고 색상 선택 → <strong>확인</strong> → 원하는 요일의 시간대를 드래그하세요. 교수님 이름은 생략할 수 있습니다.</p>
       </div>
 
       <div class="timetable-scroll" aria-label="시간표. 모바일에서는 좌우로 스크롤할 수 있습니다.">
@@ -97,7 +100,7 @@
 <script src="assets/js/mascot-progress-reset-20260724.js"></script>
 <script src="assets/js/main.js?v=83"></script>
   <script src="assets/js/effects3d.js?v=11"></script>
-  <script type="module" src="assets/js/timetable.js?v=8"></script>
+  <script type="module" src="assets/js/timetable.js?v=9"></script>
   <script type="module" src="assets/js/alerts.js?v=33"></script>
   <script type="module" src="assets/js/gate.js?v=23"></script>
 </body>
