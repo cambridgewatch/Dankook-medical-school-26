@@ -229,7 +229,7 @@ function mountHeaderMascots() {
   if (!document.querySelector(".site-header")) return;
   resetMascotPoseProgressOnce();
   if (!mascotModulePromise) {
-    mascotModulePromise = import(new URL("assets/js/danwoong-walk.js?v=55", document.baseURI).href);
+    mascotModulePromise = import(new URL("assets/js/danwoong-walk.js?v=56", document.baseURI).href);
   }
   mascotModulePromise
     .then(({ mountDanwoongWalk }) => mountDanwoongWalk())

@@ -199,7 +199,10 @@ export function mountDanwoongWalk() {
     triggerWorldWidth = triggerWidth * 5.3 / height;
     poseButton.style.left = `${Math.round(triggerLeft)}px`;
     poseButton.style.width = `${Math.round(triggerWidth)}px`;
-    const pawOffset = width <= 820 ? 0 : -4;
+    const wideDesktopPawCorrection = width > 1760
+      ? Math.min(8, (width - 1760) * 0.05)
+      : 0;
+    const pawOffset = width <= 820 ? 0 : -4 - wideDesktopPawCorrection;
     poseButton.style.setProperty("--mascot-contact-x", `${meetingPixel - triggerLeft + pawOffset}px`);
   }
 
