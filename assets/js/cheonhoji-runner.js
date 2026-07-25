@@ -61,6 +61,14 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   let heronRideLift = 0;
   let previousHeronCollisionRect = null;
   const currentPlatform = () => window.matchMedia("(pointer: coarse)").matches ? "mobile" : "pc";
+  const sceneFullscreenActive = () => document.fullscreenElement === scene
+    || document.webkitFullscreenElement === scene
+    || scene.classList.contains("is-native-fullscreen")
+    || scene.classList.contains("is-fullscreen-fallback");
+  const horizontalMovementMultiplier = () => {
+    const pcTurtle = currentPlatform() === "pc" && scene.dataset.character === "turtle";
+    return pcTurtle && sceneFullscreenActive() ? 1.3 : 1;
+  };
   const validRankingKeys = new Set(["otter-mobile", "otter-pc", "turtle-mobile", "turtle-pc"]);
   const defaultRankingKey = `${localStorage.getItem("cheonhojiGameCharacter") === "turtle" ? "turtle" : "otter"}-${currentPlatform()}`;
   const savedRankingKey = localStorage.getItem("cheonhojiRankingKey");
@@ -209,7 +217,10 @@ if (scene && track && character && obstacleLayer && scoreElement) {
 
     const category = obstacleCategoryBag.shift() || "regular";
     if (category === "double") {
-      if (doubleObstacleBag.length === 0) doubleObstacleBag = shuffled(OBSTACLE_TIERS[3]);
+      const pcTurtle = currentPlatform() === "pc" && scene.dataset.character === "turtle";
+      const doubleChoices = OBSTACLE_TIERS[3].filter((type) => !(pcTurtle && type === "kiosk"));
+      doubleObstacleBag = doubleObstacleBag.filter((type) => doubleChoices.includes(type));
+      if (doubleObstacleBag.length === 0) doubleObstacleBag = shuffled(doubleChoices);
       const type = doubleObstacleBag.shift() || "barrier";
       consecutiveDoubleJumps += 1;
       lastObstacleType = type;
@@ -732,10 +743,16 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     }
 
     const currentRect = previousHeronCollisionRect;
-    if (mobileCollision || !previousRect) return overlapsAt(currentRect);
+    const mobileFullscreenOtter = mobileCollision
+      && sceneFullscreenActive()
+      && scene.dataset.character !== "turtle";
+    if ((mobileCollision && !mobileFullscreenOtter) || !previousRect) return overlapsAt(currentRect);
     const deltaX = currentRect.left - previousRect.left;
     const deltaY = currentRect.top - previousRect.top;
-    const sweepSteps = Math.max(1, Math.min(10, Math.ceil(Math.max(Math.abs(deltaX), Math.abs(deltaY)) / 2)));
+    const sweepSteps = Math.max(1, Math.min(
+      mobileFullscreenOtter ? 14 : 10,
+      Math.ceil(Math.max(Math.abs(deltaX), Math.abs(deltaY)) / (mobileFullscreenOtter ? 1.5 : 2))
+    ));
     for (let step = 0; step <= sweepSteps; step += 1) {
       const amount = step / sweepSteps;
       if (overlapsAt({
@@ -982,7 +999,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
 
     const sceneWidth = Math.max(scene.clientWidth, 1);
     const obstaclePercentPerSecond = (sceneWidth * 0.095 * speedMultiplier / sceneWidth) * 100;
-    const characterPercentPerSecond = (sceneWidth * 0.08 / sceneWidth) * 100;
+    const characterPercentPerSecond = (sceneWidth * 0.08 / sceneWidth) * 100 * horizontalMovementMultiplier();
     if (movement.left !== movement.right) {
       setCharacterX(characterX + (movement.right ? 1 : -1) * characterPercentPerSecond * delta);
     }
@@ -1033,7 +1050,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       }
     } else {
       heronRideLift = Math.max(0, heronRideLift - scene.clientHeight * 1.75 * delta);
-      const characterPercentPerSecond = 8;
+      const characterPercentPerSecond = 8 * horizontalMovementMultiplier();
       if (heronRideLift <= 0.5 && movement.left !== movement.right) {
         setCharacterX(characterX + (movement.right ? 1 : -1) * characterPercentPerSecond * delta);
       }
