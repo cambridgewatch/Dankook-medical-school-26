@@ -673,21 +673,6 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     if (gameMode !== "run" || elapsedSeconds < 1.5) return false;
     if (!window.isCheonhoHeronHazardous?.()) return false;
 
-    const currentRect = previousHeronCollisionRect;
-    const pathStartRect = previousRect || currentRect;
-    const sweptLeft = Math.min(pathStartRect.left, currentRect.left);
-    const sweptRight = Math.max(
-      pathStartRect.left + pathStartRect.width,
-      currentRect.left + currentRect.width
-    );
-    const sweptTop = Math.min(pathStartRect.top, currentRect.top);
-    const sweptBottom = Math.max(
-      pathStartRect.top + pathStartRect.height,
-      currentRect.top + currentRect.height
-    );
-    if (characterRect.right <= sweptLeft || characterRect.left >= sweptRight
-      || characterRect.bottom <= sweptTop || characterRect.top >= sweptBottom) return false;
-
     const characterMask = window.getCheonhoCharacterPixelMask?.();
     const heronMask = window.getCheonhoHeronPixelMask?.();
     if (!characterMask?.data?.length || !heronMask?.data?.length) return false;
@@ -746,6 +731,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       return false;
     }
 
+    const currentRect = previousHeronCollisionRect;
     if (mobileCollision || !previousRect) return overlapsAt(currentRect);
     const deltaX = currentRect.left - previousRect.left;
     const deltaY = currentRect.top - previousRect.top;
