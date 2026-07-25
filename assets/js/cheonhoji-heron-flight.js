@@ -579,14 +579,16 @@ if (sceneElement && canvas) {
     previousTime = time;
     updateVisuals(time, delta);
     const mobileCollisionMask = window.matchMedia("(pointer: coarse)").matches;
-    const needsBodyPixelMask = mobileCollisionMask || sceneElement.dataset.character === "turtle";
-    if (needsBodyPixelMask) {
+    const gl = renderer.getContext();
+    const expectedBodyBufferLength = gl.drawingBufferWidth * gl.drawingBufferHeight * 4;
+    const desktopTurtleMaskNeedsRefresh = !mobileCollisionMask
+      && sceneElement.dataset.character === "turtle"
+      && (!bodyPixelMaskReady || bodyPixelBuffer.length !== expectedBodyBufferLength);
+    if (mobileCollisionMask || desktopTurtleMaskNeedsRefresh) {
       mobileCollisionExcludedParts.forEach((part) => { part.visible = false; });
       renderer.render(stage, camera);
       bodyPixelMaskReady = Boolean(readHeronBodyPixels());
       mobileCollisionExcludedParts.forEach((part) => { part.visible = true; });
-    } else {
-      bodyPixelMaskReady = false;
     }
     renderer.render(stage, camera);
     requestAnimationFrame(frame);
