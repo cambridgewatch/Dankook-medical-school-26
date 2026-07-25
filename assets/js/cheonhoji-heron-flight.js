@@ -55,6 +55,9 @@ if (sceneElement && canvas) {
   sceneElement.appendChild(targetMarker);
 
   let pixelBuffer = new Uint8Array(0);
+  let pixelMaskReady = false;
+  let pixelMaskWidth = 0;
+  let pixelMaskHeight = 0;
   let bodyPixelBuffer = new Uint8Array(0);
   let bodyPixelMaskReady = false;
   function readHeronPixels() {
@@ -66,6 +69,9 @@ if (sceneElement && canvas) {
     if (pixelBuffer.length !== requiredLength) pixelBuffer = new Uint8Array(requiredLength);
     try {
       gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixelBuffer);
+      pixelMaskReady = true;
+      pixelMaskWidth = width;
+      pixelMaskHeight = height;
       return { data: pixelBuffer, width, height };
     } catch (error) {
       return null;
@@ -93,6 +99,9 @@ if (sceneElement && canvas) {
         width: gl.drawingBufferWidth,
         height: gl.drawingBufferHeight,
       };
+    }
+    if (pixelMaskReady && pixelBuffer.length === pixelMaskWidth * pixelMaskHeight * 4) {
+      return { data: pixelBuffer, width: pixelMaskWidth, height: pixelMaskHeight };
     }
     return readHeronPixels();
   };
@@ -406,6 +415,7 @@ if (sceneElement && canvas) {
       return;
     }
     flightState = "attack";
+    pixelMaskReady = false;
     stateElapsed = 0;
     stateDuration = patternDuration(currentPattern);
     warning.classList.remove("is-visible");
@@ -523,6 +533,8 @@ if (sceneElement && canvas) {
     const pixelRatio = renderer.getPixelRatio();
     if (canvas.width === Math.floor(width * pixelRatio) && canvas.height === Math.floor(height * pixelRatio)) return;
     renderer.setSize(width, height, false);
+    pixelMaskReady = false;
+    bodyPixelMaskReady = false;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
   }
@@ -591,6 +603,9 @@ if (sceneElement && canvas) {
       mobileCollisionExcludedParts.forEach((part) => { part.visible = true; });
     }
     renderer.render(stage, camera);
+    if (!mobileCollisionMask && flightState === "attack" && !pixelMaskReady) {
+      readHeronPixels();
+    }
     requestAnimationFrame(frame);
   }
 
