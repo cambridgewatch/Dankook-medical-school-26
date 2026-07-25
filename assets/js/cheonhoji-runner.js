@@ -148,6 +148,11 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     ],
     ["barrier", "fence", "gate", "kiosk", "mapboard"],
   ];
+  const obstacleAllowedForCurrentCharacter = (type) => !(
+    currentPlatform() === "pc"
+    && scene.dataset.character === "turtle"
+    && (type === "kiosk" || type === "sign")
+  );
 
   const baseLapDuration = Math.max(animationDurationSeconds(), 1);
 
@@ -217,8 +222,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
 
     const category = obstacleCategoryBag.shift() || "regular";
     if (category === "double") {
-      const pcTurtle = currentPlatform() === "pc" && scene.dataset.character === "turtle";
-      const doubleChoices = OBSTACLE_TIERS[3].filter((type) => !(pcTurtle && type === "kiosk"));
+      const doubleChoices = OBSTACLE_TIERS[3].filter(obstacleAllowedForCurrentCharacter);
       doubleObstacleBag = doubleObstacleBag.filter((type) => doubleChoices.includes(type));
       if (doubleObstacleBag.length === 0) doubleObstacleBag = shuffled(doubleChoices);
       const type = doubleObstacleBag.shift() || "barrier";
@@ -227,7 +231,11 @@ if (scene && track && character && obstacleLayer && scoreElement) {
       return type;
     }
 
-    const regularChoices = OBSTACLE_TIERS.slice(0, Math.min(tier, 2) + 1).flat();
+    const regularChoices = OBSTACLE_TIERS
+      .slice(0, Math.min(tier, 2) + 1)
+      .flat()
+      .filter(obstacleAllowedForCurrentCharacter);
+    regularObstacleBag = regularObstacleBag.filter((type) => regularChoices.includes(type));
     if (regularObstacleBag.length === 0) regularObstacleBag = shuffled(regularChoices);
     let type = regularObstacleBag.shift() || "puddle";
     const tallTypes = new Set(["bin", "sign", "lantern", "hydrant", "tripod", ...DOUBLE_JUMP_TYPES]);
@@ -385,7 +393,8 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const choices = OBSTACLE_TIERS
       .slice(0, Math.min(tier, 2) + 1)
       .flat()
-      .filter((type) => !DOUBLE_JUMP_TYPES.has(type));
+      .filter((type) => !DOUBLE_JUMP_TYPES.has(type))
+      .filter(obstacleAllowedForCurrentCharacter);
     const alternatives = choices.filter((type) => type !== lastObstacleType);
     const pool = alternatives.length ? alternatives : choices;
     const type = pool[Math.floor(Math.random() * pool.length)] || "puddle";
