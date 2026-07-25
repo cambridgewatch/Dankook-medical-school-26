@@ -131,6 +131,9 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     "puddle", "rock", "curb", "leaves", "picnicmat", "ducktoy", "skateboard",
     "acorn", "pinecone", "frisbee", "paperboat", "tennisball", "glove", "cap", "towel",
   ]);
+  const WIDE_LOW_CLUSTER_TYPES = new Set([
+    "puddle", "curb", "leaves", "picnicmat", "skateboard", "towel",
+  ]);
   const OBSTACLE_TIERS = [
     [
       "puddle", "rock", "curb", "bottle", "leaves", "picnicmat", "ducktoy", "rainboot",
@@ -151,7 +154,7 @@ if (scene && track && character && obstacleLayer && scoreElement) {
   const obstacleAllowedForCurrentCharacter = (type) => !(
     currentPlatform() === "pc"
     && scene.dataset.character === "turtle"
-    && (type === "kiosk" || type === "sign")
+    && (type === "kiosk" || type === "sign" || type === "cart")
   );
 
   const baseLapDuration = Math.max(animationDurationSeconds(), 1);
@@ -429,7 +432,11 @@ if (scene && track && character && obstacleLayer && scoreElement) {
     const clusterTypes = [firstType];
     while (clusterTypes.length < clusterCount) {
       const previousType = clusterTypes[clusterTypes.length - 1];
-      const alternatives = availableLowTypes.filter((type) => type !== previousType);
+      const previousIsWide = WIDE_LOW_CLUSTER_TYPES.has(previousType);
+      const alternatives = availableLowTypes.filter((type) => (
+        type !== previousType
+        && !(previousIsWide && WIDE_LOW_CLUSTER_TYPES.has(type))
+      ));
       const choices = alternatives.length ? alternatives : availableLowTypes;
       clusterTypes.push(choices[Math.floor(Math.random() * choices.length)] || firstType);
     }
